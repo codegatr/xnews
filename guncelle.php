@@ -30,6 +30,51 @@ $mesaj     = '';
 $mesaj_tip = '';
 
 // =====================================================
+// MANUEL DB MIGRATION (guncelleme olmadan calistir)
+// =====================================================
+if ($islem === 'migration' && post()) {
+    if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
+        $mesaj = 'Güvenlik doğrulaması başarısız.';
+        $mesaj_tip = 'hata';
+    } else {
+        $secilen_surum = preg_replace('/[^0-9.]/', '', $_POST['surum'] ?? '');
+        $migration_yolu = __DIR__ . '/sql/migration_v' . $secilen_surum . '.sql';
+        if (!file_exists($migration_yolu)) {
+            $mesaj = 'Migration dosyası bulunamadı: sql/migration_v' . $secilen_surum . '.sql';
+            $mesaj_tip = 'hata';
+        } else {
+            try {
+                $sql_icerik = file_get_contents($migration_yolu);
+                $sql_icerik = preg_replace('/--[^\n]*/', '', $sql_icerik);
+                $komutlar = array_filter(array_map('trim', explode(';', $sql_icerik)));
+                $sayac = 0;
+                $hatalar = [];
+                foreach ($komutlar as $komut) {
+                    if (stripos($komut, 'SELECT') === 0 || empty($komut)) continue;
+                    try {
+                        $db->exec($komut);
+                        $sayac++;
+                    } catch (Throwable $e) {
+                        $hatalar[] = substr($komut, 0, 60) . ' -> ' . $e->getMessage();
+                    }
+                }
+                log_ekle('islem', 'Manuel DB Migration', 'v' . $secilen_surum . ': ' . $sayac . ' OK, ' . count($hatalar) . ' hata', $yonetici['id']);
+                if (empty($hatalar)) {
+                    $mesaj = 'Migration v' . $secilen_surum . ' başarıyla uygulandı: ' . $sayac . ' komut çalıştırıldı.';
+                    $mesaj_tip = 'basari';
+                } else {
+                    $mesaj = 'Migration kısmen uygulandı: ' . $sayac . ' başarılı, ' . count($hatalar) . ' hata. İlk hata: ' . $hatalar[0];
+                    $mesaj_tip = 'uyari';
+                }
+            } catch (Throwable $e) {
+                $mesaj = 'Migration hatası: ' . $e->getMessage();
+                $mesaj_tip = 'hata';
+            }
+        }
+    }
+}
+
+// =====================================================
 // YARDIMCI FONKSIYONLAR
 // =====================================================
 
@@ -436,6 +481,41 @@ body { background: #f5f7fa; padding: 40px 20px; }
                 <a href="<?= url('guncelle.php') ?>" class="buton ikincil">Tekrar Kontrol Et</a>
             </div>
         </div>
+    <?php endif; ?>
+
+    <!-- Manuel DB Migration -->
+    <?php
+    // Mevcut migration dosyalarini bul
+    $mevcut_migrations = [];
+    foreach (glob(__DIR__ . '/sql/migration_v*.sql') as $mf) {
+        if (preg_match('/migration_v([\d.]+)\.sql$/', $mf, $mm)) {
+            $mevcut_migrations[] = $mm[1];
+        }
+    }
+    rsort($mevcut_migrations);
+    ?>
+    <?php if (!empty($mevcut_migrations)): ?>
+    <details style="margin-top:20px;background:#fff;border-radius:8px;padding:16px 20px;border:1px solid var(--border)">
+        <summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--muted)">🗄️ Manuel DB Migration Çalıştır</summary>
+        <div style="margin-top:16px">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
+                Güncelleme sırasında migration çalışmadıysa buradan manuel tetikleyebilirsin.
+                Veritabanındaki kategori adları, ayar etiketleri gibi display text'leri günceller.
+                SLUG'lar ve SQL kolon adları dokunulmaz.
+            </p>
+            <form method="post" action="?islem=migration" onsubmit="return confirm('Migration veritabanını etkiler. Devam edilsin mi?')">
+                <?= csrf_input() ?>
+                <div style="display:flex;gap:10px;align-items:center">
+                    <select name="surum" required style="padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
+                        <?php foreach ($mevcut_migrations as $ms): ?>
+                            <option value="<?= h($ms) ?>">v<?= h($ms) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" class="buton" style="padding:10px 20px">Migration Çalıştır</button>
+                </div>
+            </form>
+        </div>
+    </details>
     <?php endif; ?>
 
     <!-- Manifest bilgileri -->

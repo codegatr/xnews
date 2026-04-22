@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.0.4",
+    "surum": "1.0.5",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,10 +17,11 @@
         "install.lock"
     ],
     "degisiklikler": [
-        "1.0.4 - KRITIK: cron.php array key bugu ('başlık' -> 'baslik') - yeni haberler artik eklenir; DB migration otomatik calisir (kategori adlari Turkceye doner); h() fonksiyonu &apos; double-escape fix; footer overlap fix; Ana Sayfa / CANLI duzeltmesi",
-        "1.0.3 - Display text Turkce karakterleri SQL fix sonrasi yeniden uygulandi, csrf_dogrula fonksiyon adi ASCII",
-        "1.0.2 - KRITIK FIX: SQL kolon isimleri ASCII'ye geri alindi (v1.0.1 patlagini duzelten hotfix)",
-        "1.0.1 - Turkce karakter duzeltmeleri (500+ yer), ana sayfa bos durum, Google Fonts latin-ext",
+        "1.0.5 - Manuel DB migration butonu (guncelle.php), bolum-baslik CSS overlap fix, manset-grid margin arttir, placeholder SVG Turkce karakterli",
+        "1.0.4 - KRITIK: cron array key bug, DB migration auto, h() double-escape fix, footer overlap",
+        "1.0.3 - Display text Turkce karakterleri yeniden uygulandi",
+        "1.0.2 - SQL kolon isimleri ASCII'ye geri alindi (hotfix)",
+        "1.0.1 - Turkce karakter duzeltmeleri",
         "1.0.0 - Ilk surum"
     ]
 }
