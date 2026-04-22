@@ -309,7 +309,7 @@ main { padding: 40px 0 80px; min-height: 500px; position: relative; z-index: 0; 
     display: flex;
     align-items: baseline;
     gap: 20px;
-    margin: 40px 0 24px;
+    margin: 0 0 24px;
     padding-bottom: 12px;
     border-bottom: 3px solid var(--black);
     position: relative;
@@ -332,6 +332,7 @@ main { padding: 40px 0 80px; min-height: 500px; position: relative; z-index: 0; 
     letter-spacing: -.5px;
     flex: 1 1 auto;
     min-width: 0;
+    line-height: 1.1;
 }
 .bolum-baslik .tumu {
     font-family: var(--font-ui);
@@ -346,6 +347,15 @@ main { padding: 40px 0 80px; min-height: 500px; position: relative; z-index: 0; 
     white-space: nowrap;
 }
 .bolum-baslik .tumu:hover { color: var(--brand); }
+
+/* Kategori bolum - her biri ayri bir bolum */
+.kategori-bolum {
+    display: block;
+    clear: both;
+    margin: 0 0 60px;
+    padding: 0;
+}
+.kategori-bolum + .kategori-bolum { margin-top: 0; }
 
 /* ===================================================
    MANSET GRID (ana sayfa hero)
@@ -451,8 +461,10 @@ main { padding: 40px 0 80px; min-height: 500px; position: relative; z-index: 0; 
 /* ===================================================
    KATEGORI SERIT (her kategori icin ayri bolum)
    =================================================== */
-.kategori-bolum { margin-bottom: 48px; }
-.kat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); }
+.kat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); align-items: stretch; }
+.kat-grid .haber-kart { display: flex; flex-direction: column; height: 100%; }
+.kat-grid .haber-kart .metin { flex: 1; display: flex; flex-direction: column; }
+.kat-grid .haber-kart .meta { margin-top: auto; }
 .kat-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
 
 /* ===================================================
