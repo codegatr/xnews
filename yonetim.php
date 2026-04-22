@@ -533,6 +533,7 @@ $sayfa_adlari = [
     'loglar'       => 'Loglar',
     'etiketler'    => 'Etiketler',
     'talepler'     => 'Kaldırma Talepleri',
+    'adsense-rehber' => 'AdSense Rehberi',
 ];
 $sayfa_basligi = $sayfa_adlari[$sayfa] ?? 'Yönetim';
 
@@ -712,6 +713,36 @@ function menu_aktif(string $mevcut, string $slug): string {
                         <div class="ikon"><?= ikon('activity') ?></div>
                         <div class="sayi"><?= number_format($s_okunma, 0, ',', '.') ?></div>
                         <div class="etiket">Toplam okunma</div>
+                    </div>
+                </div>
+
+                <?php
+                // AdSense entegrasyon durumu
+                $as_id = trim(ayar('adsense_client_id', ''));
+                $as_auto = ayar('adsense_auto_ads', '0') === '1';
+                $as_valid = !empty($as_id) && preg_match('/^ca-pub-\d{10,20}$/', $as_id);
+                $ads_txt_mevcut = file_exists(__DIR__ . '/ads.txt');
+                $reklam_ads_adedi = (int)$db->query("SELECT COUNT(*) FROM {$prefix}ads WHERE aktif=1 AND tip IN('adsense','kod')")->fetchColumn();
+                ?>
+                <div class="panel" style="margin-bottom:20px;background:<?= $as_valid ? 'linear-gradient(135deg,#ecfdf5,#fff)' : 'linear-gradient(135deg,#fef3c7,#fff)' ?>;border-left:4px solid <?= $as_valid ? '#10b981' : '#f59e0b' ?>">
+                    <div class="panel-ic" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+                        <div style="font-size:44px"><?= $as_valid ? '💰' : '⚠️' ?></div>
+                        <div style="flex:1;min-width:260px">
+                            <h3 style="margin:0 0 4px;color:<?= $as_valid ? '#065f46' : '#92400e' ?>">
+                                Google AdSense:
+                                <?= $as_valid ? 'Aktif ✓' : 'Henüz Yapılandırılmadı' ?>
+                            </h3>
+                            <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px">
+                                <span>📌 Client: <strong style="color:<?= $as_valid ? '#10b981' : '#dc2626' ?>"><?= $as_valid ? h($as_id) : 'Girilmedi' ?></strong></span>
+                                <span>🤖 Auto Ads: <strong style="color:<?= $as_auto ? '#10b981' : '#94a3b8' ?>"><?= $as_auto ? 'Açık' : 'Kapalı' ?></strong></span>
+                                <span>📄 ads.txt: <strong style="color:<?= $ads_txt_mevcut ? '#10b981' : '#dc2626' ?>"><?= $ads_txt_mevcut ? 'Mevcut' : 'Yok' ?></strong></span>
+                                <span>🎯 Manuel: <strong><?= $reklam_ads_adedi ?> adet</strong></span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <a href="<?= url('yonetim.php?sayfa=ayarlar&grup=reklam') ?>" class="buton">AdSense Ayarları</a>
+                            <a href="<?= url('yonetim.php?sayfa=adsense-rehber') ?>" class="buton ikincil">📚 Rehber</a>
+                        </div>
                     </div>
                 </div>
 
@@ -1478,6 +1509,12 @@ function menu_aktif(string $mevcut, string $slug): string {
                 </form>
                 <?php else:
                     $reklam_liste = $db->query("SELECT * FROM {$prefix}ads ORDER BY konum, ad")->fetchAll();
+
+                    // AdSense entegrasyon durumu
+                    $as_id_r = trim(ayar('adsense_client_id', ''));
+                    $as_valid_r = !empty($as_id_r) && preg_match('/^ca-pub-\d{10,20}$/', $as_id_r);
+                    $as_auto_r = ayar('adsense_auto_ads', '0') === '1';
+                    $as_adet_r = (int)$db->query("SELECT COUNT(*) FROM {$prefix}ads WHERE tip IN('adsense','kod') AND aktif=1")->fetchColumn();
             ?>
                 <div class="icerik-bas">
                     <div>
@@ -1486,6 +1523,47 @@ function menu_aktif(string $mevcut, string $slug): string {
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=reklamlar&islem=ekle') ?>" class="buton"><?= ikon('plus') ?>Yeni Reklam</a>
                 </div>
+
+                <!-- AdSense Hızlı Kurulum Paneli -->
+                <div class="panel" style="margin-bottom:18px;background:<?= $as_valid_r ? 'linear-gradient(135deg,#ecfdf5,#fff)' : 'linear-gradient(135deg,#fef3c7,#fff)' ?>;border-left:4px solid <?= $as_valid_r ? '#10b981' : '#f59e0b' ?>">
+                    <div class="panel-ic">
+                        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px">
+                            <div style="font-size:36px"><?= $as_valid_r ? '💰' : '⚙️' ?></div>
+                            <div style="flex:1;min-width:240px">
+                                <h3 style="margin:0 0 4px;color:<?= $as_valid_r ? '#065f46' : '#92400e' ?>">
+                                    Google AdSense <?= $as_valid_r ? 'Aktif ✓' : 'Yapılandırılmadı' ?>
+                                </h3>
+                                <div style="font-size:13px;color:var(--muted)">
+                                    <?php if ($as_valid_r): ?>
+                                        Client: <code><?= h($as_id_r) ?></code>
+                                        · Auto Ads: <strong style="color:<?= $as_auto_r ? '#10b981' : '#94a3b8' ?>"><?= $as_auto_r ? 'Açık' : 'Kapalı' ?></strong>
+                                        · <?= $as_adet_r ?> manuel reklam aktif
+                                    <?php else: ?>
+                                        Önce AdSense Publisher ID'nizi girin (<code>ca-pub-xxxxxxxxxx</code>)
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                                <?php if (!$as_valid_r): ?>
+                                <a href="<?= url('yonetim.php?sayfa=ayarlar&grup=reklam') ?>" class="buton">AdSense Ayarla</a>
+                                <?php endif; ?>
+                                <a href="<?= url('yonetim.php?sayfa=adsense-rehber') ?>" class="buton ikincil">📚 Kurulum Rehberi</a>
+                            </div>
+                        </div>
+
+                        <?php if ($as_valid_r): ?>
+                        <div style="padding:12px 14px;background:#fff;border-radius:8px;border:1px dashed #cbd5e1;font-size:13px;line-height:1.6">
+                            <strong>🎯 AdSense Reklam Birimi Ekleme:</strong>
+                            <ol style="margin:6px 0 0;padding-left:22px">
+                                <li><a href="https://www.google.com/adsense/new/u/0/pub-<?= h(preg_replace('/^ca-pub-/', '', $as_id_r)) ?>/myads/units" target="_blank">AdSense → Reklamlar → Reklam Birimleri</a> bölümünden yeni birim oluştur.</li>
+                                <li>Birimin HTML kodunu kopyala (<code>&lt;script async...&gt;&lt;ins class="adsbygoogle"...&gt;</code> ile başlayan blok).</li>
+                                <li>Aşağıdaki <strong>"Yeni Reklam"</strong> butonuna bas, <strong>Tip: Google AdSense</strong> seç, kodu yapıştır, konum belirle, kaydet.</li>
+                            </ol>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <div class="panel">
                     <div class="panel-ic sikisik">
                         <div class="tablo-sarmal">
@@ -1857,6 +1935,165 @@ function menu_aktif(string $mevcut, string $slug): string {
                     </form>
                 </div>
                 <?php break;
+
+            // ====================================
+            // ADSENSE KURULUM REHBERİ
+            // ====================================
+            case 'adsense-rehber':
+                $as_id = trim(ayar('adsense_client_id', ''));
+                $as_valid = !empty($as_id) && preg_match('/^ca-pub-\d{10,20}$/', $as_id);
+                $ads_txt_mevcut = file_exists(__DIR__ . '/ads.txt');
+                $auto_ads = ayar('adsense_auto_ads', '0') === '1';
+                $reklam_as_adet = (int)$db->query("SELECT COUNT(*) FROM {$prefix}ads WHERE tip IN('adsense','kod') AND aktif=1")->fetchColumn();
+            ?>
+                <div class="icerik-bas">
+                    <div>
+                        <h1>📚 Google AdSense Kurulum Rehberi</h1>
+                        <div class="alt-metin">XNEWS ile AdSense'i tam entegre etmenin adım adım rehberi</div>
+                    </div>
+                </div>
+
+                <!-- Adım 1: AdSense Hesabı -->
+                <div class="panel" style="margin-bottom:18px">
+                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
+                        <div style="width:36px;height:36px;border-radius:50%;background:<?= $as_valid ? '#10b981' : '#cbd5e1' ?>;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">1</div>
+                        <h3 style="margin:0">AdSense Hesabı ve Site Kaydı</h3>
+                        <span style="margin-left:auto;color:<?= $as_valid ? '#10b981' : '#94a3b8' ?>"><?= $as_valid ? '✓ Tamamlandı' : 'Bekliyor' ?></span>
+                    </div>
+                    <div class="panel-ic">
+                        <ol style="margin:0;padding-left:22px;line-height:1.8">
+                            <li><a href="https://adsense.google.com" target="_blank">adsense.google.com</a> adresine git, hesap oluştur veya giriş yap.</li>
+                            <li>"Siteler" menüsünden <strong>xnews.com.tr</strong>'yi ekle.</li>
+                            <li>"Publisher ID" değerini kopyala (format: <code>ca-pub-7160164794098300</code>).</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Adım 2: ID Kaydetme -->
+                <div class="panel" style="margin-bottom:18px">
+                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
+                        <div style="width:36px;height:36px;border-radius:50%;background:<?= $as_valid ? '#10b981' : '#cbd5e1' ?>;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">2</div>
+                        <h3 style="margin:0">Publisher ID'yi XNEWS'e Gir</h3>
+                        <span style="margin-left:auto;color:<?= $as_valid ? '#10b981' : '#94a3b8' ?>"><?= $as_valid ? '✓ ' . h($as_id) : 'Bekliyor' ?></span>
+                    </div>
+                    <div class="panel-ic">
+                        <ol style="margin:0;padding-left:22px;line-height:1.8">
+                            <li><strong>Yönetim → Ayarlar → Reklam</strong> bölümüne git.</li>
+                            <li>"AdSense Publisher ID" alanına kopyaladığın ID'yi yapıştır.</li>
+                            <li>"Kaydet" butonuna bas.</li>
+                            <li>Sistem otomatik olarak:
+                                <ul style="margin:6px 0;padding-left:20px">
+                                    <li>Tüm sayfalara <code>&lt;meta name="google-adsense-account"&gt;</code> ekler.</li>
+                                    <li><code>&lt;script&gt;</code> adsbygoogle.js head'e enjekte edilir.</li>
+                                    <li><code>public_html/ads.txt</code> fiziksel olarak oluşturulur.</li>
+                                </ul>
+                            </li>
+                        </ol>
+                        <a href="<?= url('yonetim.php?sayfa=ayarlar&grup=reklam') ?>" class="buton" style="margin-top:10px">Reklam Ayarlarına Git →</a>
+                    </div>
+                </div>
+
+                <!-- Adım 3: Doğrulama -->
+                <div class="panel" style="margin-bottom:18px">
+                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
+                        <div style="width:36px;height:36px;border-radius:50%;background:<?= $ads_txt_mevcut ? '#10b981' : '#cbd5e1' ?>;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">3</div>
+                        <h3 style="margin:0">AdSense Panelinde Siteyi Doğrula</h3>
+                        <span style="margin-left:auto;color:<?= $ads_txt_mevcut ? '#10b981' : '#94a3b8' ?>"><?= $ads_txt_mevcut ? '✓ ads.txt mevcut' : 'ads.txt yok' ?></span>
+                    </div>
+                    <div class="panel-ic">
+                        <ol style="margin:0;padding-left:22px;line-height:1.8">
+                            <li>AdSense paneline dön.</li>
+                            <li>"Siteniz doğrulanıyor" uyarısında <strong>"Kodu yerleştirdim"</strong> kutusunu işaretle.</li>
+                            <li><strong>"Doğrula"</strong> butonuna bas.</li>
+                            <li>Google birkaç saat içinde siteyi onaylayacak.</li>
+                            <li>Ayrıca <a href="<?= url('ads.txt') ?>" target="_blank">xnews.com.tr/ads.txt</a> adresini aç — içerik olmalı.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Adım 4: Reklamları Göster -->
+                <div class="panel" style="margin-bottom:18px">
+                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
+                        <div style="width:36px;height:36px;border-radius:50%;background:<?= ($auto_ads || $reklam_as_adet > 0) ? '#10b981' : '#cbd5e1' ?>;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">4</div>
+                        <h3 style="margin:0">Reklamları Sitede Göster</h3>
+                        <span style="margin-left:auto;color:<?= ($auto_ads || $reklam_as_adet > 0) ? '#10b981' : '#94a3b8' ?>"><?= ($auto_ads || $reklam_as_adet > 0) ? '✓ Aktif' : 'Bekliyor' ?></span>
+                    </div>
+                    <div class="panel-ic">
+                        <p style="margin:0 0 12px">İki yöntem var — istediğini seçebilir veya ikisini birden kullanabilirsin:</p>
+
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:14px">
+                            <div style="padding:16px;border:2px solid <?= $auto_ads ? '#10b981' : '#e5e7eb' ?>;border-radius:10px">
+                                <h4 style="margin:0 0 6px">🤖 Yöntem A: Auto Ads (Önerilen)</h4>
+                                <p style="margin:0 0 8px;color:var(--muted);font-size:13px;line-height:1.5">
+                                    Google otomatik olarak en uygun yerlere reklam yerleştirir.
+                                    Sen hiçbir şey yapmak zorunda değilsin.
+                                </p>
+                                <p style="margin:0;font-size:13px">
+                                    <strong>Reklam Ayarları → Otomatik Reklamlar = Açık</strong>
+                                </p>
+                                <div style="margin-top:8px;font-size:12px;color:<?= $auto_ads ? '#10b981' : '#94a3b8' ?>">
+                                    Durum: <?= $auto_ads ? 'AÇIK ✓' : 'Kapalı' ?>
+                                </div>
+                            </div>
+
+                            <div style="padding:16px;border:2px solid <?= $reklam_as_adet > 0 ? '#10b981' : '#e5e7eb' ?>;border-radius:10px">
+                                <h4 style="margin:0 0 6px">🎯 Yöntem B: Manuel Slot'lar</h4>
+                                <p style="margin:0 0 8px;color:var(--muted);font-size:13px;line-height:1.5">
+                                    AdSense'de "Reklam birimi" oluştur, kodunu kopyala, XNEWS'te bir slot'a yapıştır.
+                                    Daha fazla kontrol isteyenler için.
+                                </p>
+                                <p style="margin:0;font-size:13px">
+                                    <strong>Yönetim → Reklamlar → Yeni Ekle</strong>
+                                </p>
+                                <div style="margin-top:8px;font-size:12px;color:<?= $reklam_as_adet > 0 ? '#10b981' : '#94a3b8' ?>">
+                                    <?= $reklam_as_adet ?> adet aktif
+                                </div>
+                            </div>
+                        </div>
+
+                        <p style="margin:0;padding:10px 14px;background:#eff6ff;border-radius:6px;font-size:13px;color:#1e3a8a">
+                            <strong>💡 İpucu:</strong> Yeni yayına başlayan siteler için Auto Ads daha kolaydır. Site büyüdükçe Yöntem B ile reklam yerleştirmesini optimize edebilirsin.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Mevcut Slot Konumları -->
+                <div class="panel" style="margin-bottom:18px">
+                    <div class="panel-bas">
+                        <h3 style="margin:0">📍 XNEWS'te Mevcut Reklam Slot Konumları</h3>
+                    </div>
+                    <div class="panel-ic">
+                        <table class="tablo" style="margin:0">
+                            <thead><tr><th>Slot Kodu</th><th>Konum</th><th>Önerilen Boyut</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>ust_banner</code></td><td>Header altı, tüm sayfalarda</td><td>Leaderboard 728×90</td></tr>
+                                <tr><td><code>sidebar_ust</code></td><td>Yan panel üst</td><td>Medium Rectangle 300×250</td></tr>
+                                <tr><td><code>sidebar_alt</code></td><td>Yan panel alt</td><td>Large Skyscraper 300×600</td></tr>
+                                <tr><td><code>makale_ust</code></td><td>Haber başlığından sonra</td><td>Billboard 970×250</td></tr>
+                                <tr><td><code>makale_ic</code></td><td>Haber metninde 3. paragraf sonrası</td><td>In-article responsive</td></tr>
+                                <tr><td><code>makale_alt</code></td><td>Haber sonunda</td><td>Medium Rectangle 300×250</td></tr>
+                                <tr><td><code>alt_banner</code></td><td>Footer öncesi</td><td>Leaderboard 728×90</td></tr>
+                                <tr><td><code>mobil_sabit</code></td><td>Mobilde alta yapışık</td><td>Mobile Banner 320×50</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Politika Uyarıları -->
+                <div class="panel" style="background:#fef3c7;border-left:4px solid #f59e0b">
+                    <div class="panel-ic">
+                        <h3 style="margin:0 0 10px;color:#92400e">⚠️ AdSense Politika Uyarıları</h3>
+                        <ul style="margin:0;padding-left:22px;line-height:1.7;color:#78350f;font-size:13px">
+                            <li><strong>Telif:</strong> XNEWS bir haber agregatörüdür. AdSense politikası "özgün içerik" ister. Tam metni yerine <strong>özet + kaynak linki</strong> göster (zaten böyle).</li>
+                            <li><strong>Footer uyarısı:</strong> Sitemizde "RSS agregatörü" bildirimi var (v1.2.2) — AdSense incelemesi için avantaj.</li>
+                            <li><strong>KVKK + Gizlilik:</strong> Gerekli sayfalar mevcut (v1.0.9).</li>
+                            <li><strong>Trafik:</strong> AdSense minimum trafik istemez ama düzenli içerik (RSS ile zaten otomatik) ve kaliteli tasarım (v1.2.0) önemli.</li>
+                            <li><strong>Botlar:</strong> AdSense tıklamalarını kontrol eder. Kendin tıklamayın, başkalarına tıklatmayın — hesap kapatılır.</li>
+                        </ul>
+                    </div>
+                </div>
+                <?php break;
+
 
             // ====================================
             // KALDIRMA TALEPLERİ (Takedown)

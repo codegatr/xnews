@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.2.4",
+    "surum": "1.2.5",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,6 +17,7 @@
         "install.lock"
     ],
     "degisiklikler": [
+        "1.2.5 - Google AdSense tam entegrasyon: Dashboard durum karti (Client ID, Auto Ads, ads.txt, manuel reklam sayisi), AdSense Kurulum Rehberi sayfasi (4 adim + slot konum tablosu + politika uyarilari), Reklamlar listesi basinda AdSense hizli kurulum karti (reklam birimi ekleme workflow), direkt AdSense paneline birim olusturma linki.",
         "1.2.4 - ads.txt fiziksel dosya otomatik yazma: Ayarlar kaydedildiginde (AdSense ID veya ads.txt icerigi degistiyse) public_html/ads.txt fiziksel olarak yazilir. Araclar sekmesine 'ads.txt Simdi Yaz' butonu + mevcut dosya onizleme + AdSense ID kontrolu uyarisi eklendi.",
         "1.2.3 - Google AdSense entegrasyonu: Yonetim > Reklam > AdSense Client ID + Otomatik Reklamlar switch + ads.txt icerik. Client ID girilince site head'e otomatik ekleniyor (meta tag + script), /ads.txt route dinamik icerik.",
         "1.2.2 - Kaldirma Talepleri admin sayfasi + Footer yasal uyari (RSS agregatoru bildirimi)",
