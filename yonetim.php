@@ -457,8 +457,27 @@ if ($sayfa === 'ayarlar' && post()) {
             if (empty($anahtar)) continue;
             ayar_guncelle($anahtar, is_array($deger) ? implode(',', $deger) : $deger);
         }
+
+        // ÖZEL: AdSense/ads.txt ayarları değiştiyse fiziksel ads.txt dosyasını yaz
+        if (isset($ayarlar['adsense_client_id']) || isset($ayarlar['ads_txt_icerik'])) {
+            $icerik = trim(ayar('ads_txt_icerik', ''));
+            $client = trim(ayar('adsense_client_id', ''));
+            if (empty($icerik) && !empty($client) && preg_match('/^ca-pub-(\d+)$/', $client, $m)) {
+                // Otomatik üret
+                $icerik = "# XNEWS - Otomatik olusturuldu\n";
+                $icerik .= "google.com, pub-{$m[1]}, DIRECT, f08c47fec0942fa0\n";
+            }
+            if (!empty($icerik)) {
+                $ads_dosya = dirname(__DIR__) . '/ads.txt';
+                // Proje kokunde oldugumuz icin __DIR__ = public_html; ama admin scriptleri de kokte; hadi deneyelim
+                $ads_dosya = __DIR__ . '/ads.txt';
+                @file_put_contents($ads_dosya, $icerik);
+                log_ekle('islem', 'ads.txt dosyasi guncellendi', 'Boyut: ' . strlen($icerik) . ' byte', $yonetici['id']);
+            }
+        }
+
         log_ekle('islem', 'Ayarlar güncellendi', count($ayarlar) . ' alan', $yonetici['id']);
-        flash('Ayarlar kaydedildi.', 'basari');
+        flash('Ayarlar kaydedildi.' . (isset($ayarlar['adsense_client_id']) ? ' ads.txt dosyasi otomatik yazildi.' : ''), 'basari');
         yonlendir(url('yonetim.php?sayfa=ayarlar' . (!empty($_GET['grup']) ? '&grup=' . h($_GET['grup']) : '')));
     } catch (Throwable $e) {
         flash('Hata: ' . $e->getMessage(), 'hata');
@@ -1677,6 +1696,25 @@ function menu_aktif(string $mevcut, string $slug): string {
                 ];
 
                 if ($grup === 'araclar') {
+                    // ads.txt fiziksel yazma aracı
+                    if (($_POST['islem'] ?? '') === 'adstxt_yaz' && csrf_dogrula($_POST['_csrf'] ?? '')) {
+                        $icerik = trim(ayar('ads_txt_icerik', ''));
+                        $client = trim(ayar('adsense_client_id', ''));
+                        if (empty($icerik) && !empty($client) && preg_match('/^ca-pub-(\d+)$/', $client, $m)) {
+                            $icerik = "# XNEWS - Otomatik olusturuldu\ngoogle.com, pub-{$m[1]}, DIRECT, f08c47fec0942fa0\n";
+                        }
+                        if (empty($icerik)) {
+                            $_SESSION['flash'] = 'AdSense Client ID veya ads.txt icerigi girilmemis. Once Reklam ayarlarindan doldurun.';
+                        } else {
+                            $yazildi = @file_put_contents(__DIR__ . '/ads.txt', $icerik);
+                            $_SESSION['flash'] = $yazildi
+                                ? "ads.txt dosyasi yazildi ({$yazildi} byte). Test: xnews.com.tr/ads.txt"
+                                : 'ads.txt yazilamadi. Dosya izinlerini kontrol edin (public_html yazilabilir olmali).';
+                        }
+                        header('Location: ' . url('yonetim.php?sayfa=ayarlar&grup=araclar'));
+                        exit;
+                    }
+
                     $bozuk_adet = 0;
                     $ornek = [];
                     $stmt = $db->query("SELECT id, baslik FROM {$prefix}news WHERE
@@ -1726,6 +1764,39 @@ function menu_aktif(string $mevcut, string $slug): string {
                                 <?= csrf_input() ?>
                                 <input type="hidden" name="islem" value="karakter_temizle">
                                 <button type="submit" class="btn btn-ana">🧹 Tüm Haberleri Temizle</button>
+                            </form>
+
+                            <hr style="margin:30px 0;border:none;border-top:1px solid var(--border)">
+
+                            <h3 style="margin:0 0 6px">📄 ads.txt Dosyasını Fiziksel Olarak Yaz</h3>
+                            <p style="color:var(--muted);font-size:14px;margin:0 0 16px;line-height:1.5">
+                                Google AdSense ve diğer reklam ağları <code>yoursite.com/ads.txt</code> dosyasının <strong>fiziksel</strong> olarak sunucuda durmasını ister.
+                                Dinamik route bazı hostinglerde tanınmayabiliyor. Bu buton <code>public_html/ads.txt</code> olarak <strong>gerçek dosya</strong> yazar.
+                                <br><br>
+                                İçerik: <strong>Yönetim → Ayarlar → Reklam → AdSense Publisher ID</strong> ya da <strong>ads.txt İçeriği</strong> alanından alınır.
+                                Her ikisi de boşsa hiçbir şey yazılmaz.
+                            </p>
+                            <?php
+                            $adstxt_mevcut = file_exists(__DIR__ . '/ads.txt');
+                            $adstxt_icerik = $adstxt_mevcut ? @file_get_contents(__DIR__ . '/ads.txt') : '';
+                            $adsense_id_mevcut = trim(ayar('adsense_client_id', ''));
+                            ?>
+                            <?php if ($adstxt_mevcut): ?>
+                            <div style="background:#d1fae5;border-left:3px solid #10b981;padding:12px 16px;margin-bottom:14px;border-radius:4px;font-size:13px">
+                                <strong style="color:#065f46">✓ ads.txt mevcut</strong> (<?= strlen($adstxt_icerik) ?> byte)<br>
+                                <code style="display:block;margin-top:6px;padding:6px 10px;background:#fff;border-radius:3px;font-size:12px;white-space:pre-wrap"><?= h($adstxt_icerik) ?></code>
+                                <a href="<?= url('ads.txt') ?>" target="_blank" style="font-size:12px;margin-top:6px;display:inline-block">xnews.com.tr/ads.txt test →</a>
+                            </div>
+                            <?php elseif (!$adsense_id_mevcut): ?>
+                            <div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:12px 16px;margin-bottom:14px;border-radius:4px;font-size:13px">
+                                <strong>⚠ AdSense Publisher ID henüz girilmemiş</strong><br>
+                                Önce <a href="<?= url('yonetim.php?sayfa=ayarlar&grup=reklam') ?>">Reklam Ayarları</a> bölümünden <code>ca-pub-xxxxxxxxx</code> ID'nizi girin.
+                            </div>
+                            <?php endif; ?>
+                            <form method="post">
+                                <?= csrf_input() ?>
+                                <input type="hidden" name="islem" value="adstxt_yaz">
+                                <button type="submit" class="btn btn-ana">📄 ads.txt Dosyasını Şimdi Yaz</button>
                             </form>
                         </div>
                     </div>
