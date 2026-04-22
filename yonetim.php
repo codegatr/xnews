@@ -2169,6 +2169,12 @@ function menu_aktif(string $mevcut, string $slug): string {
                 $site = $_SERVER['HTTP_HOST'] ?? 'xnews.com.tr';
                 $cron_anahtar = ayar('cron_anahtar', '');
                 $son_cekim = ayar('son_cron_tarihi', '');
+                // Proje kök dizinini tespit et (/home/kullanici/domains/site.com/public_html/)
+                $dokuman_kok = rtrim(str_replace('\\', '/', __DIR__), '/');
+                $cron_php_yolu = $dokuman_kok . '/cron.php';
+                // PHP binary yolu - DirectAdmin'de genelde /usr/local/bin/php
+                $php_yolu = '/usr/local/bin/php';
+                $tam_komut = $php_yolu . ' ' . $cron_php_yolu . ' ' . $cron_anahtar;
             ?>
                 <div class="icerik-bas">
                     <div>
@@ -2187,97 +2193,105 @@ function menu_aktif(string $mevcut, string $slug): string {
                                     Cron Durumu: <?= $son_cekim ? 'Çalışıyor ✓' : 'Henüz kurulmadı' ?>
                                 </h3>
                                 <div style="font-size:13px;color:var(--muted)">
-                                    <?= $son_cekim ? ('Son çekim: ' . h(goreceli_zaman($son_cekim))) : 'Cron.php henüz çalıştırılmadı. Aşağıdaki adımları takip edin.' ?>
+                                    <?= $son_cekim ? ('Son çekim: ' . h(goreceli_zaman($son_cekim))) : 'Cron henüz çalışmadı. Aşağıdaki adımları takip edin.' ?>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Cron URL + Anahtar -->
-                <div class="panel" style="margin-bottom:18px">
-                    <div class="panel-bas"><h3 style="margin:0">📋 Kopyalanacak Bilgiler</h3></div>
+                <!-- Tam Cron Komutu (ÖNERİLEN) -->
+                <div class="panel" style="margin-bottom:18px;border:2px solid #10b981">
+                    <div class="panel-bas" style="background:#ecfdf5">
+                        <h3 style="margin:0;color:#065f46">⭐ Önerilen: PHP CLI (En Güvenilir)</h3>
+                    </div>
                     <div class="panel-ic">
-                        <div class="form-grup" style="margin-bottom:14px">
-                            <label style="font-weight:600">Cron URL (Chip + wget yöntemi için):</label>
-                            <div style="display:flex;gap:8px;align-items:stretch">
-                                <input type="text" readonly value="https://<?= h($site) ?>/cron.php?anahtar=<?= h($cron_anahtar) ?>" style="flex:1;font-family:monospace;font-size:12px" id="cronUrl">
-                                <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('cronUrl').value).then(()=>this.innerText='✓ Kopyalandı')" class="buton ikincil" style="white-space:nowrap">📋 Kopyala</button>
-                            </div>
+                        <p style="margin:0 0 10px;font-size:14px">Bu komut DirectAdmin'de <strong>Command</strong> alanına birebir yapıştırılır:</p>
+                        <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:10px">
+                            <input type="text" readonly value="<?= h($tam_komut) ?>" style="flex:1;font-family:monospace;font-size:11px;background:#f8fafc" id="cronCmdCLI" onclick="this.select()">
+                            <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('cronCmdCLI').value).then(()=>{this.innerText='✓ Kopyalandı';setTimeout(()=>this.innerText='📋 Kopyala',2000)})" class="buton" style="white-space:nowrap">📋 Kopyala</button>
                         </div>
-                        <div class="form-grup">
-                            <label style="font-weight:600">Tam Cron Komutu (DirectAdmin için):</label>
-                            <div style="display:flex;gap:8px;align-items:stretch">
-                                <input type="text" readonly value="wget -q -O /dev/null 'https://<?= h($site) ?>/cron.php?anahtar=<?= h($cron_anahtar) ?>' >/dev/null 2>&amp;1" style="flex:1;font-family:monospace;font-size:12px" id="cronCmd">
-                                <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('cronCmd').value).then(()=>this.innerText='✓ Kopyalandı')" class="buton" style="white-space:nowrap">📋 Kopyala</button>
-                            </div>
+                        <div style="background:#f1f5f9;padding:10px 14px;border-radius:6px;font-size:12px;color:var(--muted)">
+                            <strong>Bileşenleri:</strong>
+                            <div style="margin-top:4px">PHP Binary: <code><?= h($php_yolu) ?></code></div>
+                            <div>Script Yolu: <code><?= h($cron_php_yolu) ?></code></div>
+                            <div>Anahtar: <code><?= h(substr($cron_anahtar, 0, 8)) ?>...</code> (güvenlik için gizlendi)</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Adım 1: DirectAdmin Giriş -->
+                <!-- Alternatif: wget -->
                 <div class="panel" style="margin-bottom:18px">
-                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
-                        <div style="width:36px;height:36px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">1</div>
-                        <h3 style="margin:0">DirectAdmin Paneline Giriş</h3>
-                    </div>
+                    <div class="panel-bas"><h3 style="margin:0">🔄 Alternatif: HTTP (wget)</h3></div>
                     <div class="panel-ic">
-                        <ol style="margin:0;padding-left:22px;line-height:1.8">
-                            <li>Hosting sağlayıcının DirectAdmin paneline giriş yap (genelde: <code>https://sunucu:2222</code>)</li>
-                            <li>Ana menüden <strong>"Advanced Features"</strong> veya <strong>"Gelişmiş Özellikler"</strong> bölümüne git</li>
-                            <li><strong>"Cron Jobs"</strong> veya <strong>"Zamanlanmış Görevler"</strong> linkine tıkla</li>
-                        </ol>
+                        <p style="margin:0 0 10px;font-size:13px;color:var(--muted)">PHP CLI çalışmıyorsa veya başka bir sunucudan tetiklemek istiyorsanız:</p>
+                        <div style="display:flex;gap:8px;align-items:stretch">
+                            <input type="text" readonly value="wget -q -O /dev/null --no-check-certificate 'https://<?= h($site) ?>/cron.php?anahtar=<?= h($cron_anahtar) ?>'" style="flex:1;font-family:monospace;font-size:11px" id="cronCmdWget">
+                            <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('cronCmdWget').value).then(()=>{this.innerText='✓';setTimeout(()=>this.innerText='📋',2000)})" class="buton ikincil" style="white-space:nowrap">📋</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Adım 2: Yeni Cron -->
+                <!-- Adım 1-2-3 Kurulum -->
                 <div class="panel" style="margin-bottom:18px">
-                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
-                        <div style="width:36px;height:36px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">2</div>
-                        <h3 style="margin:0">Yeni Cron Oluştur</h3>
-                    </div>
+                    <div class="panel-bas"><h3 style="margin:0">📋 DirectAdmin'de Kurulum (3 Adım)</h3></div>
                     <div class="panel-ic">
-                        <p style="margin:0 0 12px">DirectAdmin Cron Jobs sayfasında aşağıdaki zamanlama tablosunu doldur:</p>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+                            <div style="padding:14px;background:#f8fafc;border-radius:8px;border-left:3px solid #2563eb">
+                                <strong style="font-size:13px;color:#2563eb">ADIM 1</strong>
+                                <h4 style="margin:4px 0 6px">DirectAdmin Panelinde Cron Jobs'a Git</h4>
+                                <p style="margin:0;font-size:13px;color:var(--muted);line-height:1.5">
+                                    Ana menü → <strong>Advanced Features</strong> → <strong>Cron Jobs</strong>
+                                </p>
+                            </div>
+
+                            <div style="padding:14px;background:#f8fafc;border-radius:8px;border-left:3px solid #7c3aed">
+                                <strong style="font-size:13px;color:#7c3aed">ADIM 2</strong>
+                                <h4 style="margin:4px 0 6px">Zamanlama + Komut Gir</h4>
+                                <p style="margin:0;font-size:13px;color:var(--muted);line-height:1.5">
+                                    Aşağıdaki tablo değerlerini <strong>ilgili alanlara</strong> gir ve yukarıdan kopyaladığın <strong>PHP CLI komutunu</strong> "Command" alanına yapıştır.
+                                </p>
+                            </div>
+
+                            <div style="padding:14px;background:#f8fafc;border-radius:8px;border-left:3px solid #10b981">
+                                <strong style="font-size:13px;color:#10b981">ADIM 3</strong>
+                                <h4 style="margin:4px 0 6px">Create / Oluştur</h4>
+                                <p style="margin:0;font-size:13px;color:var(--muted);line-height:1.5">
+                                    Kaydet → 5 dk bekle → Dashboard'a dön, <strong>Toplam Haber</strong> sayısı artmış olmalı.
+                                </p>
+                            </div>
+                        </div>
+
+                        <h4 style="margin:20px 0 10px">Frekans Tablosu (DirectAdmin Alanları)</h4>
                         <table class="tablo" style="margin:0">
                             <thead>
-                                <tr><th>Alan</th><th>Değer (5 dakikada bir)</th><th>Açıklama</th></tr>
+                                <tr><th>Sıklık</th><th>Minute</th><th>Hour</th><th>Day</th><th>Month</th><th>Weekday</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td><strong>Minute</strong></td><td><code>*/5</code></td><td>Her 5 dakikada</td></tr>
-                                <tr><td><strong>Hour</strong></td><td><code>*</code></td><td>Tüm saatlerde</td></tr>
-                                <tr><td><strong>Day of Month</strong></td><td><code>*</code></td><td>Her gün</td></tr>
-                                <tr><td><strong>Month</strong></td><td><code>*</code></td><td>Her ay</td></tr>
-                                <tr><td><strong>Day of Week</strong></td><td><code>*</code></td><td>Her gün</td></tr>
-                                <tr><td><strong>Command</strong></td><td><code style="font-size:11px">wget -q -O /dev/null 'https://<?= h($site) ?>/cron.php?anahtar=<?= h(substr($cron_anahtar, 0, 8)) ?>...'</code></td><td>Yukarıdan tam komutu kopyala</td></tr>
+                                <tr style="background:#ecfdf5"><td><strong>Her 5 dakikada ⭐</strong></td><td><code>*/5</code></td><td><code>*</code></td><td><code>*</code></td><td><code>*</code></td><td><code>*</code></td></tr>
+                                <tr><td>Her 10 dakikada</td><td><code>*/10</code></td><td><code>*</code></td><td><code>*</code></td><td><code>*</code></td><td><code>*</code></td></tr>
+                                <tr><td>Her 15 dakikada</td><td><code>*/15</code></td><td><code>*</code></td><td><code>*</code></td><td><code>*</code></td><td><code>*</code></td></tr>
+                                <tr><td>Saat başı</td><td><code>0</code></td><td><code>*</code></td><td><code>*</code></td><td><code>*</code></td><td><code>*</code></td></tr>
+                                <tr><td>Günde 4 kez (0/6/12/18)</td><td><code>0</code></td><td><code>0,6,12,18</code></td><td><code>*</code></td><td><code>*</code></td><td><code>*</code></td></tr>
                             </tbody>
                         </table>
-                        <p style="margin:14px 0 0;color:var(--muted);font-size:13px">
-                            <strong>Diğer sıklık seçenekleri:</strong><br>
-                            • Her 10 dakikada → Minute: <code>*/10</code><br>
-                            • Her saat başı → Minute: <code>0</code>, Hour: <code>*</code><br>
-                            • Günde 4 kez (6/12/18/0 saat) → Minute: <code>0</code>, Hour: <code>0,6,12,18</code>
+                        <p style="margin:12px 0 0;color:var(--muted);font-size:12px">
+                            💡 <strong>Öneri:</strong> 77 RSS kaynağı için <strong>5 dakikada bir</strong> ideal. Hosting'in kaynak tüketimini izleyip daha seyrek yapabilirsin.
                         </p>
                     </div>
                 </div>
 
-                <!-- Adım 3: Test -->
+                <!-- Test -->
                 <div class="panel" style="margin-bottom:18px">
-                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
-                        <div style="width:36px;height:36px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">3</div>
-                        <h3 style="margin:0">Test Et</h3>
-                    </div>
+                    <div class="panel-bas"><h3 style="margin:0">✅ Test</h3></div>
                     <div class="panel-ic">
-                        <ol style="margin:0;padding-left:22px;line-height:1.8">
-                            <li><strong>Create</strong> veya <strong>Oluştur</strong> butonuna bas</li>
-                            <li>5 dakika bekle, Dashboard'a dön</li>
-                            <li>"Toplam haber" rakamının arttığını veya "Son RSS çekimleri" listesinde yeni zaman görmen gerekli</li>
-                            <li>Ayrıca burada <strong>"Manuel Çekim Tetikle"</strong> butonuyla anlık test edebilirsin:</li>
-                        </ol>
-                        <form method="post" action="<?= url('yonetim.php?sayfa=cekim-tetik') ?>" style="margin-top:14px">
+                        <p style="margin:0 0 14px;font-size:14px">Cron kurulumunu doğrulamak için:</p>
+                        <form method="post" action="<?= url('yonetim.php?sayfa=cekim-tetik') ?>" style="display:inline-block">
                             <?= csrf_input() ?>
                             <button type="submit" class="buton">⚡ Manuel RSS Çekimini Tetikle</button>
-                            <a href="<?= url('yonetim.php?sayfa=loglar&tip=cron') ?>" class="buton ikincil">📋 Cron Logları</a>
                         </form>
+                        <a href="<?= url('yonetim.php?sayfa=loglar&tip=cron') ?>" class="buton ikincil">📋 Cron Logları</a>
+                        <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton ikincil">🔍 RSS Kaynakları (hata kontrolü)</a>
                     </div>
                 </div>
 
@@ -2286,11 +2300,11 @@ function menu_aktif(string $mevcut, string $slug): string {
                     <div class="panel-ic">
                         <h3 style="margin:0 0 10px;color:#92400e">🔧 Sorun Giderme</h3>
                         <ul style="margin:0;padding-left:22px;line-height:1.7;color:#78350f;font-size:13px">
-                            <li><strong>Cron çalışmıyor:</strong> Hosting panelindeki e-posta adresine cron çıktısı gönderilir, kontrol et.</li>
-                            <li><strong>wget komutu bulunamadı:</strong> Bazı hostinglerde <code>curl</code> kullan: <code>curl -s 'URL'</code></li>
-                            <li><strong>SSL hatası:</strong> URL'i <code>http://</code> olarak yaz veya <code>--no-check-certificate</code> ekle.</li>
-                            <li><strong>Anahtar değiştirmek istiyorsan:</strong> <a href="<?= url('yonetim.php?sayfa=ayarlar&grup=guvenlik') ?>">Ayarlar → Güvenlik</a></li>
-                            <li><strong>DirectAdmin dışında (Plesk/cPanel):</strong> Aynı mantık, sadece menü adları farklı.</li>
+                            <li><strong>"No such file or directory":</strong> <code><?= h($cron_php_yolu) ?></code> yolu doğru mu? DirectAdmin dosya yöneticisinden kontrol et.</li>
+                            <li><strong>PHP sürümü:</strong> Eğer <code>/usr/local/bin/php</code> PHP 7.x ise, XNEWS PHP 8.3 ister. Hosting sağlayıcıya PHP 8.3 CLI yolunu sor (genelde <code>/usr/local/php83/bin/php</code> gibi).</li>
+                            <li><strong>Cron çalışıyor ama haber yok:</strong> <a href="<?= url('yonetim.php?sayfa=loglar&tip=cron') ?>">Cron Logları</a>'ndan hata mesajına bak.</li>
+                            <li><strong>Anahtar değiştirmek:</strong> <a href="<?= url('yonetim.php?sayfa=ayarlar&grup=guvenlik') ?>">Güvenlik Ayarları</a>'ndan <code>cron_anahtar</code>. Değiştirdikten sonra DirectAdmin cron'u da güncelle!</li>
+                            <li><strong>E-posta bildirimleri:</strong> DirectAdmin cron her çalıştığında e-posta gönderir. Sessizleştirmek için komuta ekle: <code>>/dev/null 2>&amp;1</code></li>
                         </ul>
                     </div>
                 </div>
