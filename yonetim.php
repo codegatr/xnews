@@ -1624,6 +1624,42 @@ function menu_aktif(string $mevcut, string $slug): string {
             // ====================================
             case 'ayarlar':
                 $grup = $_GET['grup'] ?? 'genel';
+
+                // Bozuk karakter temizlik aracı
+                if ($grup === 'araclar' && ($_POST['islem'] ?? '') === 'karakter_temizle') {
+                    // CSRF
+                    if (csrf_dogrula($_POST['_csrf'] ?? '')) {
+                        $guncellendi = 0;
+                        $toplam = (int)$db->query("SELECT COUNT(*) FROM {$prefix}news")->fetchColumn();
+                        // Tüm haberleri sayfalı oku, temizle, güncelle
+                        $offset = 0;
+                        $limit  = 500;
+                        while ($offset < $toplam) {
+                            $st = $db->prepare("SELECT id, baslik, ozet, icerik, yazar FROM {$prefix}news LIMIT ? OFFSET ?");
+                            $st->bindValue(1, $limit, PDO::PARAM_INT);
+                            $st->bindValue(2, $offset, PDO::PARAM_INT);
+                            $st->execute();
+                            $haberler = $st->fetchAll();
+                            foreach ($haberler as $hb) {
+                                $yb = temizle_metin($hb['baslik']);
+                                $yo = temizle_metin($hb['ozet'] ?? '');
+                                $yi = temizle_metin($hb['icerik'] ?? '');
+                                $yy = temizle_metin($hb['yazar'] ?? '');
+                                if ($yb !== $hb['baslik'] || $yo !== ($hb['ozet'] ?? '')
+                                    || $yi !== ($hb['icerik'] ?? '') || $yy !== ($hb['yazar'] ?? '')) {
+                                    $up = $db->prepare("UPDATE {$prefix}news SET baslik=?, ozet=?, icerik=?, yazar=? WHERE id=?");
+                                    $up->execute([$yb, $yo, $yi, $yy, $hb['id']]);
+                                    $guncellendi++;
+                                }
+                            }
+                            $offset += $limit;
+                        }
+                        $_SESSION['flash'] = "Temizlik tamamlandı. {$toplam} haberden {$guncellendi} tanesi güncellendi.";
+                    }
+                    header('Location: ' . url('yonetim.php?sayfa=ayarlar&grup=araclar'));
+                    exit;
+                }
+
                 $gruplar = [
                     'genel'       => 'Genel',
                     'sosyal'      => 'Sosyal Medya',
@@ -1631,7 +1667,66 @@ function menu_aktif(string $mevcut, string $slug): string {
                     'goruntuleme' => 'Goruntuleme',
                     'cron'        => 'RSS / Cron',
                     'reklam'      => 'Reklam',
+                    'araclar'     => '🛠 Araçlar',
                 ];
+
+                if ($grup === 'araclar') {
+                    $bozuk_adet = 0;
+                    $ornek = [];
+                    $stmt = $db->query("SELECT id, baslik FROM {$prefix}news WHERE
+                        baslik REGEXP '[[:cntrl:]]'
+                        OR baslik LIKE CONCAT('%', CHAR(0xE2, 0x80, 0x8B USING utf8), '%')
+                        OR baslik LIKE CONCAT('%', CHAR(0xE2, 0x80, 0x8C USING utf8), '%')
+                        OR baslik LIKE CONCAT('%', CHAR(0xE2, 0x80, 0x8D USING utf8), '%')
+                        OR baslik LIKE CONCAT('%', CHAR(0xEF, 0xBB, 0xBF USING utf8), '%')
+                        LIMIT 5");
+                    if ($stmt) $ornek = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $bozuk_adet = count($ornek);
+                    ?>
+                    <div class="icerik-bas">
+                        <div>
+                            <h1>🛠 Araçlar</h1>
+                            <div class="alt-metin">Bakım ve temizlik araçları</div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-bas" style="padding:0">
+                            <div style="display:flex;gap:2px;overflow-x:auto;width:100%">
+                                <?php foreach ($gruplar as $g => $gad): ?>
+                                    <a href="<?= url('yonetim.php?sayfa=ayarlar&grup=' . $g) ?>" style="padding:14px 20px;font-size:13px;font-weight:<?= $grup === $g ? '600' : '500' ?>;color:<?= $grup === $g ? 'var(--brand)' : 'var(--ink-muted)' ?>;border-bottom:2px solid <?= $grup === $g ? 'var(--brand)' : 'transparent' ?>;white-space:nowrap"><?= h($gad) ?></a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <div class="panel-ic">
+                            <h3 style="margin:0 0 6px">🧹 Bozuk Karakter Temizleme</h3>
+                            <p style="color:var(--muted);font-size:14px;margin:0 0 16px;line-height:1.5">
+                                RSS'ten gelen eski haberlerde <strong>zero-width / kontrol karakterleri</strong> olabilir.
+                                Bu karakterler başlık altında renkli kutucuklar gibi görünür.
+                                Bu araç veritabanındaki tüm haberleri tarar ve bu görünmez karakterleri temizler.
+                                <br><br>
+                                <strong>Not:</strong> Yeni gelecek haberler otomatik temizleniyor (v1.1.2+). Bu araç sadece eski kayıtlar için.
+                            </p>
+                            <?php if (!empty($ornek)): ?>
+                            <div style="background:#fee;border-left:3px solid #c8102e;padding:12px 16px;margin-bottom:16px;border-radius:4px">
+                                <strong style="color:#c8102e">⚠ Bozuk karakter içerme ihtimali olan haberler tespit edildi:</strong>
+                                <ul style="margin:8px 0 0;padding-left:24px;font-size:13px">
+                                    <?php foreach ($ornek as $o): ?>
+                                        <li><?= h(mb_substr($o['baslik'], 0, 80, 'UTF-8')) ?>...</li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                            <?php endif; ?>
+                            <form method="post" onsubmit="return confirm('Tüm haberlerde bozuk karakter temizliği yapılacak. Devam edilsin mi?')">
+                                <?= csrf_input() ?>
+                                <input type="hidden" name="islem" value="karakter_temizle">
+                                <button type="submit" class="btn btn-ana">🧹 Tüm Haberleri Temizle</button>
+                            </form>
+                        </div>
+                    </div>
+                    <?php
+                    break;
+                }
+
                 $stmt = $db->prepare("SELECT * FROM {$prefix}settings WHERE grup = ? ORDER BY sira, anahtar");
                 $stmt->execute([$grup]);
                 $ayar_liste = $stmt->fetchAll();

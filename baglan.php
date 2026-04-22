@@ -68,17 +68,26 @@ if (session_status() === PHP_SESSION_NONE) {
  */
 function h(?string $s): string {
     $s = (string)$s;
-    // Görünmez kontrol karakterlerini temizle (kart bug'ı: renkli kutular)
-    // Tab (0x09), Newline (0x0A), Carriage Return (0x0D) hariç
-    $s = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $s);
-    // Zero-width karakterler (invisible, kopya/yapıştır kirliliği)
-    $s = preg_replace('/[\x{200B}-\x{200F}\x{2028}\x{2029}\x{FEFF}]/u', '', $s);
-    // Replacement character U+FFFD (bozuk encoding göstergesi) da temizle
+    // Unicode \p{Cf} = Format kategorisi TAMAMI (tüm zero-width, bidi markers,
+    // word joiner, invisible separator, variation selector, vs.)
+    // Bu, manuel karakter listelerinden çok daha kapsamlı.
+    $s = preg_replace('/\p{Cf}/u', '', $s);
+    // ASCII kontrol karakterleri (tab, LF, CR hariç — whitespace doğal)
+    $s = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $s);
+    // Replacement character U+FFFD (bozuk encoding göstergesi)
     $s = str_replace("\u{FFFD}", '', $s);
-    // Önce HTML entity'leri cöz (RSS'ten gelen çift-escape sorunu: &apos;in → 'in),
-    // sonra güvenli escape uygula. XSS koruması korunur.
+    // HTML entity decode + escape
     $s = html_entity_decode($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     return htmlspecialchars($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
+
+// Veritabanı için ham temizlik (DB'ye yazmadan önce)
+function temizle_metin(?string $s): string {
+    $s = (string)$s;
+    $s = preg_replace('/\p{Cf}/u', '', $s);
+    $s = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $s);
+    $s = str_replace("\u{FFFD}", '', $s);
+    return trim($s);
 }
 
 /**
