@@ -11,7 +11,7 @@ SET NAMES utf8mb4;
 -- 7=Magazin, 8=Sağlık, 9=Eğitim, 10=Kultur Sanat, 11=Yaşam, 12=Otomobil
 
 INSERT INTO `xn_sources`
-    (`ad`, `slug`, `site_url`, `rss_url`, `varsayilan_kategori_id`, `açıklama`, `atfi_metin`, `cekim_sikligi`, `max_haber_adet`, `aktif`) VALUES
+    (`ad`, `slug`, `site_url`, `rss_url`, `varsayilan_kategori_id`, `aciklama`, `atfi_metin`, `cekim_sikligi`, `max_haber_adet`, `aktif`) VALUES
 
 -- ULUSAL HABER KAYNAKLARI
 ('TRT Haber - Manset', 'trthaber-manset', 'https://www.trthaber.com', 'https://www.trthaber.com/manset_articles.rss', 1, 'TRT Haber manset haberleri', 'TRT Haber', 10, 30, 1),

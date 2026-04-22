@@ -74,7 +74,7 @@ if ($adim === 4 && $_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         // Site URL ve adi ayarlara yaz
-        $db->prepare("UPDATE `{$prefix}settings` SET değer = ? WHERE anahtar = 'site_adi'")->execute([$site_adi]);
+        $db->prepare("UPDATE `{$prefix}settings` SET deger = ? WHERE anahtar = 'site_adi'")->execute([$site_adi]);
 
         // config.php uret
         $guvenlik = bin2hex(random_bytes(32));

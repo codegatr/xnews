@@ -18,7 +18,7 @@ $prefix = DB_PREFIX;
 $kategori_slug = preg_replace('/[^a-z0-9-]/i', '', $_GET['kategori'] ?? '');
 $kaynak_slug   = preg_replace('/[^a-z0-9-]/i', '', $_GET['kaynak'] ?? '');
 $baslik_ek     = '';
-$where         = "n.durum = 'yayında'";
+$where         = "n.durum = 'yayinda'";
 $params        = [];
 
 if ($kategori_slug) {

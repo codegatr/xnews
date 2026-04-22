@@ -281,7 +281,7 @@ try {
 
     if (empty($kaynaklar)) {
         yaz('Çekilecek kaynak yok.', 'u');
-        yaz('Toplam süre: ' . round(microtime(true) - $baslangic_zamani, 2) . ' sn', 'a');
+        yaz('Toplam sure: ' . round(microtime(true) - $baslangic_zamani, 2) . ' sn', 'a');
         if ($gorsel_cikti) echo '</body>';
         exit;
     }
@@ -325,7 +325,7 @@ try {
                 $kat_id = (int)($kaynak['varsayilan_kategori_id'] ?? 0);
                 if (empty($kat_id)) {
                     // Kategori secili degilse ilk aktif kategoriyi kullan
-                    $kat_id = (int)$db->query("SELECT id FROM " . DB_PREFIX . "categories WHERE aktif = 1 ORDER BY sıra LIMIT 1")->fetchColumn();
+                    $kat_id = (int)$db->query("SELECT id FROM " . DB_PREFIX . "categories WHERE aktif = 1 ORDER BY sira LIMIT 1")->fetchColumn();
                     if (empty($kat_id)) {
                         $kaynak_atlanan++; continue;
                     }
@@ -357,9 +357,9 @@ try {
 
                 // INSERT
                 $stmt = $db->prepare("INSERT INTO " . DB_PREFIX . "news
-                    (başlık, slug, ozet, icerik, resim, kaynak_id, kategori_id, yazar, orijinal_url,
+                    (baslik, slug, ozet, icerik, resim, kaynak_id, kategori_id, yazar, orijinal_url,
                      guid, icerik_hash, durum, yayin_tarihi, olusturma)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'yayında', ?, NOW())");
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'yayinda', ?, NOW())");
                 $stmt->execute([
                     mb_substr($oge['baslik'], 0, 255, 'UTF-8'),
                     $slug,
@@ -380,7 +380,7 @@ try {
             // Kaynagi guncelle
             $db->prepare("UPDATE " . DB_PREFIX . "sources
                 SET son_cekim = NOW(), son_durum = ?, son_hata = NULL, toplam_haber = toplam_haber + ?
-                WHERE id = ?")->execute(['başarılı', $kaynak_eklenen, $kaynak['id']]);
+                WHERE id = ?")->execute(['basarili', $kaynak_eklenen, $kaynak['id']]);
 
             yaz('  ✓ ' . $kaynak_eklenen . ' yeni, ' . $kaynak_atlanan . ' atlandı.', 'b');
 

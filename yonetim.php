@@ -48,7 +48,7 @@ if ($sayfa === 'giris' || !giris_kontrol()) {
         if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
             $hata = 'Güvenlik doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin.';
         } elseif (empty($k) || empty($s)) {
-            $hata = 'Kullanıcı adı ve şifre zorunludur.';
+            $hata = 'Kullanıcı adı ve sifre zorunludur.';
         } else {
             $stmt = $db->prepare("SELECT * FROM " . DB_PREFIX . "users WHERE (kullanici_adi = ? OR eposta = ?) AND durum = 1 LIMIT 1");
             $stmt->execute([$k, $k]);
@@ -71,7 +71,7 @@ if ($sayfa === 'giris' || !giris_kontrol()) {
                 log_ekle('bilgi', 'Yönetici girisi', $kullanici['kullanici_adi'], $kullanici['id']);
                 yonlendir(url('yonetim.php'));
             } else {
-                $hata = 'Kullanıcı adı veya şifre hatalı.';
+                $hata = 'Kullanıcı adı veya sifre hatali.';
                 $deneme['sayi']++;
                 $deneme['son'] = time();
                 $_SESSION[$limit_anahtar] = $deneme;
@@ -163,7 +163,7 @@ if ($sayfa === 'kaynaklar' && post()) {
             if ($islem === 'ekle') {
                 $slug = benzersiz_slug($db, "{$prefix}sources", slug_olustur($ad));
                 $stmt = $db->prepare("INSERT INTO {$prefix}sources
-                    (ad, slug, site_url, rss_url, varsayilan_kategori_id, logo, açıklama, dil, atfi_metin, aktif, cekim_sikligi, max_haber_adet)
+                    (ad, slug, site_url, rss_url, varsayilan_kategori_id, logo, aciklama, dil, atfi_metin, aktif, cekim_sikligi, max_haber_adet)
                     VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$ad, $slug, $site_url_d, $rss_url, $kat_id, $aciklama, $dil, $atfi, $aktif, $sikligi, $max_haber]);
                 log_ekle('islem', 'Kaynak eklendi', $ad, $yonetici['id']);
@@ -171,7 +171,7 @@ if ($sayfa === 'kaynaklar' && post()) {
             } else {
                 if ($id < 1) throw new Exception('Gecersiz kaynak ID.');
                 $stmt = $db->prepare("UPDATE {$prefix}sources
-                    SET ad = ?, site_url = ?, rss_url = ?, varsayilan_kategori_id = ?, açıklama = ?, dil = ?,
+                    SET ad = ?, site_url = ?, rss_url = ?, varsayilan_kategori_id = ?, aciklama = ?, dil = ?,
                         atfi_metin = ?, aktif = ?, cekim_sikligi = ?, max_haber_adet = ? WHERE id = ?");
                 $stmt->execute([$ad, $site_url_d, $rss_url, $kat_id, $aciklama, $dil, $atfi, $aktif, $sikligi, $max_haber, $id]);
                 log_ekle('islem', 'Kaynak güncellendi', $ad, $yonetici['id']);
@@ -216,13 +216,13 @@ if ($sayfa === 'kategoriler' && post()) {
 
             if ($islem === 'ekle') {
                 $slug = benzersiz_slug($db, "{$prefix}categories", slug_olustur($ad));
-                $stmt = $db->prepare("INSERT INTO {$prefix}categories (ad, slug, açıklama, renk, sıra, aktif) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt = $db->prepare("INSERT INTO {$prefix}categories (ad, slug, aciklama, renk, sira, aktif) VALUES (?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$ad, $slug, $aciklama, $renk, $sira, $aktif]);
                 log_ekle('islem', 'Kategori eklendi', $ad, $yonetici['id']);
                 flash('Kategori eklendi.', 'basari');
             } else {
                 if ($id < 1) throw new Exception('Gecersiz kategori.');
-                $stmt = $db->prepare("UPDATE {$prefix}categories SET ad = ?, açıklama = ?, renk = ?, sıra = ?, aktif = ? WHERE id = ?");
+                $stmt = $db->prepare("UPDATE {$prefix}categories SET ad = ?, aciklama = ?, renk = ?, sira = ?, aktif = ? WHERE id = ?");
                 $stmt->execute([$ad, $aciklama, $renk, $sira, $aktif, $id]);
                 log_ekle('islem', 'Kategori güncellendi', $ad, $yonetici['id']);
                 flash('Kategori güncellendi.', 'basari');
@@ -267,7 +267,7 @@ if ($sayfa === 'haberler' && post()) {
             $resim_alt   = trim($_POST['resim_alt'] ?? '');
             $yazar       = trim($_POST['yazar'] ?? '');
             $orij_url    = trim($_POST['orijinal_url'] ?? '');
-            $durum       = in_array($_POST['durum'] ?? '', ['yayında','taslak','arsiv','beklemede'], true) ? $_POST['durum'] : 'yayında';
+            $durum       = in_array($_POST['durum'] ?? '', ['yayinda','taslak','arsiv','beklemede'], true) ? $_POST['durum'] : 'yayinda';
             $manset      = isset($_POST['manset']) ? 1 : 0;
             $one_cikan   = isset($_POST['one_cikan']) ? 1 : 0;
             $son_dakika  = isset($_POST['son_dakika']) ? 1 : 0;
@@ -282,7 +282,7 @@ if ($sayfa === 'haberler' && post()) {
                 $slug = benzersiz_slug($db, "{$prefix}news", slug_olustur($baslik, 200));
                 $hash = sha1(mb_strtolower($baslik, 'UTF-8') . '|' . $kat_id);
                 $stmt = $db->prepare("INSERT INTO {$prefix}news
-                    (başlık, slug, ozet, icerik, resim, resim_alt, kaynak_id, kategori_id, yazar, yazar_id,
+                    (baslik, slug, ozet, icerik, resim, resim_alt, kaynak_id, kategori_id, yazar, yazar_id,
                      orijinal_url, icerik_hash, manset, one_cikan, son_dakika, durum, seo_baslik, seo_aciklama, yayin_tarihi)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 $stmt->execute([$baslik, $slug, $ozet, $icerik, $resim, $resim_alt, $kaynak_id, $kat_id, $yazar, $yonetici['id'],
@@ -293,7 +293,7 @@ if ($sayfa === 'haberler' && post()) {
             } else {
                 if ($id < 1) throw new Exception('Gecersiz haber.');
                 $stmt = $db->prepare("UPDATE {$prefix}news SET
-                    başlık = ?, ozet = ?, icerik = ?, resim = ?, resim_alt = ?, kaynak_id = ?, kategori_id = ?,
+                    baslik = ?, ozet = ?, icerik = ?, resim = ?, resim_alt = ?, kaynak_id = ?, kategori_id = ?,
                     yazar = ?, orijinal_url = ?, manset = ?, one_cikan = ?, son_dakika = ?, durum = ?,
                     seo_baslik = ?, seo_aciklama = ?, yayin_tarihi = ? WHERE id = ?");
                 $stmt->execute([$baslik, $ozet, $icerik, $resim, $resim_alt, $kaynak_id, $kat_id, $yazar, $orij_url,
@@ -319,7 +319,7 @@ if ($sayfa === 'haberler' && post()) {
                     $db->prepare("DELETE FROM {$prefix}news WHERE id IN ({$ph})")->execute($idler);
                     flash(count($idler) . ' haber silindi.', 'basari');
                     break;
-                case 'yayında':
+                case 'yayinda':
                 case 'taslak':
                 case 'arsiv':
                     $db->prepare("UPDATE {$prefix}news SET durum = ? WHERE id IN ({$ph})")->execute(array_merge([$eylem], $idler));
@@ -656,7 +656,7 @@ function menu_aktif(string $mevcut, string $slug): string {
             ?>
                 <div class="hosgeldin-kart">
                     <h2>Hoş geldin, <?= h(explode(' ', $yonetici['ad_soyad'] ?: $yonetici['kullanici_adi'])[0]) ?> 👋</h2>
-                    <p>XNEWS yönetim paneline eriştin. Aşağıdaki istatistiklerden sistemin genel durumunu görüntüleyebilirsin.</p>
+                    <p>XNEWS yonetim paneline eriştin. Aşağıdaki istatistiklerden sistemin genel durumunu görüntüleyebilirsin.</p>
                     <div class="butonlar">
                         <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton">RSS Kaynakları</a>
                         <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" class="buton ikincil">Manuel Haber Ekle</a>
@@ -751,7 +751,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                         $kaynak_d = $st->fetch();
                         if (!$kaynak_d) { flash('Kaynak bulunamadı.', 'hata'); yonlendir(url('yonetim.php?sayfa=kaynaklar')); }
                     }
-                    $kategoriler = $db->query("SELECT id, ad FROM {$prefix}categories WHERE aktif = 1 ORDER BY sıra, ad")->fetchAll();
+                    $kategoriler = $db->query("SELECT id, ad FROM {$prefix}categories WHERE aktif = 1 ORDER BY sira, ad")->fetchAll();
             ?>
                 <div class="icerik-bas">
                     <div>
@@ -1057,7 +1057,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                         $haber_d = $st->fetch();
                         if (!$haber_d) { flash('Haber bulunamadı.', 'hata'); yonlendir(url('yonetim.php?sayfa=haberler')); }
                     }
-                    $kategoriler_liste = $db->query("SELECT id, ad FROM {$prefix}categories WHERE aktif = 1 ORDER BY sıra, ad")->fetchAll();
+                    $kategoriler_liste = $db->query("SELECT id, ad FROM {$prefix}categories WHERE aktif = 1 ORDER BY sira, ad")->fetchAll();
                     $kaynaklar_liste   = $db->query("SELECT id, ad FROM {$prefix}sources ORDER BY ad")->fetchAll();
             ?>
                 <div class="icerik-bas">
@@ -1129,8 +1129,8 @@ function menu_aktif(string $mevcut, string $slug): string {
                                     <div class="form-grup">
                                         <label>Durum</label>
                                         <select name="durum">
-                                            <?php foreach (['yayında'=>'Yayında','taslak'=>'Taslak','beklemede'=>'Beklemede','arsiv'=>'Arsiv'] as $d => $l): ?>
-                                                <option value="<?= $d ?>" <?= ($haber_d['durum'] ?? 'yayında') === $d ? 'selected' : '' ?>><?= $l ?></option>
+                                            <?php foreach (['yayinda'=>'Yayında','taslak'=>'Taslak','beklemede'=>'Beklemede','arsiv'=>'Arsiv'] as $d => $l): ?>
+                                                <option value="<?= $d ?>" <?= ($haber_d['durum'] ?? 'yayinda') === $d ? 'selected' : '' ?>><?= $l ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
@@ -1199,7 +1199,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     $where = []; $params = [];
                     if ($arama)    { $where[] = 'n.baslik LIKE ?'; $params[] = "%$arama%"; }
                     if ($f_kat)    { $where[] = 'n.kategori_id = ?'; $params[] = $f_kat; }
-                    if ($f_durum && in_array($f_durum, ['yayında','taslak','arsiv','beklemede'], true)) { $where[] = 'n.durum = ?'; $params[] = $f_durum; }
+                    if ($f_durum && in_array($f_durum, ['yayinda','taslak','arsiv','beklemede'], true)) { $where[] = 'n.durum = ?'; $params[] = $f_durum; }
                     if ($f_kaynak) { $where[] = 'n.kaynak_id = ?'; $params[] = $f_kaynak; }
                     $sqlw = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
@@ -1216,7 +1216,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                         {$sqlw} ORDER BY n.yayin_tarihi DESC LIMIT {$limit_l} OFFSET {$offset_l}");
                     $st->execute($params);
                     $haber_liste = $st->fetchAll();
-                    $kategoriler_liste = $db->query("SELECT id, ad FROM {$prefix}categories ORDER BY sıra, ad")->fetchAll();
+                    $kategoriler_liste = $db->query("SELECT id, ad FROM {$prefix}categories ORDER BY sira, ad")->fetchAll();
                     $kaynaklar_liste   = $db->query("SELECT id, ad FROM {$prefix}sources ORDER BY ad")->fetchAll();
             ?>
                 <div class="icerik-bas">
@@ -1240,7 +1240,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                             </select>
                             <select name="durum" onchange="this.form.submit()">
                                 <option value="">Tüm durumlar</option>
-                                <?php foreach (['yayında'=>'Yayında','taslak'=>'Taslak','beklemede'=>'Beklemede','arsiv'=>'Arsiv'] as $d => $l): ?>
+                                <?php foreach (['yayinda'=>'Yayında','taslak'=>'Taslak','beklemede'=>'Beklemede','arsiv'=>'Arsiv'] as $d => $l): ?>
                                     <option value="<?= $d ?>" <?= $f_durum === $d ? 'selected' : '' ?>><?= $l ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -1285,7 +1285,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                                 <div style="font-size:12px;color:var(--muted-light)"><?= h($h['kaynak_ad'] ?? 'Manuel') ?> · <?= (int)$h['okunma'] ?> okuma</div>
                                             </td>
                                             <td><?php if ($h['kategori_ad']): ?><span class="renk-nokta" style="background:<?= h($h['kategori_renk']) ?>"></span><?= h($h['kategori_ad']) ?><?php endif; ?></td>
-                                            <td><span class="rozet <?= $h['durum'] === 'yayında' ? 'aktif' : ($h['durum'] === 'taslak' ? 'taslak' : 'pasif') ?>"><?= h($h['durum']) ?></span></td>
+                                            <td><span class="rozet <?= $h['durum'] === 'yayinda' ? 'aktif' : ($h['durum'] === 'taslak' ? 'taslak' : 'pasif') ?>"><?= h($h['durum']) ?></span></td>
                                             <td style="font-size:12px;color:var(--muted)"><?= h(goreceli_zaman($h['yayin_tarihi'])) ?></td>
                                             <td class="islemler">
                                                 <a href="<?= h(haber_url($h)) ?>" target="_blank" title="Sitede gor"><?= ikon('arrow-up-right') ?></a>
@@ -1307,7 +1307,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                             <div style="display:flex;gap:10px;align-items:center">
                                 <select name="toplu_eylem" required style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
                                     <option value="">Toplu islem...</option>
-                                    <option value="yayında">Yayında yap</option>
+                                    <option value="yayinda">Yayında yap</option>
                                     <option value="taslak">Taslaga al</option>
                                     <option value="arsiv">Arsivle</option>
                                     <option value="sil">Sil</option>
@@ -1574,7 +1574,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                 <div class="icerik-bas">
                     <div>
                         <h1>Kullanıcılar</h1>
-                        <div class="alt-metin"><?= count($usr_liste) ?> kullanıcı</div>
+                        <div class="alt-metin"><?= count($usr_liste) ?> kullanici</div>
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=kullanicilar&islem=ekle') ?>" class="buton"><?= ikon('plus') ?>Yeni Kullanıcı</a>
                 </div>
@@ -1632,7 +1632,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     'cron'        => 'RSS / Cron',
                     'reklam'      => 'Reklam',
                 ];
-                $stmt = $db->prepare("SELECT * FROM {$prefix}settings WHERE grup = ? ORDER BY sıra, anahtar");
+                $stmt = $db->prepare("SELECT * FROM {$prefix}settings WHERE grup = ? ORDER BY sira, anahtar");
                 $stmt->execute([$grup]);
                 $ayar_liste = $stmt->fetchAll();
             ?>

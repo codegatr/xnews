@@ -44,7 +44,7 @@ foreach ($kategoriler as $k) {
 // 4) Haberler (son 5000)
 $stmt = $db->query("SELECT id, slug, yayin_tarihi, guncelleme
     FROM {$prefix}news
-    WHERE durum = 'yayında'
+    WHERE durum = 'yayinda'
     ORDER BY yayin_tarihi DESC LIMIT 5000");
 foreach ($stmt as $h) {
     $url = url('haber/' . $h['id'] . '-' . $h['slug']);

@@ -52,18 +52,18 @@ CREATE TABLE IF NOT EXISTS `xn_categories` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `ad` VARCHAR(80) NOT NULL,
     `slug` VARCHAR(100) NOT NULL,
-    `açıklama` VARCHAR(255) DEFAULT NULL,
+    `aciklama` VARCHAR(255) DEFAULT NULL,
     `renk` VARCHAR(7) NOT NULL DEFAULT '#dc2626',
     `ikon` VARCHAR(40) DEFAULT 'newspaper',
     `ust_id` INT UNSIGNED DEFAULT NULL,
-    `sıra` SMALLINT NOT NULL DEFAULT 0,
+    `sira` SMALLINT NOT NULL DEFAULT 0,
     `seo_baslik` VARCHAR(160) DEFAULT NULL,
     `seo_aciklama` VARCHAR(255) DEFAULT NULL,
     `aktif` TINYINT(1) NOT NULL DEFAULT 1,
     `olusturma` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_slug` (`slug`),
-    KEY `ix_sira` (`sıra`),
+    KEY `ix_sira` (`sira`),
     KEY `ix_ust_id` (`ust_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -78,12 +78,12 @@ CREATE TABLE IF NOT EXISTS `xn_sources` (
     `rss_url` VARCHAR(500) NOT NULL,
     `varsayilan_kategori_id` INT UNSIGNED DEFAULT NULL,
     `logo` VARCHAR(255) DEFAULT NULL,
-    `açıklama` TEXT,
+    `aciklama` TEXT,
     `dil` VARCHAR(5) NOT NULL DEFAULT 'tr',
     `atfi_metin` VARCHAR(120) DEFAULT NULL COMMENT 'Kaynak: X yazisi',
     `aktif` TINYINT(1) NOT NULL DEFAULT 1,
     `son_cekim` DATETIME DEFAULT NULL,
-    `son_durum` ENUM('başarılı','hata','bekliyor') NOT NULL DEFAULT 'bekliyor',
+    `son_durum` ENUM('basarili','hata','bekliyor') NOT NULL DEFAULT 'bekliyor',
     `son_hata` TEXT,
     `toplam_haber` INT UNSIGNED NOT NULL DEFAULT 0,
     `cekim_sikligi` SMALLINT NOT NULL DEFAULT 10 COMMENT 'Dakika',
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `xn_sources` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `xn_news` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `başlık` VARCHAR(255) NOT NULL,
+    `baslik` VARCHAR(255) NOT NULL,
     `slug` VARCHAR(280) NOT NULL,
     `ozet` TEXT,
     `icerik` MEDIUMTEXT,
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `xn_news` (
     KEY `ix_manset` (`manset`, `yayin_tarihi`),
     KEY `ix_one_cikan` (`one_cikan`, `yayin_tarihi`),
     KEY `ix_okunma` (`okunma`),
-    FULLTEXT KEY `ft_arama` (`başlık`, `ozet`, `icerik`)
+    FULLTEXT KEY `ft_arama` (`baslik`, `ozet`, `icerik`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------
@@ -188,12 +188,12 @@ CREATE TABLE IF NOT EXISTS `xn_ads` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `xn_settings` (
     `anahtar` VARCHAR(80) NOT NULL,
-    `değer` TEXT,
+    `deger` TEXT,
     `tip` ENUM('metin','sayi','html','json','boolean','gorsel') NOT NULL DEFAULT 'metin',
     `grup` VARCHAR(40) NOT NULL DEFAULT 'genel',
     `etiket` VARCHAR(120) DEFAULT NULL,
-    `açıklama` VARCHAR(255) DEFAULT NULL,
-    `sıra` SMALLINT NOT NULL DEFAULT 0,
+    `aciklama` VARCHAR(255) DEFAULT NULL,
+    `sira` SMALLINT NOT NULL DEFAULT 0,
     PRIMARY KEY (`anahtar`),
     KEY `ix_grup` (`grup`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS `xn_settings` (
 CREATE TABLE IF NOT EXISTS `xn_logs` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `tip` ENUM('bilgi','uyari','hata','guvenlik','cron','islem') NOT NULL DEFAULT 'bilgi',
-    `başlık` VARCHAR(255) NOT NULL,
+    `baslik` VARCHAR(255) NOT NULL,
     `detay` TEXT,
     `kullanici_id` INT UNSIGNED DEFAULT NULL,
     `ip` VARCHAR(45) DEFAULT NULL,
@@ -222,7 +222,7 @@ CREATE TABLE IF NOT EXISTS `xn_logs` (
 CREATE TABLE IF NOT EXISTS `xn_cron_history` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `kaynak_id` INT UNSIGNED DEFAULT NULL,
-    `durum` ENUM('başarılı','hata','kismi') NOT NULL,
+    `durum` ENUM('basarili','hata','kismi') NOT NULL,
     `eklenen` SMALLINT NOT NULL DEFAULT 0,
     `atlanan` SMALLINT NOT NULL DEFAULT 0,
     `toplam` SMALLINT NOT NULL DEFAULT 0,
@@ -255,7 +255,7 @@ CREATE TABLE IF NOT EXISTS `xn_visitors` (
 -- -----------------------------------------------------
 -- VARSAYILAN AYARLAR
 -- -----------------------------------------------------
-INSERT INTO `xn_settings` (`anahtar`, `değer`, `tip`, `grup`, `etiket`, `sıra`) VALUES
+INSERT INTO `xn_settings` (`anahtar`, `deger`, `tip`, `grup`, `etiket`, `sira`) VALUES
 -- Genel
 ('site_adi', 'XNEWS', 'metin', 'genel', 'Site Adi', 1),
 ('site_slogan', 'Haberin Hizli Adresi', 'metin', 'genel', 'Slogan', 2),
@@ -294,20 +294,20 @@ INSERT INTO `xn_settings` (`anahtar`, `değer`, `tip`, `grup`, `etiket`, `sıra`
 ('cron_son_calisma', '', 'metin', 'cron', 'Son cron çalışması', 2),
 ('otomatik_yayin', '1', 'boolean', 'cron', 'RSS haberleri otomatik yayinla', 3),
 ('duplicate_kontrol', '1', 'boolean', 'cron', 'Tekrar eden haberleri engelle', 4),
-('kaynak_goster', '1', 'boolean', 'cron', 'Haber altinda kaynak göster (YASAL ZORUNLU)', 5),
+('kaynak_goster', '1', 'boolean', 'cron', 'Haber altinda kaynak goster (YASAL ZORUNLU)', 5),
 
 -- Reklam
-('reklam_aktif', '1', 'boolean', 'reklam', 'Reklamlari göster', 1),
+('reklam_aktif', '1', 'boolean', 'reklam', 'Reklamlari goster', 1),
 ('adsense_kimlik', '', 'metin', 'reklam', 'Google AdSense yayinci ID', 2),
 
 -- Güncelleme
 ('son_guncelleme_kontrol', '', 'metin', 'sistem', 'Son guncelleme kontrolü', 1),
-('mevcut_surum', '1.0.0', 'metin', 'sistem', 'Yuklu sürüm', 2);
+('mevcut_surum', '1.0.0', 'metin', 'sistem', 'Yuklu surum', 2);
 
 -- -----------------------------------------------------
 -- VARSAYILAN KATEGORILER
 -- -----------------------------------------------------
-INSERT INTO `xn_categories` (`ad`, `slug`, `açıklama`, `renk`, `ikon`, `sıra`) VALUES
+INSERT INTO `xn_categories` (`ad`, `slug`, `aciklama`, `renk`, `ikon`, `sira`) VALUES
 ('Gündem', 'gundem', 'Gündem ve son dakika haberleri', '#dc2626', 'flame', 1),
 ('Türkiye', 'turkiye', 'Türkiye haberleri', '#b91c1c', 'flag', 2),
 ('Dünya', 'dunya', 'Dünya haberleri', '#2563eb', 'globe', 3),

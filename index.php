@@ -20,11 +20,11 @@ $prefix   = DB_PREFIX;
 // =====================================================
 // ORTAK VERILER
 // =====================================================
-$menu_kategoriler = $db->query("SELECT id, ad, slug, renk FROM {$prefix}categories WHERE aktif = 1 AND ust_id IS NULL ORDER BY sıra, ad")->fetchAll();
+$menu_kategoriler = $db->query("SELECT id, ad, slug, renk FROM {$prefix}categories WHERE aktif = 1 AND ust_id IS NULL ORDER BY sira, ad")->fetchAll();
 
-$sd_haberler = $db->query("SELECT id, başlık, slug FROM {$prefix}news WHERE son_dakika = 1 AND durum = 'yayında' ORDER BY yayin_tarihi DESC LIMIT 8")->fetchAll();
+$sd_haberler = $db->query("SELECT id, baslik, slug FROM {$prefix}news WHERE son_dakika = 1 AND durum = 'yayinda' ORDER BY yayin_tarihi DESC LIMIT 8")->fetchAll();
 if (empty($sd_haberler)) {
-    $sd_haberler = $db->query("SELECT id, başlık, slug FROM {$prefix}news WHERE durum = 'yayında' ORDER BY yayin_tarihi DESC LIMIT 5")->fetchAll();
+    $sd_haberler = $db->query("SELECT id, baslik, slug FROM {$prefix}news WHERE durum = 'yayinda' ORDER BY yayin_tarihi DESC LIMIT 5")->fetchAll();
 }
 
 $sosyal_liste = [
@@ -262,7 +262,7 @@ case 'anasayfa':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.durum = 'yayında' AND h.manset = 1
+        WHERE h.durum = 'yayinda' AND h.manset = 1
         ORDER BY h.yayin_tarihi DESC LIMIT {$manset_adet}")->fetchAll();
 
     if (count($mansetler) < $manset_adet) {
@@ -271,7 +271,7 @@ case 'anasayfa':
             FROM {$prefix}news h
             LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
             LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-            WHERE h.durum = 'yayında' AND h.manset = 0
+            WHERE h.durum = 'yayinda' AND h.manset = 0
             ORDER BY h.yayin_tarihi DESC LIMIT {$eksik}")->fetchAll();
         $mansetler = array_merge($mansetler, $ekstra);
     }
@@ -283,7 +283,7 @@ case 'anasayfa':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.durum = 'yayında' AND h.id NOT IN ($in)
+        WHERE h.durum = 'yayinda' AND h.id NOT IN ($in)
         ORDER BY h.yayin_tarihi DESC LIMIT {$son_adet}");
     $stmt->execute($haric_ids);
     $son_haberler = $stmt->fetchAll();
@@ -291,7 +291,7 @@ case 'anasayfa':
     $pop = $db->query("SELECT h.*, k.ad AS kat_ad, k.slug AS kat_slug
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
-        WHERE h.durum = 'yayında' AND h.yayin_tarihi >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        WHERE h.durum = 'yayinda' AND h.yayin_tarihi >= DATE_SUB(NOW(), INTERVAL 7 DAY)
         ORDER BY h.okunma DESC LIMIT 5")->fetchAll();
 
     sayfa_basla(['aktif_sayfa' => 'anasayfa']);
@@ -351,7 +351,7 @@ case 'anasayfa':
                     FROM {$prefix}news h
                     LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
                     LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-                    WHERE h.durum = 'yayında' AND h.kategori_id = ?
+                    WHERE h.durum = 'yayinda' AND h.kategori_id = ?
                     ORDER BY h.yayin_tarihi DESC LIMIT 4");
                 $st->execute([$kat['id']]);
                 $kat_haberleri = $st->fetchAll();
@@ -406,7 +406,7 @@ case 'kategori':
     $per_page = (int)ayar('kategori_sayfa_adet', 15);
     $offset = ($sayfa_no - 1) * $per_page;
 
-    $st = $db->prepare("SELECT COUNT(*) FROM {$prefix}news WHERE kategori_id = ? AND durum = 'yayında'");
+    $st = $db->prepare("SELECT COUNT(*) FROM {$prefix}news WHERE kategori_id = ? AND durum = 'yayinda'");
     $st->execute([$kat['id']]);
     $toplam = (int)$st->fetchColumn();
     $son_sayfa = max(1, (int)ceil($toplam / $per_page));
@@ -415,7 +415,7 @@ case 'kategori':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.kategori_id = ? AND h.durum = 'yayında'
+        WHERE h.kategori_id = ? AND h.durum = 'yayinda'
         ORDER BY h.yayin_tarihi DESC LIMIT {$per_page} OFFSET {$offset}");
     $st->execute([$kat['id']]);
     $haberler = $st->fetchAll();
@@ -423,8 +423,8 @@ case 'kategori':
     sayfa_basla([
         'aktif_sayfa' => 'kategori',
         'aktif_kategori' => $kat,
-        'başlık' => $kat['ad'] . ' Haberleri - ' . ayar('site_adi'),
-        'açıklama' => $kat['aciklama'] ?: "{$kat['ad']} kategorisindeki son haberler",
+        'baslik' => $kat['ad'] . ' Haberleri - ' . ayar('site_adi'),
+        'aciklama' => $kat['aciklama'] ?: "{$kat['ad']} kategorisindeki son haberler",
     ]);
 ?>
 <main><div class="kapsayici">
@@ -471,7 +471,7 @@ case 'haber':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.id = ? AND h.durum = 'yayında'");
+        WHERE h.id = ? AND h.durum = 'yayinda'");
     $st->execute([$hid]);
     $haber = $st->fetch();
     if (!$haber) { http_response_code(404); goto sayfa_404; }
@@ -485,7 +485,7 @@ case 'haber':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.kategori_id = ? AND h.id != ? AND h.durum = 'yayında'
+        WHERE h.kategori_id = ? AND h.id != ? AND h.durum = 'yayinda'
         ORDER BY h.yayin_tarihi DESC LIMIT 4");
     $st->execute([$haber['kategori_id'], $hid]);
     $ilgili = $st->fetchAll();
@@ -571,16 +571,16 @@ case 'arama':
             FROM {$prefix}news h
             LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
             LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-            WHERE h.durum = 'yayında' AND (h.baslik LIKE ? OR h.ozet LIKE ? OR h.icerik LIKE ?)
+            WHERE h.durum = 'yayinda' AND (h.baslik LIKE ? OR h.ozet LIKE ? OR h.icerik LIKE ?)
             ORDER BY h.yayin_tarihi DESC LIMIT {$per_page} OFFSET {$offset}");
         $st->execute([$like, $like, $like]);
         $sonuc = $st->fetchAll();
 
-        $st = $db->prepare("SELECT COUNT(*) FROM {$prefix}news WHERE durum = 'yayında' AND (başlık LIKE ? OR ozet LIKE ?)");
+        $st = $db->prepare("SELECT COUNT(*) FROM {$prefix}news WHERE durum = 'yayinda' AND (baslik LIKE ? OR ozet LIKE ?)");
         $st->execute([$like, $like]);
         $toplam = (int)$st->fetchColumn();
     }
-    sayfa_basla(['aktif_sayfa' => 'arama', 'başlık' => $q ? "'{$q}' arama sonuclari - " . ayar('site_adi') : 'Arama - ' . ayar('site_adi')]);
+    sayfa_basla(['aktif_sayfa' => 'arama', 'baslik' => $q ? "'{$q}' arama sonuclari - " . ayar('site_adi') : 'Arama - ' . ayar('site_adi')]);
 ?>
 <main><div class="kapsayici">
     <div class="bolum-baslik"><h2>Arama<?= $q ? ': ' . h($q) : '' ?></h2><span class="tumu"><?= $toplam ?> sonuc</span></div>

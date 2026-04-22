@@ -146,7 +146,7 @@ function ayar(string $anahtar, $varsayilan = null) {
     global $db;
     static $onbellek = null;
     if ($onbellek === null) {
-        $stmt = $db->query("SELECT anahtar, değer FROM `" . DB_PREFIX . "settings`");
+        $stmt = $db->query("SELECT anahtar, deger FROM `" . DB_PREFIX . "settings`");
         $onbellek = [];
         foreach ($stmt->fetchAll() as $r) $onbellek[$r['anahtar']] = $r['deger'];
     }
@@ -156,7 +156,7 @@ function ayar(string $anahtar, $varsayilan = null) {
 /** Ayar guncelle */
 function ayar_guncelle(string $anahtar, $deger): bool {
     global $db;
-    $stmt = $db->prepare("UPDATE `" . DB_PREFIX . "settings` SET değer = ? WHERE anahtar = ?");
+    $stmt = $db->prepare("UPDATE `" . DB_PREFIX . "settings` SET deger = ? WHERE anahtar = ?");
     return $stmt->execute([$deger, $anahtar]);
 }
 
@@ -166,7 +166,7 @@ function ayar_guncelle(string $anahtar, $deger): bool {
 function log_ekle(string $tip, string $baslik, ?string $detay = null, ?int $kullanici_id = null): void {
     global $db;
     try {
-        $stmt = $db->prepare("INSERT INTO `" . DB_PREFIX . "logs` (tip, başlık, detay, kullanici_id, ip, user_agent, url) VALUES (?,?,?,?,?,?,?)");
+        $stmt = $db->prepare("INSERT INTO `" . DB_PREFIX . "logs` (tip, baslik, detay, kullanici_id, ip, user_agent, url) VALUES (?,?,?,?,?,?,?)");
         $stmt->execute([
             $tip, mb_substr($baslik, 0, 255), $detay, $kullanici_id,
             istemci_ip(),
@@ -261,7 +261,7 @@ function giris_kontrol(): ?array {
     global $db;
     if (empty($_SESSION['yonetici_id'])) return null;
 
-    // Oturum süresi kontrolü
+    // Oturum suresi kontrolü
     if (!empty($_SESSION['son_aktivite']) && (time() - $_SESSION['son_aktivite']) > OTURUM_SURESI) {
         session_unset(); session_destroy();
         return null;
@@ -275,7 +275,7 @@ function giris_kontrol(): ?array {
 
 function yonetici_zorunlu(): array {
     $u = giris_kontrol();
-    if (!$u) { yonlendir(url('yönetim')); }
+    if (!$u) { yonlendir(url('yonetim')); }
     return $u;
 }
 
