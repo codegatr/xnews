@@ -1,6 +1,6 @@
 <?php
 /**
- * XNEWS - RSS Cekim Motoru (Cron)
+ * XNEWS - RSS Çekim Motoru (Cron)
  *
  * Kullanim:
  *   HTTP: https://xnews.com.tr/cron.php?anahtar=CRON_ANAHTARI
@@ -23,10 +23,10 @@ if (PHP_SAPI === 'cli') {
     if (!empty($argv[2])) $_GET['kaynak_id'] = $argv[2];
 }
 
-// Anahtar dogrulama
+// Anahtar doğrulama
 if (empty($_GET['anahtar']) || !hash_equals(CRON_ANAHTARI, (string)$_GET['anahtar'])) {
     http_response_code(403);
-    die('Erisim reddedildi.');
+    die('Erişim reddedildi.');
 }
 
 // Zaman limiti (DirectAdmin varsayilani 60sn, biz 300sn'ye cekiyoruz)
@@ -47,7 +47,7 @@ if ($gorsel_cikti) {
     echo '<style>body{font-family:system-ui,monospace;background:#0f172a;color:#e2e8f0;padding:30px;font-size:13px;line-height:1.6}';
     echo '.k{color:#94a3b8}.b{color:#4ade80}.h{color:#f87171}.u{color:#fbbf24}.a{color:#60a5fa}h1{color:#fff;font-size:20px;margin-bottom:16px}';
     echo 'pre{background:#1e293b;padding:12px;border-radius:6px;white-space:pre-wrap;margin:8px 0}</style>';
-    echo '<h1>🔄 XNEWS RSS Cekim Motoru</h1>';
+    echo '<h1>🔄 XNEWS RSS Çekim Motoru</h1>';
 }
 
 // Cikti yardimcisi
@@ -123,7 +123,7 @@ function rss_oge_cikar(SimpleXMLElement $item, string $format): array {
     $dc    = !empty($ns['dc'])    ? $item->children($ns['dc'])    : null;
     $content_ns = !empty($ns['content']) ? $item->children($ns['content']) : null;
 
-    // Baslik
+    // Başlık
     $baslik = (string)($item->title ?? '');
 
     // Link
@@ -139,7 +139,7 @@ function rss_oge_cikar(SimpleXMLElement $item, string $format): array {
         $link = (string)($item->link ?? '');
     }
 
-    // Aciklama/Ozet
+    // Açıklama/Özet
     $ozet = '';
     if ($format === 'atom') {
         $ozet = (string)($item->summary ?? $item->content ?? '');
@@ -157,7 +157,7 @@ function rss_oge_cikar(SimpleXMLElement $item, string $format): array {
         $icerik = $ozet; // Fallback
     }
 
-    // Yayin tarihi
+    // Yayın tarihi
     $tarih = '';
     foreach (['pubDate', 'published', 'updated'] as $alan) {
         if (!empty($item->$alan)) { $tarih = (string)$item->$alan; break; }
@@ -213,7 +213,7 @@ function rss_oge_cikar(SimpleXMLElement $item, string $format): array {
             }
         }
     }
-    // 4) aciklama icindeki ilk <img src=...>
+    // 4) açıklama icindeki ilk <img src=...>
     if (empty($resim) && !empty($icerik)) {
         if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $icerik, $m)) {
             $resim = $m[1];
@@ -226,7 +226,7 @@ function rss_oge_cikar(SimpleXMLElement $item, string $format): array {
     }
 
     return [
-        'baslik'   => trim($baslik),
+        'başlık'   => trim($baslik),
         'link'     => trim($link),
         'ozet'     => $ozet,
         'icerik'   => $icerik,
@@ -262,7 +262,7 @@ function icerik_temizle(string $html): string {
 // =====================================================
 
 try {
-    // Cekilecek kaynaklari al
+    // Çekilecek kaynaklari al
     $simdi = date('Y-m-d H:i:s');
     if ($tek_kaynak_id > 0) {
         $stmt = $db->prepare("SELECT * FROM " . DB_PREFIX . "sources WHERE id = ? AND aktif = 1");
@@ -280,8 +280,8 @@ try {
     $kaynaklar = $stmt->fetchAll();
 
     if (empty($kaynaklar)) {
-        yaz('Cekilecek kaynak yok.', 'u');
-        yaz('Toplam sure: ' . round(microtime(true) - $baslangic_zamani, 2) . ' sn', 'a');
+        yaz('Çekilecek kaynak yok.', 'u');
+        yaz('Toplam süre: ' . round(microtime(true) - $baslangic_zamani, 2) . ' sn', 'a');
         if ($gorsel_cikti) echo '</body>';
         exit;
     }
@@ -305,16 +305,16 @@ try {
 
         $kaynak_eklenen = 0;
         $kaynak_atlanan = 0;
-        $durum = 'basarili';
+        $durum = 'başarılı';
         $hata_mesaj = null;
 
         try {
             $ogeler = rss_cek($kaynak['rss_url']);
             if (empty($ogeler)) {
-                throw new RuntimeException('RSS bos veya parse edilemedi.');
+                throw new RuntimeException('RSS boş veya parse edilemedi.');
             }
 
-            yaz('  ' . count($ogeler) . ' oge bulundu, isleniyor...');
+            yaz('  ' . count($ogeler) . ' öge bulundu, isleniyor...');
             $max = min(count($ogeler), (int)$kaynak['max_haber_adet']);
 
             for ($i = 0; $i < $max; $i++) {
@@ -325,7 +325,7 @@ try {
                 $kat_id = (int)($kaynak['varsayilan_kategori_id'] ?? 0);
                 if (empty($kat_id)) {
                     // Kategori secili degilse ilk aktif kategoriyi kullan
-                    $kat_id = (int)$db->query("SELECT id FROM " . DB_PREFIX . "categories WHERE aktif = 1 ORDER BY sira LIMIT 1")->fetchColumn();
+                    $kat_id = (int)$db->query("SELECT id FROM " . DB_PREFIX . "categories WHERE aktif = 1 ORDER BY sıra LIMIT 1")->fetchColumn();
                     if (empty($kat_id)) {
                         $kaynak_atlanan++; continue;
                     }
@@ -347,7 +347,7 @@ try {
                 // Slug
                 $slug = benzersiz_slug($db, DB_PREFIX . 'news', slug_olustur($oge['baslik'], 200));
 
-                // Icerik temizligi
+                // İçerik temizligi
                 $icerik_temiz = icerik_temizle($oge['icerik']);
                 if (empty($icerik_temiz) && !empty($oge['ozet'])) {
                     $icerik_temiz = '<p>' . strip_tags($oge['ozet']) . '</p>';
@@ -357,9 +357,9 @@ try {
 
                 // INSERT
                 $stmt = $db->prepare("INSERT INTO " . DB_PREFIX . "news
-                    (baslik, slug, ozet, icerik, resim, kaynak_id, kategori_id, yazar, orijinal_url,
+                    (başlık, slug, ozet, icerik, resim, kaynak_id, kategori_id, yazar, orijinal_url,
                      guid, icerik_hash, durum, yayin_tarihi, olusturma)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'yayinda', ?, NOW())");
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'yayında', ?, NOW())");
                 $stmt->execute([
                     mb_substr($oge['baslik'], 0, 255, 'UTF-8'),
                     $slug,
@@ -380,9 +380,9 @@ try {
             // Kaynagi guncelle
             $db->prepare("UPDATE " . DB_PREFIX . "sources
                 SET son_cekim = NOW(), son_durum = ?, son_hata = NULL, toplam_haber = toplam_haber + ?
-                WHERE id = ?")->execute(['basarili', $kaynak_eklenen, $kaynak['id']]);
+                WHERE id = ?")->execute(['başarılı', $kaynak_eklenen, $kaynak['id']]);
 
-            yaz('  ✓ ' . $kaynak_eklenen . ' yeni, ' . $kaynak_atlanan . ' atlandi.', 'b');
+            yaz('  ✓ ' . $kaynak_eklenen . ' yeni, ' . $kaynak_atlanan . ' atlandı.', 'b');
 
         } catch (Throwable $e) {
             $durum = 'hata';
@@ -406,17 +406,17 @@ try {
         $toplam_atlanan += $kaynak_atlanan;
     }
 
-    // Genel ayar: son cron calismasi
+    // Genel ayar: son cron çalışması
     ayar_guncelle('cron_son_calisma', date('Y-m-d H:i:s'));
 
     $toplam_sure = round(microtime(true) - $baslangic_zamani, 2);
 
     yaz(str_repeat('-', 60));
-    yaz('TOPLAM: ' . $toplam_eklenen . ' haber eklendi, ' . $toplam_atlanan . ' atlandi, ' . $toplam_hatali . ' kaynak hatali.', 'b');
-    yaz('Sure: ' . $toplam_sure . ' sn', 'a');
+    yaz('TOPLAM: ' . $toplam_eklenen . ' haber eklendi, ' . $toplam_atlanan . ' atlandı, ' . $toplam_hatali . ' kaynak hatali.', 'b');
+    yaz('Süre: ' . $toplam_sure . ' sn', 'a');
 
-    log_ekle('cron', 'RSS cekimi tamamlandi',
-        "Eklenen: {$toplam_eklenen}, Atlanan: {$toplam_atlanan}, Hatali kaynak: {$toplam_hatali}, Sure: {$toplam_sure}sn");
+    log_ekle('cron', 'RSS çekimi tamamlandi',
+        "Eklenen: {$toplam_eklenen}, Atlanan: {$toplam_atlanan}, Hatali kaynak: {$toplam_hatali}, Süre: {$toplam_sure}sn");
 
 } catch (Throwable $e) {
     log_ekle('hata', 'Cron global hata', $e->getMessage() . "\n" . $e->getTraceAsString());

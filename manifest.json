@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.0.0",
+    "surum": "1.0.1",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,6 +17,7 @@
         "install.lock"
     ],
     "degisiklikler": [
-        "1.0.0 - Ilk surum: RSS toplama, yonetim paneli, reklam slotlari, GitHub guncelleme sistemi"
+        "1.0.1 - Türkçe karakter düzeltmeleri (500+ yer), ana sayfa boş durum iyileştirmesi, Google Fonts latin-ext subset, dashboard cilalama",
+        "1.0.0 - İlk sürüm: RSS toplama, yönetim paneli, reklam slotları, GitHub güncelleme sistemi"
     ]
 }

@@ -20,11 +20,11 @@ $prefix   = DB_PREFIX;
 // =====================================================
 // ORTAK VERILER
 // =====================================================
-$menu_kategoriler = $db->query("SELECT id, ad, slug, renk FROM {$prefix}categories WHERE aktif = 1 AND ust_id IS NULL ORDER BY sira, ad")->fetchAll();
+$menu_kategoriler = $db->query("SELECT id, ad, slug, renk FROM {$prefix}categories WHERE aktif = 1 AND ust_id IS NULL ORDER BY sıra, ad")->fetchAll();
 
-$sd_haberler = $db->query("SELECT id, baslik, slug FROM {$prefix}news WHERE son_dakika = 1 AND durum = 'yayinda' ORDER BY yayin_tarihi DESC LIMIT 8")->fetchAll();
+$sd_haberler = $db->query("SELECT id, başlık, slug FROM {$prefix}news WHERE son_dakika = 1 AND durum = 'yayında' ORDER BY yayin_tarihi DESC LIMIT 8")->fetchAll();
 if (empty($sd_haberler)) {
-    $sd_haberler = $db->query("SELECT id, baslik, slug FROM {$prefix}news WHERE durum = 'yayinda' ORDER BY yayin_tarihi DESC LIMIT 5")->fetchAll();
+    $sd_haberler = $db->query("SELECT id, başlık, slug FROM {$prefix}news WHERE durum = 'yayında' ORDER BY yayin_tarihi DESC LIMIT 5")->fetchAll();
 }
 
 $sosyal_liste = [
@@ -40,8 +40,8 @@ $sosyal_liste = [
 // =====================================================
 function sayfa_basla(array $opt): void {
     global $menu_kategoriler, $sd_haberler, $sosyal_liste;
-    $tr_ay  = ['Ocak','Subat','Mart','Nisan','Mayis','Haziran','Temmuz','Agustos','Eylul','Ekim','Kasim','Aralik'];
-    $tr_gun = ['Pazar','Pazartesi','Sali','Carsamba','Persembe','Cuma','Cumartesi'];
+    $tr_ay  = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+    $tr_gun = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
     $bugun  = $tr_gun[(int)date('w')] . ', ' . (int)date('j') . ' ' . $tr_ay[(int)date('n') - 1] . ' ' . date('Y');
 
     $baslik    = $opt['baslik']    ?? ayar('site_adi') . ' - ' . ayar('site_slogan');
@@ -74,7 +74,7 @@ function sayfa_basla(array $opt): void {
 <link rel="apple-touch-icon" href="<?= url('favicon.svg') ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600;700&subset=latin-ext&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=<?= h(ayar('mevcut_surum', '1.0.0')) ?>">
 <link rel="alternate" type="application/rss+xml" title="<?= h(ayar('site_adi')) ?>" href="<?= url('rss') ?>">
 <?php if ($gsc = ayar('google_site_verification')): ?><meta name="google-site-verification" content="<?= h($gsc) ?>"><?php endif; ?>
@@ -102,7 +102,7 @@ function sayfa_basla(array $opt): void {
 </div></div>
 
 <header class="logo-bar"><div class="kapsayici">
-    <div class="lb-sol"><div class="caps">Turkiye ve Dunya Haberleri</div></div>
+    <div class="lb-sol"><div class="caps">Türkiye ve Dünya Haberleri</div></div>
     <a href="<?= url() ?>" class="logo-link">
         <div class="logo-metin"><span class="x">X</span>NEWS</div>
         <div class="logo-alt"><?= h(ayar('site_slogan', 'Haberin Hizli Adresi')) ?></div>
@@ -140,8 +140,8 @@ function sayfa_basla(array $opt): void {
     <ul>
         <li><a href="<?= url() ?>">Anasayfa</a></li>
         <?php foreach ($menu_kategoriler as $kat): ?><li><a href="<?= h(kategori_url($kat)) ?>"><?= h($kat['ad']) ?></a></li><?php endforeach; ?>
-        <li><a href="<?= url('hakkimizda') ?>">Hakkimizda</a></li>
-        <li><a href="<?= url('iletisim') ?>">Iletisim</a></li>
+        <li><a href="<?= url('hakkimizda') ?>">Hakkımızda</a></li>
+        <li><a href="<?= url('iletisim') ?>">İletişim</a></li>
         <li><a href="<?= url('reklam') ?>">Reklam</a></li>
     </ul>
 </aside>
@@ -172,7 +172,7 @@ function sayfa_bitis(string $aktif = ''): void {
     <div class="footer-grid">
         <div class="footer-marka">
             <a href="<?= url() ?>" class="logo-link"><div class="logo-metin"><span class="x">X</span>NEWS</div></a>
-            <p><?= h(ayar('site_aciklama', 'Turkiye ve dunyadan son dakika haberleri.')) ?></p>
+            <p><?= h(ayar('site_aciklama', 'Türkiye ve dünyadan son dakika haberleri.')) ?></p>
             <div class="footer-sosyal">
                 <?php foreach ($sosyal_liste as $an => [$ad, $ik]): if ($u = ayar($an)): ?>
                     <a href="<?= h($u) ?>" target="_blank" rel="noopener" title="<?= h($ad) ?>"><?= $ik ?></a>
@@ -190,8 +190,8 @@ function sayfa_bitis(string $aktif = ''): void {
         <div>
             <h4>Kurumsal</h4>
             <ul>
-                <li><a href="<?= url('hakkimizda') ?>">Hakkimizda</a></li>
-                <li><a href="<?= url('iletisim') ?>">Iletisim</a></li>
+                <li><a href="<?= url('hakkimizda') ?>">Hakkımızda</a></li>
+                <li><a href="<?= url('iletisim') ?>">İletişim</a></li>
                 <li><a href="<?= url('reklam') ?>">Reklam Ver</a></li>
                 <li><a href="<?= url('gizlilik') ?>">Gizlilik Politikasi</a></li>
                 <li><a href="<?= url('kullanim-sartlari') ?>">Kullanim Sartlari</a></li>
@@ -207,7 +207,7 @@ function sayfa_bitis(string $aktif = ''): void {
         </div>
     </div>
     <div class="footer-alt">
-        <div>© <?= date('Y') ?> <?= h(ayar('site_adi', 'XNEWS')) ?>. Tum haklari saklidir.</div>
+        <div>© <?= date('Y') ?> <?= h(ayar('site_adi', 'XNEWS')) ?>. Tüm haklari saklidir.</div>
         <div><a href="https://codega.com.tr" target="_blank" rel="noopener">Powered by CODEGA</a></div>
     </div>
 </div></footer>
@@ -262,7 +262,7 @@ case 'anasayfa':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.durum = 'yayinda' AND h.manset = 1
+        WHERE h.durum = 'yayında' AND h.manset = 1
         ORDER BY h.yayin_tarihi DESC LIMIT {$manset_adet}")->fetchAll();
 
     if (count($mansetler) < $manset_adet) {
@@ -271,7 +271,7 @@ case 'anasayfa':
             FROM {$prefix}news h
             LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
             LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-            WHERE h.durum = 'yayinda' AND h.manset = 0
+            WHERE h.durum = 'yayında' AND h.manset = 0
             ORDER BY h.yayin_tarihi DESC LIMIT {$eksik}")->fetchAll();
         $mansetler = array_merge($mansetler, $ekstra);
     }
@@ -283,7 +283,7 @@ case 'anasayfa':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.durum = 'yayinda' AND h.id NOT IN ($in)
+        WHERE h.durum = 'yayında' AND h.id NOT IN ($in)
         ORDER BY h.yayin_tarihi DESC LIMIT {$son_adet}");
     $stmt->execute($haric_ids);
     $son_haberler = $stmt->fetchAll();
@@ -291,18 +291,27 @@ case 'anasayfa':
     $pop = $db->query("SELECT h.*, k.ad AS kat_ad, k.slug AS kat_slug
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
-        WHERE h.durum = 'yayinda' AND h.yayin_tarihi >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        WHERE h.durum = 'yayında' AND h.yayin_tarihi >= DATE_SUB(NOW(), INTERVAL 7 DAY)
         ORDER BY h.okunma DESC LIMIT 5")->fetchAll();
 
     sayfa_basla(['aktif_sayfa' => 'anasayfa']);
 ?>
 <main><div class="kapsayici">
     <?php if (empty($mansetler)): ?>
-        <div class="bos-sonuc">
-            <div class="ikon">📰</div>
-            <h2>Henuz haber yok</h2>
-            <p>RSS cron calismasini bekleyin veya yonetim panelinden manuel haber ekleyin.</p>
-            <p style="margin-top:20px"><a href="<?= url('yonetim.php') ?>" style="display:inline-block;background:#c8102e;color:#fff;padding:12px 24px;font-weight:600;text-transform:uppercase;font-size:13px;letter-spacing:.08em;font-family:var(--font-ui)">Yonetim Paneli</a></p>
+        <div class="bos-sonuc" style="padding:80px 20px">
+            <div class="ikon" style="font-size:64px;margin-bottom:20px">📰</div>
+            <h2 style="font-family:var(--font-manset,'Oswald',sans-serif);font-size:32px;margin-bottom:12px">Henüz haber yok</h2>
+            <p style="max-width:540px;margin:0 auto 32px;color:#64748b;font-size:16px;line-height:1.6">
+                Haberler RSS çekim motoruyla otomatik dolar. Aşağıdaki seçeneklerden biriyle başlayabilirsiniz:
+            </p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+                <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" style="display:inline-block;background:#c8102e;color:#fff;padding:14px 28px;font-weight:700;text-transform:uppercase;font-size:13px;letter-spacing:.1em;font-family:var(--font-ui);border-radius:3px">RSS Kaynakları (32 hazır)</a>
+                <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" style="display:inline-block;background:#0f172a;color:#fff;padding:14px 28px;font-weight:700;text-transform:uppercase;font-size:13px;letter-spacing:.1em;font-family:var(--font-ui);border-radius:3px">Manuel Haber Ekle</a>
+            </div>
+            <p style="margin-top:40px;color:#94a3b8;font-size:13px">
+                <strong>İpucu:</strong> DirectAdmin Cron'dan her 10 dakikada bir
+                <code style="background:#f1f5f9;padding:2px 6px;border-radius:3px;font-size:12px">cron.php</code> çalıştırın → haberler otomatik dolar.
+            </p>
         </div>
     <?php else: ?>
 
@@ -342,7 +351,7 @@ case 'anasayfa':
                     FROM {$prefix}news h
                     LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
                     LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-                    WHERE h.durum = 'yayinda' AND h.kategori_id = ?
+                    WHERE h.durum = 'yayında' AND h.kategori_id = ?
                     ORDER BY h.yayin_tarihi DESC LIMIT 4");
                 $st->execute([$kat['id']]);
                 $kat_haberleri = $st->fetchAll();
@@ -351,7 +360,7 @@ case 'anasayfa':
             <section class="kategori-bolum">
                 <div class="bolum-baslik">
                     <h2><?= h($kat['ad']) ?></h2>
-                    <a href="<?= h(kategori_url($kat)) ?>" class="tumu">Tumu →</a>
+                    <a href="<?= h(kategori_url($kat)) ?>" class="tumu">Tümü →</a>
                 </div>
                 <div class="kat-grid">
                     <?php foreach ($kat_haberleri as $h) haber_karti($h); ?>
@@ -363,9 +372,9 @@ case 'anasayfa':
         <aside class="sidebar">
             <?php reklam_goster('sidebar_ust'); ?>
             <div class="sidebar-blok">
-                <h3>En Cok Okunan</h3>
+                <h3>En Çok Okunan</h3>
                 <?php if (empty($pop)): ?>
-                    <p style="color:var(--muted);font-size:13px;padding:12px 0">Henuz okunma verisi yok.</p>
+                    <p style="color:var(--muted);font-size:13px;padding:12px 0">Henüz okunma verisi yok.</p>
                 <?php else: $i = 1; foreach ($pop as $p): ?>
                 <a href="<?= h(haber_url($p)) ?>" class="mini-kart">
                     <span class="numara"><?= $i++ ?></span>
@@ -397,7 +406,7 @@ case 'kategori':
     $per_page = (int)ayar('kategori_sayfa_adet', 15);
     $offset = ($sayfa_no - 1) * $per_page;
 
-    $st = $db->prepare("SELECT COUNT(*) FROM {$prefix}news WHERE kategori_id = ? AND durum = 'yayinda'");
+    $st = $db->prepare("SELECT COUNT(*) FROM {$prefix}news WHERE kategori_id = ? AND durum = 'yayında'");
     $st->execute([$kat['id']]);
     $toplam = (int)$st->fetchColumn();
     $son_sayfa = max(1, (int)ceil($toplam / $per_page));
@@ -406,7 +415,7 @@ case 'kategori':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.kategori_id = ? AND h.durum = 'yayinda'
+        WHERE h.kategori_id = ? AND h.durum = 'yayında'
         ORDER BY h.yayin_tarihi DESC LIMIT {$per_page} OFFSET {$offset}");
     $st->execute([$kat['id']]);
     $haberler = $st->fetchAll();
@@ -414,14 +423,14 @@ case 'kategori':
     sayfa_basla([
         'aktif_sayfa' => 'kategori',
         'aktif_kategori' => $kat,
-        'baslik' => $kat['ad'] . ' Haberleri - ' . ayar('site_adi'),
-        'aciklama' => $kat['aciklama'] ?: "{$kat['ad']} kategorisindeki son haberler",
+        'başlık' => $kat['ad'] . ' Haberleri - ' . ayar('site_adi'),
+        'açıklama' => $kat['aciklama'] ?: "{$kat['ad']} kategorisindeki son haberler",
     ]);
 ?>
 <main><div class="kapsayici">
     <div class="bolum-baslik"><h2><?= h($kat['ad']) ?></h2><span class="tumu"><?= $toplam ?> haber</span></div>
     <?php if (empty($haberler)): ?>
-        <div class="bos-sonuc"><div class="ikon">📭</div><h2>Bu kategoride henuz haber yok</h2></div>
+        <div class="bos-sonuc"><div class="ikon">📭</div><h2>Bu kategoride henüz haber yok</h2></div>
     <?php else: ?>
         <div class="icerik-sidebar-grid">
             <div>
@@ -462,7 +471,7 @@ case 'haber':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.id = ? AND h.durum = 'yayinda'");
+        WHERE h.id = ? AND h.durum = 'yayında'");
     $st->execute([$hid]);
     $haber = $st->fetch();
     if (!$haber) { http_response_code(404); goto sayfa_404; }
@@ -476,7 +485,7 @@ case 'haber':
         FROM {$prefix}news h
         LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
         LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-        WHERE h.kategori_id = ? AND h.id != ? AND h.durum = 'yayinda'
+        WHERE h.kategori_id = ? AND h.id != ? AND h.durum = 'yayında'
         ORDER BY h.yayin_tarihi DESC LIMIT 4");
     $st->execute([$haber['kategori_id'], $hid]);
     $ilgili = $st->fetchAll();
@@ -486,8 +495,8 @@ case 'haber':
     sayfa_basla([
         'aktif_sayfa' => 'haber',
         'aktif_kategori' => ['id' => $haber['kategori_id']],
-        'baslik' => ($haber['seo_baslik'] ?: $haber['baslik']) . ' - ' . ayar('site_adi'),
-        'aciklama' => $haber['seo_aciklama'] ?: kisalt($haber['ozet'], 160),
+        'başlık' => ($haber['seo_baslik'] ?: $haber['baslik']) . ' - ' . ayar('site_adi'),
+        'açıklama' => $haber['seo_aciklama'] ?: kisalt($haber['ozet'], 160),
         'gorsel' => haber_gorsel($haber['resim']),
     ]);
 ?>
@@ -539,7 +548,7 @@ case 'haber':
 
     <?php if (!empty($ilgili)): ?>
     <section style="margin-top:60px;max-width:1080px;margin-left:auto;margin-right:auto">
-        <div class="bolum-baslik"><h2>Ilgili Haberler</h2></div>
+        <div class="bolum-baslik"><h2>İlgili Haberler</h2></div>
         <div class="kat-grid"><?php foreach ($ilgili as $i) haber_karti($i); ?></div>
     </section>
     <?php endif; ?>
@@ -562,16 +571,16 @@ case 'arama':
             FROM {$prefix}news h
             LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
             LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
-            WHERE h.durum = 'yayinda' AND (h.baslik LIKE ? OR h.ozet LIKE ? OR h.icerik LIKE ?)
+            WHERE h.durum = 'yayında' AND (h.baslik LIKE ? OR h.ozet LIKE ? OR h.icerik LIKE ?)
             ORDER BY h.yayin_tarihi DESC LIMIT {$per_page} OFFSET {$offset}");
         $st->execute([$like, $like, $like]);
         $sonuc = $st->fetchAll();
 
-        $st = $db->prepare("SELECT COUNT(*) FROM {$prefix}news WHERE durum = 'yayinda' AND (baslik LIKE ? OR ozet LIKE ?)");
+        $st = $db->prepare("SELECT COUNT(*) FROM {$prefix}news WHERE durum = 'yayında' AND (başlık LIKE ? OR ozet LIKE ?)");
         $st->execute([$like, $like]);
         $toplam = (int)$st->fetchColumn();
     }
-    sayfa_basla(['aktif_sayfa' => 'arama', 'baslik' => $q ? "'{$q}' arama sonuclari - " . ayar('site_adi') : 'Arama - ' . ayar('site_adi')]);
+    sayfa_basla(['aktif_sayfa' => 'arama', 'başlık' => $q ? "'{$q}' arama sonuclari - " . ayar('site_adi') : 'Arama - ' . ayar('site_adi')]);
 ?>
 <main><div class="kapsayici">
     <div class="bolum-baslik"><h2>Arama<?= $q ? ': ' . h($q) : '' ?></h2><span class="tumu"><?= $toplam ?> sonuc</span></div>
@@ -581,7 +590,7 @@ case 'arama':
         <button type="submit" style="padding:0 24px;background:var(--brand);color:#fff;border:none;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:13px;cursor:pointer">Ara</button>
     </form>
     <?php if (empty($sonuc) && $q): ?>
-        <div class="bos-sonuc"><div class="ikon">🔍</div><h2>Sonuc Bulunamadi</h2><p>"<?= h($q) ?>" icin haber bulunamadi.</p></div>
+        <div class="bos-sonuc"><div class="ikon">🔍</div><h2>Sonuç Bulunamadı</h2><p>"<?= h($q) ?>" için haber bulunamadı.</p></div>
     <?php elseif (!empty($sonuc)): ?>
         <div class="kat-grid-3"><?php foreach ($sonuc as $h) haber_karti($h); ?></div>
     <?php endif; ?>
@@ -594,49 +603,49 @@ case 'arama':
 // STATIK SAYFALAR
 // -----------------------------------------------------
 case 'hakkimizda': case 'iletisim': case 'reklam': case 'gizlilik': case 'kullanim':
-    $basliklar = ['hakkimizda' => 'Hakkimizda', 'iletisim' => 'Iletisim', 'reklam' => 'Reklam Ver', 'gizlilik' => 'Gizlilik Politikasi', 'kullanim' => 'Kullanim Sartlari'];
+    $basliklar = ['hakkimizda' => 'Hakkımızda', 'iletisim' => 'İletişim', 'reklam' => 'Reklam Ver', 'gizlilik' => 'Gizlilik Politikasi', 'kullanim' => 'Kullanim Sartlari'];
     $baslik_st = $basliklar[$sayfa];
-    sayfa_basla(['aktif_sayfa' => $sayfa, 'baslik' => $baslik_st . ' - ' . ayar('site_adi')]);
+    sayfa_basla(['aktif_sayfa' => $sayfa, 'başlık' => $baslik_st . ' - ' . ayar('site_adi')]);
 ?>
 <main><div class="kapsayici">
     <article class="haber-detay">
         <div class="hd-ust-bilgi"><h1 class="hd-baslik"><?= h($baslik_st) ?></h1></div>
         <div class="hd-icerik">
         <?php if ($sayfa === 'hakkimizda'): ?>
-            <p><?= h(ayar('site_adi', 'XNEWS')) ?>, Turkiye ve dunyadan guncel haberleri hizli ve tarafsiz bicimde okuyuculariyla bulusturan dijital bir haber platformudur.</p>
-            <p>Platformumuz; Turkiye'nin onde gelen haber kaynaklarindan otomatik olarak haber akisi saglar, tum icerikler kaynak belirtilerek orijinal yayinciya link ile birlikte sunulur.</p>
+            <p><?= h(ayar('site_adi', 'XNEWS')) ?>, Türkiye ve dünyadan guncel haberleri hızlı ve tarafsiz bicimde okuyuculariyla bulusturan dijital bir haber platformudur.</p>
+            <p>Platformumuz; Türkiye'nin onde gelen haber kaynaklarindan otomatik olarak haber akisi saglar, tum icerikler kaynak belirtilerek orijinal yayinciya link ile birlikte sunulur.</p>
             <h2>Misyonumuz</h2>
-            <p>Okuyuculara hizli, dogrudan ve yanli olmayan haber erisimi saglamak.</p>
-            <h2>Iletisim</h2>
-            <p>Oneri, sikayet ve is birligi teklifleriniz icin <a href="<?= url('iletisim') ?>">iletisim sayfasi</a>ni kullanabilirsiniz.</p>
+            <p>Okuyuculara hızlı, dogrudan ve yanli olmayan haber erisimi saglamak.</p>
+            <h2>İletişim</h2>
+            <p>Oneri, sikayet ve is birligi teklifleriniz için <a href="<?= url('iletisim') ?>">iletisim sayfasi</a>ni kullanabilirsiniz.</p>
         <?php elseif ($sayfa === 'iletisim'): ?>
-            <p>Bizimle iletisime gecmek icin asagidaki kanallardan ulasabilirsiniz.</p>
+            <p>Bizimle iletisime gecmek için asagidaki kanallardan ulasabilirsiniz.</p>
             <ul>
                 <li><strong>E-posta:</strong> <a href="mailto:<?= h(ayar('iletisim_eposta', '')) ?>"><?= h(ayar('iletisim_eposta', '')) ?></a></li>
                 <?php if ($tel = ayar('iletisim_telefon')): ?><li><strong>Telefon:</strong> <?= h($tel) ?></li><?php endif; ?>
                 <?php if ($adr = ayar('iletisim_adres')): ?><li><strong>Adres:</strong> <?= h($adr) ?></li><?php endif; ?>
             </ul>
         <?php elseif ($sayfa === 'reklam'): ?>
-            <p><?= h(ayar('site_adi')) ?> uzerinde reklam vermek icin bizimle iletisime gecin.</p>
+            <p><?= h(ayar('site_adi')) ?> uzerinde reklam vermek için bizimle iletisime gecin.</p>
             <h2>Reklam Alanlarimiz</h2>
             <ul>
-                <li>Ust Banner (970×90)</li>
+                <li>Üst Banner (970×90)</li>
                 <li>Sidebar (300×250 / 300×600)</li>
                 <li>Makale Ici ve Disi Banner (728×90)</li>
                 <li>Alt Banner (970×90)</li>
                 <li>Mobil Sabit (320×50)</li>
                 <li>Google AdSense uyumlu ozel yerlestirmeler</li>
             </ul>
-            <p>Teklif almak icin: <a href="mailto:<?= h(ayar('iletisim_eposta')) ?>"><?= h(ayar('iletisim_eposta')) ?></a></p>
+            <p>Teklif almak için: <a href="mailto:<?= h(ayar('iletisim_eposta')) ?>"><?= h(ayar('iletisim_eposta')) ?></a></p>
         <?php elseif ($sayfa === 'gizlilik'): ?>
-            <p>Bu sayfa yonetim panelinden guncellenebilir.</p>
+            <p>Bu sayfa yönetim panelinden guncellenebilir.</p>
             <h2>1. Toplanan Bilgiler</h2>
             <p>Sitemizi ziyaret ettiginizde IP adresiniz, tarayici bilgileriniz anonim olarak kaydedilir.</p>
             <h2>2. Cerezler</h2>
-            <p>Sitemiz oturum yonetimi ve analiz icin cerez kullanir.</p>
+            <p>Sitemiz oturum yonetimi ve analiz için cerez kullanir.</p>
         <?php elseif ($sayfa === 'kullanim'): ?>
-            <p>Bu sayfa yonetim panelinden guncellenebilir.</p>
-            <h2>Icerik Kullanimi</h2>
+            <p>Bu sayfa yönetim panelinden guncellenebilir.</p>
+            <h2>İçerik Kullanimi</h2>
             <p>Sitemizde yer alan haberler kaynak belirtilmek suretiyle orijinal yayincilardan sunulmaktadir. Haberlerin telif hakki kaynak yayin kurulusuna aittir.</p>
         <?php endif; ?>
         </div>
@@ -653,12 +662,12 @@ case '404':
 default:
 sayfa_404:
     http_response_code(404);
-    sayfa_basla(['baslik' => '404 - Sayfa Bulunamadi - ' . ayar('site_adi'), 'aktif_sayfa' => '404']);
+    sayfa_basla(['başlık' => '404 - Sayfa Bulunamadı - ' . ayar('site_adi'), 'aktif_sayfa' => '404']);
 ?>
 <main><div class="kapsayici">
     <div class="hata-sayfa">
         <div class="numara">404</div>
-        <h1>Sayfa Bulunamadi</h1>
+        <h1>Sayfa Bulunamadı</h1>
         <p style="color:var(--muted);margin-bottom:28px">Aradiginiz sayfa silinmis, tasinmis veya hic var olmamis olabilir.</p>
         <a href="<?= url() ?>" style="display:inline-block;background:var(--black);color:#fff;padding:14px 32px;font-family:var(--font-ui);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:13px">Ana Sayfaya Don</a>
     </div>
@@ -675,6 +684,6 @@ sayfa_404:
     } else {
         log_ekle('hata', 'index.php hatasi', $e->getMessage());
         http_response_code(500);
-        echo '<div style="padding:60px;text-align:center;font-family:system-ui"><h1>Bir hata olustu</h1><p>Kisa bir sure sonra tekrar deneyiniz.</p></div>';
+        echo '<div style="padding:60px;text-align:center;font-family:system-ui"><h1>Bir hata olustu</h1><p>Kısa bir sure sonra tekrar deneyiniz.</p></div>';
     }
 }

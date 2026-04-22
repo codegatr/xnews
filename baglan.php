@@ -1,24 +1,24 @@
 <?php
 /**
- * XNEWS - Merkezi Baglanti ve Yardimci Fonksiyonlar
- * Tum dosyalar bu dosyayi include eder.
+ * XNEWS - Merkezi Bağlantı ve Yardimci Fonksiyonlar
+ * Tüm dosyalar bu dosyayi include eder.
  */
 
-if (!defined('XNEWS')) { http_response_code(403); die('Erisim reddedildi.'); }
+if (!defined('XNEWS')) { http_response_code(403); die('Erişim reddedildi.'); }
 
 // -----------------------------------------------------
-// Konfigurasyon kontrolu
+// Konfigurasyon kontrolü
 // -----------------------------------------------------
 if (!file_exists(__DIR__ . '/config.php')) {
     if (file_exists(__DIR__ . '/kurulum.php') && !defined('KURULUM_MODU')) {
         header('Location: kurulum.php'); exit;
     }
     http_response_code(503);
-    die('Konfigurasyon dosyasi bulunamadi. Lutfen kurulumu tamamlayin: <a href="kurulum.php">Kuruluma Git</a>');
+    die('Konfigurasyon dosyasi bulunamadı. Lutfen kurulumu tamamlayin: <a href="kurulum.php">Kuruluma Git</a>');
 }
 require_once __DIR__ . '/config.php';
 
-// PHP surum kontrolu
+// PHP sürüm kontrolü
 if (version_compare(PHP_VERSION, '8.1.0', '<')) {
     die('Bu uygulama PHP 8.1 ve uzerini gerektirir. Mevcut: ' . PHP_VERSION);
 }
@@ -64,7 +64,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // =====================================================
 
 /**
- * XSS korumasi - HTML ciktisi icin
+ * XSS korumasi - HTML ciktisi için
  */
 function h(?string $s): string {
     return htmlspecialchars((string)$s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -83,7 +83,7 @@ function csrf_token(): string {
 /**
  * CSRF token dogrula
  */
-function csrf_dogrula(?string $token): bool {
+function csrf_doğrula(?string $token): bool {
     return !empty($token) && !empty($_SESSION['_csrf']) && hash_equals($_SESSION['_csrf'], $token);
 }
 
@@ -108,8 +108,8 @@ function istemci_ip(): string {
 }
 
 /**
- * URL dostu slug uret (ASCII - Turkce karakterler donusturulur)
- * KURAL: URL'lerde asla Turkce karakter olmaz!
+ * URL dostu slug uret (ASCII - Türkçe karakterler donusturulur)
+ * KURAL: URL'lerde asla Türkçe karakter olmaz!
  */
 function slug_olustur(string $metin, int $max = 100): string {
     $tr = ['ı','İ','ğ','Ğ','ü','Ü','ş','Ş','ö','Ö','ç','Ç'];
@@ -146,7 +146,7 @@ function ayar(string $anahtar, $varsayilan = null) {
     global $db;
     static $onbellek = null;
     if ($onbellek === null) {
-        $stmt = $db->query("SELECT anahtar, deger FROM `" . DB_PREFIX . "settings`");
+        $stmt = $db->query("SELECT anahtar, değer FROM `" . DB_PREFIX . "settings`");
         $onbellek = [];
         foreach ($stmt->fetchAll() as $r) $onbellek[$r['anahtar']] = $r['deger'];
     }
@@ -156,7 +156,7 @@ function ayar(string $anahtar, $varsayilan = null) {
 /** Ayar guncelle */
 function ayar_guncelle(string $anahtar, $deger): bool {
     global $db;
-    $stmt = $db->prepare("UPDATE `" . DB_PREFIX . "settings` SET deger = ? WHERE anahtar = ?");
+    $stmt = $db->prepare("UPDATE `" . DB_PREFIX . "settings` SET değer = ? WHERE anahtar = ?");
     return $stmt->execute([$deger, $anahtar]);
 }
 
@@ -166,7 +166,7 @@ function ayar_guncelle(string $anahtar, $deger): bool {
 function log_ekle(string $tip, string $baslik, ?string $detay = null, ?int $kullanici_id = null): void {
     global $db;
     try {
-        $stmt = $db->prepare("INSERT INTO `" . DB_PREFIX . "logs` (tip, baslik, detay, kullanici_id, ip, user_agent, url) VALUES (?,?,?,?,?,?,?)");
+        $stmt = $db->prepare("INSERT INTO `" . DB_PREFIX . "logs` (tip, başlık, detay, kullanici_id, ip, user_agent, url) VALUES (?,?,?,?,?,?,?)");
         $stmt->execute([
             $tip, mb_substr($baslik, 0, 255), $detay, $kullanici_id,
             istemci_ip(),
@@ -180,22 +180,22 @@ function log_ekle(string $tip, string $baslik, ?string $detay = null, ?int $kull
 // YARDIMCI FONKSIYONLAR
 // =====================================================
 
-/** Tarihi Turkce goster */
+/** Tarihi Türkçe göster */
 function tr_tarih(string $tarih, bool $saat_goster = true): string {
     $ts = strtotime($tarih);
     if (!$ts) return $tarih;
-    $aylar = ['Ocak','Subat','Mart','Nisan','Mayis','Haziran','Temmuz','Agustos','Eylul','Ekim','Kasim','Aralik'];
+    $aylar = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
     $gun = date('j', $ts); $ay = $aylar[date('n', $ts) - 1]; $yil = date('Y', $ts);
     return $saat_goster ? "{$gun} {$ay} {$yil} {$ay}, " . date('H:i', $ts) : "{$gun} {$ay} {$yil}";
 }
 
-/** "5 dakika once" formati */
+/** "5 dakika önce" formati */
 function goreceli_zaman(string $tarih): string {
     $fark = time() - strtotime($tarih);
-    if ($fark < 60)     return 'az once';
-    if ($fark < 3600)   return floor($fark / 60) . ' dakika once';
-    if ($fark < 86400)  return floor($fark / 3600) . ' saat once';
-    if ($fark < 604800) return floor($fark / 86400) . ' gun once';
+    if ($fark < 60)     return 'az önce';
+    if ($fark < 3600)   return floor($fark / 60) . ' dakika önce';
+    if ($fark < 86400)  return floor($fark / 3600) . ' saat önce';
+    if ($fark < 604800) return floor($fark / 86400) . ' gun önce';
     return tr_tarih($tarih, false);
 }
 
@@ -242,7 +242,7 @@ function json_cevap(array $veri, int $kod = 200): never {
 // GORSEL ISLEMLER
 // =====================================================
 
-/** Varsayilan gorseli getir (resim bossa) */
+/** Varsayılan gorseli getir (resim bossa) */
 function haber_gorsel(?string $resim): string {
     if (!empty($resim)) {
         if (str_starts_with($resim, 'http')) return $resim;
@@ -261,7 +261,7 @@ function giris_kontrol(): ?array {
     global $db;
     if (empty($_SESSION['yonetici_id'])) return null;
 
-    // Oturum suresi kontrolu
+    // Oturum süresi kontrolü
     if (!empty($_SESSION['son_aktivite']) && (time() - $_SESSION['son_aktivite']) > OTURUM_SURESI) {
         session_unset(); session_destroy();
         return null;
@@ -275,7 +275,7 @@ function giris_kontrol(): ?array {
 
 function yonetici_zorunlu(): array {
     $u = giris_kontrol();
-    if (!$u) { yonlendir(url('yonetim')); }
+    if (!$u) { yonlendir(url('yönetim')); }
     return $u;
 }
 
@@ -283,7 +283,7 @@ function admin_zorunlu(): array {
     $u = yonetici_zorunlu();
     if ($u['rol'] !== 'admin') {
         http_response_code(403);
-        die('Bu islem icin admin yetkisi gerekiyor.');
+        die('Bu islem için admin yetkisi gerekiyor.');
     }
     return $u;
 }
@@ -314,7 +314,7 @@ function reklam_goster(string $konum): void {
     $r = $stmt->fetch();
     if (!$r) return;
 
-    // Gosterim sayacini rastgele orneklemeyle artir
+    // Gösterim sayacini rastgele orneklemeyle artir
     if (mt_rand(1, 5) === 1) {
         try { $db->prepare("UPDATE " . DB_PREFIX . "ads SET gosterim = gosterim + 5 WHERE id = ?")->execute([$r['id']]); }
         catch (Throwable $e) {}

@@ -5,10 +5,10 @@
  * Bu dosya KURULUM sirasinda otomatik olusturulur.
  * GitHub guncellemelerinde ASLA UZERINE YAZILMAZ.
  *
- * Manuel kurulum icin: config.sample.php -> config.php kopyalayin ve duzenleyin.
+ * Manuel kurulum için: config.sample.php -> config.php kopyalayin ve duzenleyin.
  */
 
-if (!defined('XNEWS')) { http_response_code(403); die('Erisim reddedildi.'); }
+if (!defined('XNEWS')) { http_response_code(403); die('Erişim reddedildi.'); }
 
 // ==========================================
 // VERITABANI AYARLARI
@@ -34,20 +34,20 @@ define('SITE_SLOGAN', 'Haberin Hizli Adresi');
 define('GUVENLIK_ANAHTARI', 'KURULUMDA_URETILECEK');
 define('CSRF_ANAHTARI', 'KURULUMDA_URETILECEK');
 
-// Yonetim paneli zaman asimi (saniye)
+// Yönetim paneli zaman asimi (saniye)
 define('OTURUM_SURESI', 7200); // 2 saat
 
 // ==========================================
 // GITHUB GUNCELLEME
 // ==========================================
-// GitHub Personal Access Token (ozel repo icin). Public repo icin bos birakin.
+// GitHub Personal Access Token (ozel repo için). Public repo için boş birakin.
 define('GITHUB_TOKEN', '');
 define('GUNCELLEME_AKTIF', true);
 
 // ==========================================
 // RSS CEKIM AYARLARI
 // ==========================================
-define('CRON_ANAHTARI', 'KURULUMDA_URETILECEK'); // cron.php?anahtar=... icin
+define('CRON_ANAHTARI', 'KURULUMDA_URETILECEK'); // cron.php?anahtar=... için
 define('MAX_CEKIM_SURESI', 300); // 5 dakika (saniye)
 define('HTTP_TIMEOUT', 15); // RSS istegi zaman asimi
 

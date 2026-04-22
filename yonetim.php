@@ -1,9 +1,9 @@
 <?php
 /**
- * XNEWS - Yonetim Paneli (Tek Dosya)
- * Asama 3A: Login + Dashboard + Kaynaklar + Kategoriler + Cikis
+ * XNEWS - Yönetim Paneli (Tek Dosya)
+ * Asama 3A: Login + Dashboard + Kaynaklar + Kategoriler + Çıkış
  *
- * Asama 3B'de eklenecek: Haberler CRUD, Reklam, Ayarlar, Kullanicilar, Loglar, Manuel RSS
+ * Asama 3B'de eklenecek: Haberler CRUD, Reklam, Ayarlar, Kullanıcılar, Loglar, Manuel RSS
  *
  * CODEGA pattern: single-file PHP
  */
@@ -45,10 +45,10 @@ if ($sayfa === 'giris' || !giris_kontrol()) {
     if (post()) {
         $k = trim($_POST['kullanici'] ?? '');
         $s = $_POST['sifre'] ?? '';
-        if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
-            $hata = 'Guvenlik dogrulamasi basarisiz. Sayfayi yenileyip tekrar deneyin.';
+        if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+            $hata = 'Güvenlik doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin.';
         } elseif (empty($k) || empty($s)) {
-            $hata = 'Kullanici adi ve sifre zorunludur.';
+            $hata = 'Kullanıcı adı ve şifre zorunludur.';
         } else {
             $stmt = $db->prepare("SELECT * FROM " . DB_PREFIX . "users WHERE (kullanici_adi = ? OR eposta = ?) AND durum = 1 LIMIT 1");
             $stmt->execute([$k, $k]);
@@ -58,24 +58,24 @@ if ($sayfa === 'giris' || !giris_kontrol()) {
             $limit_anahtar = 'giris_deneme_' . md5(istemci_ip());
             $deneme = $_SESSION[$limit_anahtar] ?? ['sayi' => 0, 'son' => 0];
             if ($deneme['sayi'] >= 5 && (time() - $deneme['son']) < 300) {
-                $hata = 'Cok fazla basarisiz giris denemesi. 5 dakika sonra tekrar deneyin.';
-                log_ekle('guvenlik', 'Rate limit: Giris denemesi engelle');
+                $hata = 'Çok fazla başarısız giriş denemesi. 5 dakika sonra tekrar deneyin.';
+                log_ekle('guvenlik', 'Rate limit: Giriş denemesi engelle');
             } elseif ($kullanici && password_verify($s, $kullanici['sifre_hash'])) {
-                // Basarili
+                // Başarılı
                 session_regenerate_id(true);
                 $_SESSION['yonetici_id'] = $kullanici['id'];
                 $_SESSION['son_aktivite'] = time();
                 unset($_SESSION[$limit_anahtar]);
                 $db->prepare("UPDATE " . DB_PREFIX . "users SET son_giris = NOW(), son_ip = ? WHERE id = ?")
                    ->execute([istemci_ip(), $kullanici['id']]);
-                log_ekle('bilgi', 'Yonetici girisi', $kullanici['kullanici_adi'], $kullanici['id']);
+                log_ekle('bilgi', 'Yönetici girisi', $kullanici['kullanici_adi'], $kullanici['id']);
                 yonlendir(url('yonetim.php'));
             } else {
-                $hata = 'Kullanici adi veya sifre hatali.';
+                $hata = 'Kullanıcı adı veya şifre hatalı.';
                 $deneme['sayi']++;
                 $deneme['son'] = time();
                 $_SESSION[$limit_anahtar] = $deneme;
-                log_ekle('guvenlik', 'Basarisiz giris denemesi', $k);
+                log_ekle('guvenlik', 'Başarısız giriş denemesi', $k);
             }
         }
     }
@@ -86,35 +86,35 @@ if ($sayfa === 'giris' || !giris_kontrol()) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Giris - <?= h(ayar('site_adi', 'XNEWS')) ?></title>
+<title>Giriş - <?= h(ayar('site_adi', 'XNEWS')) ?></title>
 <link rel="icon" type="image/svg+xml" href="<?= url('favicon.svg') ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=IBM+Plex+Sans:wght@400;500;600;700&subset=latin-ext&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= url('assets/css/admin.css') ?>?v=<?= h(ayar('mevcut_surum', '1.0.0')) ?>">
 </head>
 <body class="login-sayfa">
 <div class="login-kutu">
     <div class="login-bas">
         <div class="login-logo"><span class="x">X</span>NEWS</div>
-        <div class="login-alt">Yonetim Paneli</div>
+        <div class="login-alt">Yönetim Paneli</div>
     </div>
     <form class="login-form" method="post" autocomplete="on">
         <?= csrf_input() ?>
-        <h2>Giris Yap</h2>
-        <p class="alt">Devam etmek icin hesabinizla giris yapin.</p>
+        <h2>Giriş Yap</h2>
+        <p class="alt">Devam etmek için hesabinizla giris yapin.</p>
         <?php if ($hata): ?>
             <div class="login-giris-uyari">&#9888; <?= h($hata) ?></div>
         <?php endif; ?>
         <div class="form-grup">
-            <label>Kullanici adi veya e-posta</label>
+            <label>Kullanıcı adı veya e-posta</label>
             <input type="text" name="kullanici" value="<?= h($_POST['kullanici'] ?? '') ?>" required autofocus>
         </div>
         <div class="form-grup">
-            <label>Sifre</label>
+            <label>Şifre</label>
             <input type="password" name="sifre" required>
         </div>
-        <button type="submit" class="buton" style="width:100%;padding:13px;font-size:14px">Giris Yap</button>
+        <button type="submit" class="buton" style="width:100%;padding:13px;font-size:14px">Giriş Yap</button>
         <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:20px">
             <a href="<?= url() ?>" style="color:#94a3b8">&larr; Public siteye don</a>
         </p>
@@ -136,8 +136,8 @@ $prefix = DB_PREFIX;
 // POST ISLEMLER - KAYNAKLAR
 // =====================================================
 if ($sayfa === 'kaynaklar' && post()) {
-    if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
-        flash('Guvenlik dogrulamasi basarisiz.', 'hata');
+    if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+        flash('Güvenlik doğrulaması başarısız.', 'hata');
         yonlendir(url('yonetim.php?sayfa=kaynaklar'));
     }
     try {
@@ -157,25 +157,25 @@ if ($sayfa === 'kaynaklar' && post()) {
                 throw new Exception('Ad, site URL ve RSS URL zorunlu.');
             }
             if (!filter_var($rss_url, FILTER_VALIDATE_URL) || !filter_var($site_url_d, FILTER_VALIDATE_URL)) {
-                throw new Exception('Gecerli URL girin.');
+                throw new Exception('Geçerli URL girin.');
             }
 
             if ($islem === 'ekle') {
                 $slug = benzersiz_slug($db, "{$prefix}sources", slug_olustur($ad));
                 $stmt = $db->prepare("INSERT INTO {$prefix}sources
-                    (ad, slug, site_url, rss_url, varsayilan_kategori_id, logo, aciklama, dil, atfi_metin, aktif, cekim_sikligi, max_haber_adet)
+                    (ad, slug, site_url, rss_url, varsayilan_kategori_id, logo, açıklama, dil, atfi_metin, aktif, cekim_sikligi, max_haber_adet)
                     VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$ad, $slug, $site_url_d, $rss_url, $kat_id, $aciklama, $dil, $atfi, $aktif, $sikligi, $max_haber]);
                 log_ekle('islem', 'Kaynak eklendi', $ad, $yonetici['id']);
-                flash('Kaynak basariyla eklendi.', 'basari');
+                flash('Kaynak başarıyla eklendi.', 'basari');
             } else {
                 if ($id < 1) throw new Exception('Gecersiz kaynak ID.');
                 $stmt = $db->prepare("UPDATE {$prefix}sources
-                    SET ad = ?, site_url = ?, rss_url = ?, varsayilan_kategori_id = ?, aciklama = ?, dil = ?,
+                    SET ad = ?, site_url = ?, rss_url = ?, varsayilan_kategori_id = ?, açıklama = ?, dil = ?,
                         atfi_metin = ?, aktif = ?, cekim_sikligi = ?, max_haber_adet = ? WHERE id = ?");
                 $stmt->execute([$ad, $site_url_d, $rss_url, $kat_id, $aciklama, $dil, $atfi, $aktif, $sikligi, $max_haber, $id]);
-                log_ekle('islem', 'Kaynak guncellendi', $ad, $yonetici['id']);
-                flash('Kaynak guncellendi.', 'basari');
+                log_ekle('islem', 'Kaynak güncellendi', $ad, $yonetici['id']);
+                flash('Kaynak güncellendi.', 'basari');
             }
             yonlendir(url('yonetim.php?sayfa=kaynaklar'));
         }
@@ -187,7 +187,7 @@ if ($sayfa === 'kaynaklar' && post()) {
         }
         if ($islem === 'durum' && $id > 0) {
             $db->prepare("UPDATE {$prefix}sources SET aktif = 1 - aktif WHERE id = ?")->execute([$id]);
-            flash('Kaynak durumu degistirildi.', 'basari');
+            flash('Kaynak durumu değiştirildi.', 'basari');
             yonlendir(url('yonetim.php?sayfa=kaynaklar'));
         }
     } catch (Throwable $e) {
@@ -199,8 +199,8 @@ if ($sayfa === 'kaynaklar' && post()) {
 // POST ISLEMLER - KATEGORILER
 // =====================================================
 if ($sayfa === 'kategoriler' && post()) {
-    if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
-        flash('Guvenlik dogrulamasi basarisiz.', 'hata');
+    if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+        flash('Güvenlik doğrulaması başarısız.', 'hata');
         yonlendir(url('yonetim.php?sayfa=kategoriler'));
     }
     try {
@@ -216,16 +216,16 @@ if ($sayfa === 'kategoriler' && post()) {
 
             if ($islem === 'ekle') {
                 $slug = benzersiz_slug($db, "{$prefix}categories", slug_olustur($ad));
-                $stmt = $db->prepare("INSERT INTO {$prefix}categories (ad, slug, aciklama, renk, sira, aktif) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt = $db->prepare("INSERT INTO {$prefix}categories (ad, slug, açıklama, renk, sıra, aktif) VALUES (?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$ad, $slug, $aciklama, $renk, $sira, $aktif]);
                 log_ekle('islem', 'Kategori eklendi', $ad, $yonetici['id']);
                 flash('Kategori eklendi.', 'basari');
             } else {
                 if ($id < 1) throw new Exception('Gecersiz kategori.');
-                $stmt = $db->prepare("UPDATE {$prefix}categories SET ad = ?, aciklama = ?, renk = ?, sira = ?, aktif = ? WHERE id = ?");
+                $stmt = $db->prepare("UPDATE {$prefix}categories SET ad = ?, açıklama = ?, renk = ?, sıra = ?, aktif = ? WHERE id = ?");
                 $stmt->execute([$ad, $aciklama, $renk, $sira, $aktif, $id]);
-                log_ekle('islem', 'Kategori guncellendi', $ad, $yonetici['id']);
-                flash('Kategori guncellendi.', 'basari');
+                log_ekle('islem', 'Kategori güncellendi', $ad, $yonetici['id']);
+                flash('Kategori güncellendi.', 'basari');
             }
             yonlendir(url('yonetim.php?sayfa=kategoriler'));
         }
@@ -235,7 +235,7 @@ if ($sayfa === 'kategoriler' && post()) {
             $c = $db->prepare("SELECT COUNT(*) FROM {$prefix}news WHERE kategori_id = ?");
             $c->execute([$id]);
             if ((int)$c->fetchColumn() > 0) {
-                flash('Bu kategoride haberler var, once tasiyin veya silin.', 'hata');
+                flash('Bu kategoride haberler var, önce tasiyin veya silin.', 'hata');
             } else {
                 $db->prepare("DELETE FROM {$prefix}categories WHERE id = ?")->execute([$id]);
                 log_ekle('islem', 'Kategori silindi', 'ID: ' . $id, $yonetici['id']);
@@ -252,8 +252,8 @@ if ($sayfa === 'kategoriler' && post()) {
 // POST ISLEMLER - HABERLER
 // =====================================================
 if ($sayfa === 'haberler' && post()) {
-    if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
-        flash('Guvenlik dogrulamasi basarisiz.', 'hata');
+    if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+        flash('Güvenlik doğrulaması başarısız.', 'hata');
         yonlendir(url('yonetim.php?sayfa=haberler'));
     }
     try {
@@ -267,7 +267,7 @@ if ($sayfa === 'haberler' && post()) {
             $resim_alt   = trim($_POST['resim_alt'] ?? '');
             $yazar       = trim($_POST['yazar'] ?? '');
             $orij_url    = trim($_POST['orijinal_url'] ?? '');
-            $durum       = in_array($_POST['durum'] ?? '', ['yayinda','taslak','arsiv','beklemede'], true) ? $_POST['durum'] : 'yayinda';
+            $durum       = in_array($_POST['durum'] ?? '', ['yayında','taslak','arsiv','beklemede'], true) ? $_POST['durum'] : 'yayında';
             $manset      = isset($_POST['manset']) ? 1 : 0;
             $one_cikan   = isset($_POST['one_cikan']) ? 1 : 0;
             $son_dakika  = isset($_POST['son_dakika']) ? 1 : 0;
@@ -275,14 +275,14 @@ if ($sayfa === 'haberler' && post()) {
             $seo_aciklama= trim($_POST['seo_aciklama'] ?? '');
             $yayin_tarihi= trim($_POST['yayin_tarihi'] ?? '') ?: date('Y-m-d H:i:s');
 
-            if (empty($baslik)) throw new Exception('Baslik zorunlu.');
+            if (empty($baslik)) throw new Exception('Başlık zorunlu.');
             if ($kat_id < 1)   throw new Exception('Kategori secin.');
 
             if ($islem === 'ekle') {
                 $slug = benzersiz_slug($db, "{$prefix}news", slug_olustur($baslik, 200));
                 $hash = sha1(mb_strtolower($baslik, 'UTF-8') . '|' . $kat_id);
                 $stmt = $db->prepare("INSERT INTO {$prefix}news
-                    (baslik, slug, ozet, icerik, resim, resim_alt, kaynak_id, kategori_id, yazar, yazar_id,
+                    (başlık, slug, ozet, icerik, resim, resim_alt, kaynak_id, kategori_id, yazar, yazar_id,
                      orijinal_url, icerik_hash, manset, one_cikan, son_dakika, durum, seo_baslik, seo_aciklama, yayin_tarihi)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 $stmt->execute([$baslik, $slug, $ozet, $icerik, $resim, $resim_alt, $kaynak_id, $kat_id, $yazar, $yonetici['id'],
@@ -293,13 +293,13 @@ if ($sayfa === 'haberler' && post()) {
             } else {
                 if ($id < 1) throw new Exception('Gecersiz haber.');
                 $stmt = $db->prepare("UPDATE {$prefix}news SET
-                    baslik = ?, ozet = ?, icerik = ?, resim = ?, resim_alt = ?, kaynak_id = ?, kategori_id = ?,
+                    başlık = ?, ozet = ?, icerik = ?, resim = ?, resim_alt = ?, kaynak_id = ?, kategori_id = ?,
                     yazar = ?, orijinal_url = ?, manset = ?, one_cikan = ?, son_dakika = ?, durum = ?,
                     seo_baslik = ?, seo_aciklama = ?, yayin_tarihi = ? WHERE id = ?");
                 $stmt->execute([$baslik, $ozet, $icerik, $resim, $resim_alt, $kaynak_id, $kat_id, $yazar, $orij_url,
                     $manset, $one_cikan, $son_dakika, $durum, $seo_baslik, $seo_aciklama, $yayin_tarihi, $id]);
-                log_ekle('islem', 'Haber guncellendi', $baslik, $yonetici['id']);
-                flash('Haber guncellendi.', 'basari');
+                log_ekle('islem', 'Haber güncellendi', $baslik, $yonetici['id']);
+                flash('Haber güncellendi.', 'basari');
                 yonlendir(url('yonetim.php?sayfa=haberler&islem=duzenle&id=' . $id));
             }
         }
@@ -319,7 +319,7 @@ if ($sayfa === 'haberler' && post()) {
                     $db->prepare("DELETE FROM {$prefix}news WHERE id IN ({$ph})")->execute($idler);
                     flash(count($idler) . ' haber silindi.', 'basari');
                     break;
-                case 'yayinda':
+                case 'yayında':
                 case 'taslak':
                 case 'arsiv':
                     $db->prepare("UPDATE {$prefix}news SET durum = ? WHERE id IN ({$ph})")->execute(array_merge([$eylem], $idler));
@@ -334,7 +334,7 @@ if ($sayfa === 'haberler' && post()) {
         if (in_array($islem, ['manset', 'one_cikan', 'son_dakika'], true) && $id > 0) {
             $alan = $islem;
             $db->prepare("UPDATE {$prefix}news SET `{$alan}` = 1 - `{$alan}` WHERE id = ?")->execute([$id]);
-            flash('Durum degistirildi.', 'basari');
+            flash('Durum değiştirildi.', 'basari');
             yonlendir(url('yonetim.php?sayfa=haberler'));
         }
     } catch (Throwable $e) {
@@ -346,8 +346,8 @@ if ($sayfa === 'haberler' && post()) {
 // POST ISLEMLER - REKLAMLAR
 // =====================================================
 if ($sayfa === 'reklamlar' && post()) {
-    if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
-        flash('Guvenlik dogrulamasi basarisiz.', 'hata');
+    if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+        flash('Güvenlik doğrulaması başarısız.', 'hata');
         yonlendir(url('yonetim.php?sayfa=reklamlar'));
     }
     try {
@@ -367,7 +367,7 @@ if ($sayfa === 'reklamlar' && post()) {
             $gecerli_konumlar = ['ust_banner','sidebar_ust','sidebar_alt','makale_ust','makale_ic','makale_alt','alt_banner','mobil_sabit','popup'];
             if (empty($ad)) throw new Exception('Reklam adi zorunlu.');
             if (!in_array($konum, $gecerli_konumlar, true)) throw new Exception('Gecersiz konum.');
-            if ($tip === 'gorsel' && empty($gorsel)) throw new Exception('Gorsel URL zorunlu.');
+            if ($tip === 'gorsel' && empty($gorsel)) throw new Exception('Görsel URL zorunlu.');
             if (($tip === 'kod' || $tip === 'adsense') && empty($kod)) throw new Exception('Kod icerigi zorunlu.');
 
             if ($islem === 'ekle') {
@@ -378,9 +378,9 @@ if ($sayfa === 'reklamlar' && post()) {
                 if ($id < 1) throw new Exception('Gecersiz reklam.');
                 $stmt = $db->prepare("UPDATE {$prefix}ads SET ad = ?, konum = ?, tip = ?, kod = ?, gorsel = ?, hedef_url = ?, genislik = ?, yukseklik = ?, baslangic = ?, bitis = ?, aktif = ? WHERE id = ?");
                 $stmt->execute([$ad, $konum, $tip, $kod, $gorsel, $hedef_url, $genislik, $yukseklik, $baslangic, $bitis, $aktif, $id]);
-                flash('Reklam guncellendi.', 'basari');
+                flash('Reklam güncellendi.', 'basari');
             }
-            log_ekle('islem', 'Reklam ' . ($islem === 'ekle' ? 'eklendi' : 'guncellendi'), $ad, $yonetici['id']);
+            log_ekle('islem', 'Reklam ' . ($islem === 'ekle' ? 'eklendi' : 'güncellendi'), $ad, $yonetici['id']);
             yonlendir(url('yonetim.php?sayfa=reklamlar'));
         }
         if ($islem === 'sil' && $id > 0) {
@@ -397,8 +397,8 @@ if ($sayfa === 'reklamlar' && post()) {
 // POST ISLEMLER - KULLANICILAR (sadece admin)
 // =====================================================
 if ($sayfa === 'kullanicilar' && post()) {
-    if ($yonetici['rol'] !== 'admin') { flash('Bu islem icin admin yetkisi gerekli.', 'hata'); yonlendir(url('yonetim.php')); }
-    if (!csrf_dogrula($_POST['_csrf'] ?? '')) { flash('Guvenlik dogrulamasi basarisiz.', 'hata'); yonlendir(url('yonetim.php?sayfa=kullanicilar')); }
+    if ($yonetici['rol'] !== 'admin') { flash('Bu islem için admin yetkisi gerekli.', 'hata'); yonlendir(url('yonetim.php')); }
+    if (!csrf_doğrula($_POST['_csrf'] ?? '')) { flash('Güvenlik doğrulaması başarısız.', 'hata'); yonlendir(url('yonetim.php?sayfa=kullanicilar')); }
     try {
         if ($islem === 'ekle' || $islem === 'duzenle') {
             $k_ad    = trim($_POST['kullanici_adi'] ?? '');
@@ -408,36 +408,36 @@ if ($sayfa === 'kullanicilar' && post()) {
             $sifre   = $_POST['sifre'] ?? '';
             $aktif   = isset($_POST['durum']) ? 1 : 0;
 
-            if (strlen($k_ad) < 4)                            throw new Exception('Kullanici adi en az 4 karakter.');
-            if (!filter_var($eposta, FILTER_VALIDATE_EMAIL))  throw new Exception('Gecerli e-posta girin.');
+            if (strlen($k_ad) < 4)                            throw new Exception('Kullanıcı adı en az 4 karakter.');
+            if (!filter_var($eposta, FILTER_VALIDATE_EMAIL))  throw new Exception('Geçerli e-posta girin.');
             if (empty($ad_soy))                               throw new Exception('Ad soyad zorunlu.');
 
             if ($islem === 'ekle') {
-                if (strlen($sifre) < 8) throw new Exception('Sifre en az 8 karakter.');
+                if (strlen($sifre) < 8) throw new Exception('Şifre en az 8 karakter.');
                 $stmt = $db->prepare("INSERT INTO {$prefix}users (kullanici_adi, eposta, sifre_hash, ad_soyad, rol, durum) VALUES (?,?,?,?,?,?)");
                 $stmt->execute([$k_ad, $eposta, password_hash($sifre, PASSWORD_BCRYPT), $ad_soy, $rol, $aktif]);
-                flash('Kullanici eklendi.', 'basari');
+                flash('Kullanıcı eklendi.', 'basari');
             } else {
                 if ($id < 1) throw new Exception('Gecersiz kullanici.');
                 if ($id == $yonetici['id'] && $rol !== 'admin') throw new Exception('Kendi rolunuzu degistiremezsiniz.');
                 if (!empty($sifre)) {
-                    if (strlen($sifre) < 8) throw new Exception('Sifre en az 8 karakter.');
+                    if (strlen($sifre) < 8) throw new Exception('Şifre en az 8 karakter.');
                     $db->prepare("UPDATE {$prefix}users SET kullanici_adi=?, eposta=?, ad_soyad=?, rol=?, durum=?, sifre_hash=? WHERE id=?")
                        ->execute([$k_ad, $eposta, $ad_soy, $rol, $aktif, password_hash($sifre, PASSWORD_BCRYPT), $id]);
                 } else {
                     $db->prepare("UPDATE {$prefix}users SET kullanici_adi=?, eposta=?, ad_soyad=?, rol=?, durum=? WHERE id=?")
                        ->execute([$k_ad, $eposta, $ad_soy, $rol, $aktif, $id]);
                 }
-                flash('Kullanici guncellendi.', 'basari');
+                flash('Kullanıcı güncellendi.', 'basari');
             }
-            log_ekle('guvenlik', 'Kullanici ' . ($islem === 'ekle' ? 'eklendi' : 'guncellendi'), $k_ad, $yonetici['id']);
+            log_ekle('guvenlik', 'Kullanıcı ' . ($islem === 'ekle' ? 'eklendi' : 'güncellendi'), $k_ad, $yonetici['id']);
             yonlendir(url('yonetim.php?sayfa=kullanicilar'));
         }
         if ($islem === 'sil' && $id > 0) {
             if ($id == $yonetici['id']) throw new Exception('Kendinizi silemezsiniz.');
             $db->prepare("DELETE FROM {$prefix}users WHERE id = ?")->execute([$id]);
-            log_ekle('guvenlik', 'Kullanici silindi', 'ID: ' . $id, $yonetici['id']);
-            flash('Kullanici silindi.', 'basari');
+            log_ekle('guvenlik', 'Kullanıcı silindi', 'ID: ' . $id, $yonetici['id']);
+            flash('Kullanıcı silindi.', 'basari');
             yonlendir(url('yonetim.php?sayfa=kullanicilar'));
         }
     } catch (Throwable $e) {
@@ -449,7 +449,7 @@ if ($sayfa === 'kullanicilar' && post()) {
 // POST ISLEMLER - AYARLAR
 // =====================================================
 if ($sayfa === 'ayarlar' && post()) {
-    if (!csrf_dogrula($_POST['_csrf'] ?? '')) { flash('Guvenlik dogrulamasi basarisiz.', 'hata'); yonlendir(url('yonetim.php?sayfa=ayarlar')); }
+    if (!csrf_doğrula($_POST['_csrf'] ?? '')) { flash('Güvenlik doğrulaması başarısız.', 'hata'); yonlendir(url('yonetim.php?sayfa=ayarlar')); }
     try {
         $ayarlar = $_POST['ayar'] ?? [];
         foreach ($ayarlar as $anahtar => $deger) {
@@ -457,7 +457,7 @@ if ($sayfa === 'ayarlar' && post()) {
             if (empty($anahtar)) continue;
             ayar_guncelle($anahtar, is_array($deger) ? implode(',', $deger) : $deger);
         }
-        log_ekle('islem', 'Ayarlar guncellendi', count($ayarlar) . ' alan', $yonetici['id']);
+        log_ekle('islem', 'Ayarlar güncellendi', count($ayarlar) . ' alan', $yonetici['id']);
         flash('Ayarlar kaydedildi.', 'basari');
         yonlendir(url('yonetim.php?sayfa=ayarlar' . (!empty($_GET['grup']) ? '&grup=' . h($_GET['grup']) : '')));
     } catch (Throwable $e) {
@@ -469,13 +469,13 @@ if ($sayfa === 'ayarlar' && post()) {
 // MANUEL RSS CEKIMI (cron.php'yi cagir)
 // =====================================================
 if ($sayfa === 'cekim-tetik' && post()) {
-    if (!csrf_dogrula($_POST['_csrf'] ?? '')) { flash('Guvenlik hatasi.', 'hata'); yonlendir(url('yonetim.php')); }
+    if (!csrf_doğrula($_POST['_csrf'] ?? '')) { flash('Güvenlik hatasi.', 'hata'); yonlendir(url('yonetim.php')); }
     $cron_url = url('cron.php?anahtar=' . CRON_ANAHTARI . '&manuel=1');
     $r = http_getir($cron_url, 60);
     if ($r['kod'] === 200) {
-        flash('RSS cekimi tetiklendi. Aşama 4 henuz hazir degilse hicbir haber eklenmez.', 'bilgi');
+        flash('RSS çekimi tetiklendi. Aşama 4 henüz hazir degilse hicbir haber eklenmez.', 'bilgi');
     } else {
-        flash('Cekim tetiklenemedi: HTTP ' . $r['kod'] . ' (Asama 4 cron.php henuz yuklenmemis olabilir)', 'uyari');
+        flash('Çekim tetiklenemedi: HTTP ' . $r['kod'] . ' (Asama 4 cron.php henüz yuklenmemis olabilir)', 'uyari');
     }
     yonlendir(url('yonetim.php'));
 }
@@ -494,26 +494,26 @@ $menu = [
         ['kategoriler','Kategoriler', 'folder'],
     ],
     'SISTEM' => [
-        ['kaynaklar',  'RSS Kaynaklari','rss'],
+        ['kaynaklar',  'RSS Kaynakları','rss'],
         ['reklamlar',  'Reklamlar',   'megaphone'],
-        ['kullanicilar','Kullanicilar','users'],
+        ['kullanicilar','Kullanıcılar','users'],
         ['ayarlar',    'Ayarlar',     'settings'],
         ['loglar',     'Loglar',      'file-text'],
     ],
 ];
-// Mevcut sayfa bilgisi (breadcrumb icin)
+// Mevcut sayfa bilgisi (breadcrumb için)
 $sayfa_adlari = [
     'dashboard'    => 'Dashboard',
-    'kaynaklar'    => 'RSS Kaynaklari',
+    'kaynaklar'    => 'RSS Kaynakları',
     'kategoriler'  => 'Kategoriler',
     'haberler'     => 'Haberler',
     'reklamlar'    => 'Reklamlar',
     'ayarlar'      => 'Ayarlar',
-    'kullanicilar' => 'Kullanicilar',
+    'kullanicilar' => 'Kullanıcılar',
     'loglar'       => 'Loglar',
     'etiketler'    => 'Etiketler',
 ];
-$sayfa_basligi = $sayfa_adlari[$sayfa] ?? 'Yonetim';
+$sayfa_basligi = $sayfa_adlari[$sayfa] ?? 'Yönetim';
 
 // Ikon SVG'leri
 function ikon(string $ad): string {
@@ -541,7 +541,7 @@ function ikon(string $ad): string {
     return $ikonlar[$ad] ?? '';
 }
 
-// Kisa ad - avatar icin
+// Kısa ad - avatar için
 $avatar_kisa = mb_strtoupper(mb_substr($yonetici['ad_soyad'] ?: $yonetici['kullanici_adi'], 0, 1, 'UTF-8'), 'UTF-8');
 
 // Aktif sayfa sidebar'da
@@ -555,11 +555,11 @@ function menu_aktif(string $mevcut, string $slug): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title><?= h($sayfa_basligi) ?> - <?= h(ayar('site_adi', 'XNEWS')) ?> Yonetim</title>
+<title><?= h($sayfa_basligi) ?> - <?= h(ayar('site_adi', 'XNEWS')) ?> Yönetim</title>
 <link rel="icon" type="image/svg+xml" href="<?= url('favicon.svg') ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=IBM+Plex+Sans:wght@400;500;600;700&subset=latin-ext&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= url('assets/css/admin.css') ?>?v=<?= h(ayar('mevcut_surum', '1.0.0')) ?>">
 </head>
 <body>
@@ -572,7 +572,7 @@ function menu_aktif(string $mevcut, string $slug): string {
             <div class="sb-logo-mini">X</div>
             <div>
                 <div class="baslik">XNEWS</div>
-                <div class="alt">Yonetim v<?= h(ayar('mevcut_surum', '1.0.0')) ?></div>
+                <div class="alt">Yönetim v<?= h(ayar('mevcut_surum', '1.0.0')) ?></div>
             </div>
         </div>
         <nav class="sb-nav">
@@ -591,8 +591,8 @@ function menu_aktif(string $mevcut, string $slug): string {
             <?php endforeach; ?>
         </nav>
         <div class="sb-alt">
-            <a href="<?= url('guncelle.php') ?>" style="display:block;padding:8px 0;color:#f87171"><?= ikon('activity') ?> Guncelleme Kontrol</a>
-            <a href="<?= url() ?>" target="_blank">&rarr; Siteyi Goruntule</a>
+            <a href="<?= url('guncelle.php') ?>" style="display:block;padding:8px 0;color:#f87171"><?= ikon('activity') ?> Güncelleme Kontrol</a>
+            <a href="<?= url() ?>" target="_blank">&rarr; Siteyi Görüntüle</a>
         </div>
     </aside>
 
@@ -605,17 +605,17 @@ function menu_aktif(string $mevcut, string $slug): string {
                 <button class="mobil-menu-buton" onclick="xadmin.sidebarAc()" aria-label="Menu">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 </button>
-                <div class="breadcrumb">Yonetim / <strong><?= h($sayfa_basligi) ?></strong></div>
+                <div class="breadcrumb">Yönetim / <strong><?= h($sayfa_basligi) ?></strong></div>
             </div>
             <div class="ust-bar-sag">
                 <a href="<?= url() ?>" target="_blank" class="ust-buton">
-                    <?= ikon('arrow-up-right') ?><span>Siteyi Gor</span>
+                    <?= ikon('arrow-up-right') ?><span>Siteyi Gör</span>
                 </a>
                 <div class="kullanici-dugme">
                     <div class="avatar"><?= h($avatar_kisa) ?></div>
                     <span><?= h($yonetici['ad_soyad'] ?: $yonetici['kullanici_adi']) ?></span>
                 </div>
-                <a href="<?= url('yonetim.php?sayfa=cikis') ?>" class="ust-buton" title="Cikis Yap">
+                <a href="<?= url('yonetim.php?sayfa=cikis') ?>" class="ust-buton" title="Çıkış Yap">
                     <?= ikon('logout') ?>
                 </a>
             </div>
@@ -655,14 +655,14 @@ function menu_aktif(string $mevcut, string $slug): string {
                     ORDER BY c.olusturma DESC LIMIT 6")->fetchAll();
             ?>
                 <div class="hosgeldin-kart">
-                    <h2>Hos geldin, <?= h(explode(' ', $yonetici['ad_soyad'] ?: $yonetici['kullanici_adi'])[0]) ?> 👋</h2>
-                    <p>XNEWS yonetim paneline eristin. Asagidaki istatistiklerden sistemin genel durumunu goruntuleyebilirsin.</p>
+                    <h2>Hoş geldin, <?= h(explode(' ', $yonetici['ad_soyad'] ?: $yonetici['kullanici_adi'])[0]) ?> 👋</h2>
+                    <p>XNEWS yönetim paneline eriştin. Aşağıdaki istatistiklerden sistemin genel durumunu görüntüleyebilirsin.</p>
                     <div class="butonlar">
-                        <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton">RSS Kaynaklari</a>
+                        <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton">RSS Kaynakları</a>
                         <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" class="buton ikincil">Manuel Haber Ekle</a>
                         <form method="post" action="<?= url('yonetim.php?sayfa=cekim-tetik') ?>" style="display:inline">
                             <?= csrf_input() ?>
-                            <button type="submit" class="buton ikincil" title="cron.php'yi cagirir"><?= ikon('activity') ?>RSS Cekimini Tetikle</button>
+                            <button type="submit" class="buton ikincil" title="cron.php'yi çağırır"><?= ikon('activity') ?>RSS Çekimini Tetikle</button>
                         </form>
                     </div>
                 </div>
@@ -671,7 +671,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     <div class="stat-kart mavi">
                         <div class="ikon"><?= ikon('rss') ?></div>
                         <div class="sayi"><?= number_format($s_kaynak_a, 0, ',', '.') ?></div>
-                        <div class="etiket">Aktif RSS kaynagi (<?= $s_kaynak ?> toplam)</div>
+                        <div class="etiket">Aktif RSS kaynağı (<?= $s_kaynak ?> toplam)</div>
                     </div>
                     <div class="stat-kart yesil">
                         <div class="ikon"><?= ikon('folder') ?></div>
@@ -681,7 +681,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     <div class="stat-kart kirmizi">
                         <div class="ikon"><?= ikon('newspaper') ?></div>
                         <div class="sayi"><?= number_format($s_haber, 0, ',', '.') ?></div>
-                        <div class="etiket">Toplam haber (bugun: <?= $s_haber_b ?>)</div>
+                        <div class="etiket">Toplam haber (bugün: <?= $s_haber_b ?>)</div>
                     </div>
                     <div class="stat-kart mor">
                         <div class="ikon"><?= ikon('activity') ?></div>
@@ -694,12 +694,12 @@ function menu_aktif(string $mevcut, string $slug): string {
                     <div class="panel">
                         <div class="panel-bas">
                             <h3>Son Eklenen Haberler</h3>
-                            <a href="<?= url('yonetim.php?sayfa=haberler') ?>" class="buton sm ikincil">Tumunu Gor</a>
+                            <a href="<?= url('yonetim.php?sayfa=haberler') ?>" class="buton sm ikincil">Tümünü Gör</a>
                         </div>
                         <ul class="mini-liste">
                         <?php if (empty($son_haberler)): ?>
                             <li style="padding:40px 20px;justify-content:center;color:var(--muted);display:block;text-align:center">
-                                Henuz haber yok. RSS cron calistirin veya manuel ekleyin (Asama 4).
+                                Henüz haber yok. RSS cron çalıştırın veya manuel ekleyin.
                             </li>
                         <?php else: foreach ($son_haberler as $h): ?>
                             <li>
@@ -716,12 +716,12 @@ function menu_aktif(string $mevcut, string $slug): string {
 
                     <div class="panel">
                         <div class="panel-bas">
-                            <h3>Son RSS Cekimleri</h3>
+                            <h3>Son RSS Çekimleri</h3>
                         </div>
                         <ul class="mini-liste">
                         <?php if (empty($son_cron)): ?>
                             <li style="padding:40px 20px;display:block;text-align:center;color:var(--muted)">
-                                Henuz cron calismadi (Asama 4)
+                                Henüz cron çalışmadı. DirectAdmin'den cron ekleyin veya "RSS Çekimini Tetikle" butonuna basın.
                             </li>
                         <?php else: foreach ($son_cron as $c): ?>
                             <li>
@@ -729,7 +729,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                 <div style="flex:1;min-width:0">
                                     <div class="baslik"><?= h($c['kaynak_ad'] ?? 'Bilinmeyen') ?></div>
                                     <div class="meta">
-                                        <?= (int)$c['eklenen'] ?> eklendi · <?= (int)$c['atlanan'] ?> atlandi · <?= h(goreceli_zaman($c['olusturma'])) ?>
+                                        <?= (int)$c['eklenen'] ?> eklendi · <?= (int)$c['atlanan'] ?> atlandı · <?= h(goreceli_zaman($c['olusturma'])) ?>
                                     </div>
                                 </div>
                             </li>
@@ -749,13 +749,13 @@ function menu_aktif(string $mevcut, string $slug): string {
                         $st = $db->prepare("SELECT * FROM {$prefix}sources WHERE id = ?");
                         $st->execute([$id]);
                         $kaynak_d = $st->fetch();
-                        if (!$kaynak_d) { flash('Kaynak bulunamadi.', 'hata'); yonlendir(url('yonetim.php?sayfa=kaynaklar')); }
+                        if (!$kaynak_d) { flash('Kaynak bulunamadı.', 'hata'); yonlendir(url('yonetim.php?sayfa=kaynaklar')); }
                     }
-                    $kategoriler = $db->query("SELECT id, ad FROM {$prefix}categories WHERE aktif = 1 ORDER BY sira, ad")->fetchAll();
+                    $kategoriler = $db->query("SELECT id, ad FROM {$prefix}categories WHERE aktif = 1 ORDER BY sıra, ad")->fetchAll();
             ?>
                 <div class="icerik-bas">
                     <div>
-                        <h1><?= $islem === 'ekle' ? 'Yeni Kaynak Ekle' : 'Kaynagi Duzenle' ?></h1>
+                        <h1><?= $islem === 'ekle' ? 'Yeni Kaynak Ekle' : 'Kaynagi Düzenle' ?></h1>
                         <div class="alt-metin"><?= $kaynak_d ? h($kaynak_d['ad']) : 'Yeni bir RSS kaynagi tanimlayin' ?></div>
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton ikincil"><?= ikon('arrow-left') ?>Geri</a>
@@ -787,7 +787,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                         </div>
                         <div class="form-satir-3">
                             <div class="form-grup">
-                                <label>Varsayilan Kategori</label>
+                                <label>Varsayılan Kategori</label>
                                 <select name="varsayilan_kategori_id">
                                     <option value="">Kategori yok</option>
                                     <?php foreach ($kategoriler as $k): ?>
@@ -799,13 +799,13 @@ function menu_aktif(string $mevcut, string $slug): string {
                             <div class="form-grup">
                                 <label>Dil</label>
                                 <select name="dil">
-                                    <option value="tr" <?= ($kaynak_d['dil'] ?? 'tr') === 'tr' ? 'selected' : '' ?>>Turkce</option>
+                                    <option value="tr" <?= ($kaynak_d['dil'] ?? 'tr') === 'tr' ? 'selected' : '' ?>>Türkçe</option>
                                     <option value="en" <?= ($kaynak_d['dil'] ?? '') === 'en' ? 'selected' : '' ?>>Ingilizce</option>
                                     <option value="ar" <?= ($kaynak_d['dil'] ?? '') === 'ar' ? 'selected' : '' ?>>Arapca</option>
                                 </select>
                             </div>
                             <div class="form-grup">
-                                <label>Cekim Sikligi (dakika)</label>
+                                <label>Çekim Sıklığı (dakika)</label>
                                 <input type="number" name="cekim_sikligi" min="5" max="1440" value="<?= (int)($kaynak_d['cekim_sikligi'] ?? 10) ?>">
                                 <div class="ipucu">Minimum: 5 dk</div>
                             </div>
@@ -827,13 +827,13 @@ function menu_aktif(string $mevcut, string $slug): string {
                             </div>
                         </div>
                         <div class="form-grup">
-                            <label>Aciklama (opsiyonel)</label>
-                            <textarea name="aciklama" rows="3" placeholder="Bu kaynakla ilgili kisa not..."><?= h($kaynak_d['aciklama'] ?? '') ?></textarea>
+                            <label>Açıklama (opsiyonel)</label>
+                            <textarea name="aciklama" rows="3" placeholder="Bu kaynakla ilgili kısa not..."><?= h($kaynak_d['aciklama'] ?? '') ?></textarea>
                         </div>
                     </div>
                     <div class="panel-ic" style="border-top:1px solid var(--border);background:#f8fafc">
                         <div style="display:flex;justify-content:flex-end;gap:10px">
-                            <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton ikincil">Iptal</a>
+                            <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton ikincil">İptal</a>
                             <button type="submit" class="buton"><?= ikon('save') ?><?= $islem === 'ekle' ? 'Kaynagi Ekle' : 'Degisiklikleri Kaydet' ?></button>
                         </div>
                     </div>
@@ -856,7 +856,7 @@ function menu_aktif(string $mevcut, string $slug): string {
             ?>
                 <div class="icerik-bas">
                     <div>
-                        <h1>RSS Kaynaklari</h1>
+                        <h1>RSS Kaynakları</h1>
                         <div class="alt-metin">Haber toplanacak RSS beslemelerini yonetin</div>
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=kaynaklar&islem=ekle') ?>" class="buton"><?= ikon('plus') ?>Yeni Kaynak</a>
@@ -868,7 +868,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                             <input type="hidden" name="sayfa" value="kaynaklar">
                             <input type="search" name="q" value="<?= h($arama) ?>" placeholder="Ara (ad veya URL)...">
                             <select name="aktif" onchange="this.form.submit()">
-                                <option value="-1" <?= $filtre_aktif === -1 ? 'selected' : '' ?>>Tumu</option>
+                                <option value="-1" <?= $filtre_aktif === -1 ? 'selected' : '' ?>>Tümü</option>
                                 <option value="1"  <?= $filtre_aktif === 1  ? 'selected' : '' ?>>Aktif</option>
                                 <option value="0"  <?= $filtre_aktif === 0  ? 'selected' : '' ?>>Pasif</option>
                             </select>
@@ -882,9 +882,9 @@ function menu_aktif(string $mevcut, string $slug): string {
                                 <thead>
                                     <tr>
                                         <th>Ad</th>
-                                        <th>Varsayilan Kategori</th>
+                                        <th>Varsayılan Kategori</th>
                                         <th>Haber</th>
-                                        <th>Son Cekim</th>
+                                        <th>Son Çekim</th>
                                         <th>Durum</th>
                                         <th></th>
                                     </tr>
@@ -892,7 +892,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                 <tbody>
                                 <?php if (empty($kaynak_liste)): ?>
                                     <tr><td colspan="6" class="bos">
-                                        <?= $arama ? 'Aramayla eslesen kaynak bulunamadi.' : 'Henuz kaynak eklenmemis.' ?>
+                                        <?= $arama ? 'Aramayla eslesen kaynak bulunamadı.' : 'Henüz kaynak eklenmemis.' ?>
                                     </td></tr>
                                 <?php else: foreach ($kaynak_liste as $k): ?>
                                     <tr>
@@ -924,7 +924,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                                 <?= csrf_input() ?>
                                                 <button title="<?= $k['aktif'] ? 'Pasif yap' : 'Aktif yap' ?>"><?= ikon('toggle') ?></button>
                                             </form>
-                                            <a href="<?= url('yonetim.php?sayfa=kaynaklar&islem=duzenle&id=' . $k['id']) ?>" title="Duzenle"><?= ikon('edit') ?></a>
+                                            <a href="<?= url('yonetim.php?sayfa=kaynaklar&islem=duzenle&id=' . $k['id']) ?>" title="Düzenle"><?= ikon('edit') ?></a>
                                             <form method="post" action="<?= url('yonetim.php?sayfa=kaynaklar&islem=sil&id=' . $k['id']) ?>" style="display:inline" onsubmit="return xadmin.silOnayla('Bu kaynagi silmek istediginize emin misiniz? Mevcut haberler korunur.')">
                                                 <?= csrf_input() ?>
                                                 <button class="sil" title="Sil"><?= ikon('trash') ?></button>
@@ -949,13 +949,13 @@ function menu_aktif(string $mevcut, string $slug): string {
                         $st = $db->prepare("SELECT * FROM {$prefix}categories WHERE id = ?");
                         $st->execute([$id]);
                         $kat_d = $st->fetch();
-                        if (!$kat_d) { flash('Kategori bulunamadi.', 'hata'); yonlendir(url('yonetim.php?sayfa=kategoriler')); }
+                        if (!$kat_d) { flash('Kategori bulunamadı.', 'hata'); yonlendir(url('yonetim.php?sayfa=kategoriler')); }
                     }
             ?>
                 <div class="icerik-bas">
                     <div>
-                        <h1><?= $islem === 'ekle' ? 'Yeni Kategori' : 'Kategoriyi Duzenle' ?></h1>
-                        <div class="alt-metin"><?= $kat_d ? h($kat_d['ad']) : 'Haberleri gruplamak icin yeni bir kategori olusturun' ?></div>
+                        <h1><?= $islem === 'ekle' ? 'Yeni Kategori' : 'Kategoriyi Düzenle' ?></h1>
+                        <div class="alt-metin"><?= $kat_d ? h($kat_d['ad']) : 'Haberleri gruplamak için yeni bir kategori olusturun' ?></div>
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=kategoriler') ?>" class="buton ikincil"><?= ikon('arrow-left') ?>Geri</a>
                 </div>
@@ -966,10 +966,10 @@ function menu_aktif(string $mevcut, string $slug): string {
                         <div class="form-grup">
                             <label>Kategori Adi *</label>
                             <input type="text" name="ad" value="<?= h($kat_d['ad'] ?? '') ?>" required>
-                            <div class="ipucu">Turkce karakter kullanabilirsiniz, URL icin otomatik ASCII slug uretilir.</div>
+                            <div class="ipucu">Türkçe karakter kullanabilirsiniz, URL için otomatik ASCII slug uretilir.</div>
                         </div>
                         <div class="form-grup">
-                            <label>Aciklama</label>
+                            <label>Açıklama</label>
                             <textarea name="aciklama" rows="2"><?= h($kat_d['aciklama'] ?? '') ?></textarea>
                         </div>
                         <div class="form-satir-3">
@@ -996,7 +996,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     </div>
                     <div class="panel-ic" style="border-top:1px solid var(--border);background:#f8fafc">
                         <div style="display:flex;justify-content:flex-end;gap:10px">
-                            <a href="<?= url('yonetim.php?sayfa=kategoriler') ?>" class="buton ikincil">Iptal</a>
+                            <a href="<?= url('yonetim.php?sayfa=kategoriler') ?>" class="buton ikincil">İptal</a>
                             <button type="submit" class="buton"><?= ikon('save') ?>Kaydet</button>
                         </div>
                     </div>
@@ -1007,7 +1007,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                 <div class="icerik-bas">
                     <div>
                         <h1>Kategoriler</h1>
-                        <div class="alt-metin">Haberleri gruplamak icin kullanilan kategoriler</div>
+                        <div class="alt-metin">Haberleri gruplamak için kullanilan kategoriler</div>
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=kategoriler&islem=ekle') ?>" class="buton"><?= ikon('plus') ?>Yeni Kategori</a>
                 </div>
@@ -1028,7 +1028,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                         <td><span class="rozet <?= $k['aktif'] ? 'aktif' : 'pasif' ?>"><?= $k['aktif'] ? 'Aktif' : 'Pasif' ?></span></td>
                                         <td class="islemler">
                                             <a href="<?= url('kategori/' . $k['slug']) ?>" target="_blank" title="Sitede gor"><?= ikon('arrow-up-right') ?></a>
-                                            <a href="<?= url('yonetim.php?sayfa=kategoriler&islem=duzenle&id=' . $k['id']) ?>" title="Duzenle"><?= ikon('edit') ?></a>
+                                            <a href="<?= url('yonetim.php?sayfa=kategoriler&islem=duzenle&id=' . $k['id']) ?>" title="Düzenle"><?= ikon('edit') ?></a>
                                             <?php if ($k['haber_sayisi'] == 0): ?>
                                                 <form method="post" action="<?= url('yonetim.php?sayfa=kategoriler&islem=sil&id=' . $k['id']) ?>" style="display:inline" onsubmit="return xadmin.silOnayla('Bu kategoriyi silmek istediginize emin misiniz?')">
                                                     <?= csrf_input() ?>
@@ -1055,19 +1055,19 @@ function menu_aktif(string $mevcut, string $slug): string {
                         $st = $db->prepare("SELECT * FROM {$prefix}news WHERE id = ?");
                         $st->execute([$id]);
                         $haber_d = $st->fetch();
-                        if (!$haber_d) { flash('Haber bulunamadi.', 'hata'); yonlendir(url('yonetim.php?sayfa=haberler')); }
+                        if (!$haber_d) { flash('Haber bulunamadı.', 'hata'); yonlendir(url('yonetim.php?sayfa=haberler')); }
                     }
-                    $kategoriler_liste = $db->query("SELECT id, ad FROM {$prefix}categories WHERE aktif = 1 ORDER BY sira, ad")->fetchAll();
+                    $kategoriler_liste = $db->query("SELECT id, ad FROM {$prefix}categories WHERE aktif = 1 ORDER BY sıra, ad")->fetchAll();
                     $kaynaklar_liste   = $db->query("SELECT id, ad FROM {$prefix}sources ORDER BY ad")->fetchAll();
             ?>
                 <div class="icerik-bas">
                     <div>
-                        <h1><?= $islem === 'ekle' ? 'Yeni Haber' : 'Haberi Duzenle' ?></h1>
+                        <h1><?= $islem === 'ekle' ? 'Yeni Haber' : 'Haberi Düzenle' ?></h1>
                         <div class="alt-metin"><?= $haber_d ? h(kisalt($haber_d['baslik'], 60)) : 'Manuel haber olusturun' ?></div>
                     </div>
                     <div style="display:flex;gap:8px">
                         <?php if ($haber_d): ?>
-                            <a href="<?= h(haber_url($haber_d)) ?>" target="_blank" class="buton hayalet"><?= ikon('arrow-up-right') ?>Sitede Gor</a>
+                            <a href="<?= h(haber_url($haber_d)) ?>" target="_blank" class="buton hayalet"><?= ikon('arrow-up-right') ?>Sitede Gör</a>
                         <?php endif; ?>
                         <a href="<?= url('yonetim.php?sayfa=haberler') ?>" class="buton ikincil"><?= ikon('arrow-left') ?>Geri</a>
                     </div>
@@ -1080,16 +1080,16 @@ function menu_aktif(string $mevcut, string $slug): string {
                                 <div class="panel-bas"><h3>Haber Icerigi</h3></div>
                                 <div class="panel-ic">
                                     <div class="form-grup">
-                                        <label>Baslik *</label>
+                                        <label>Başlık *</label>
                                         <input type="text" name="baslik" value="<?= h($haber_d['baslik'] ?? '') ?>" required maxlength="255">
                                     </div>
                                     <div class="form-grup">
-                                        <label>Ozet</label>
+                                        <label>Özet</label>
                                         <textarea name="ozet" rows="3" maxlength="500"><?= h($haber_d['ozet'] ?? '') ?></textarea>
                                         <div class="ipucu">Ana sayfa ve kategori listelerinde gosterilir.</div>
                                     </div>
                                     <div class="form-grup">
-                                        <label>Icerik *</label>
+                                        <label>İçerik *</label>
                                         <textarea name="icerik" rows="14" style="font-family:'IBM Plex Mono',monospace;font-size:13px"><?= h($haber_d['icerik'] ?? '') ?></textarea>
                                         <div class="ipucu">HTML destekli. Paragraflari &lt;p&gt; ile sarmalayin (3. paragraftan sonra otomatik reklam enjekte edilir).</div>
                                     </div>
@@ -1099,7 +1099,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                             <input type="url" name="resim" value="<?= h($haber_d['resim'] ?? '') ?>" placeholder="https://...">
                                         </div>
                                         <div class="form-grup">
-                                            <label>Gorsel Alt Metni</label>
+                                            <label>Görsel Alt Metni</label>
                                             <input type="text" name="resim_alt" value="<?= h($haber_d['resim_alt'] ?? '') ?>">
                                         </div>
                                     </div>
@@ -1110,12 +1110,12 @@ function menu_aktif(string $mevcut, string $slug): string {
                                 <div class="panel-bas"><h3>SEO</h3></div>
                                 <div class="panel-ic">
                                     <div class="form-grup">
-                                        <label>SEO Baslik</label>
+                                        <label>SEO Başlık</label>
                                         <input type="text" name="seo_baslik" value="<?= h($haber_d['seo_baslik'] ?? '') ?>" maxlength="200">
                                         <div class="ipucu">Bos birakilirsa haber basligi kullanilir.</div>
                                     </div>
                                     <div class="form-grup">
-                                        <label>SEO Aciklama</label>
+                                        <label>SEO Açıklama</label>
                                         <textarea name="seo_aciklama" rows="2" maxlength="300"><?= h($haber_d['seo_aciklama'] ?? '') ?></textarea>
                                     </div>
                                 </div>
@@ -1124,22 +1124,22 @@ function menu_aktif(string $mevcut, string $slug): string {
 
                         <div>
                             <div class="panel">
-                                <div class="panel-bas"><h3>Yayinlama</h3></div>
+                                <div class="panel-bas"><h3>Yayınlama</h3></div>
                                 <div class="panel-ic">
                                     <div class="form-grup">
                                         <label>Durum</label>
                                         <select name="durum">
-                                            <?php foreach (['yayinda'=>'Yayinda','taslak'=>'Taslak','beklemede'=>'Beklemede','arsiv'=>'Arsiv'] as $d => $l): ?>
-                                                <option value="<?= $d ?>" <?= ($haber_d['durum'] ?? 'yayinda') === $d ? 'selected' : '' ?>><?= $l ?></option>
+                                            <?php foreach (['yayında'=>'Yayında','taslak'=>'Taslak','beklemede'=>'Beklemede','arsiv'=>'Arsiv'] as $d => $l): ?>
+                                                <option value="<?= $d ?>" <?= ($haber_d['durum'] ?? 'yayında') === $d ? 'selected' : '' ?>><?= $l ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
                                     <div class="form-grup">
-                                        <label>Yayin Tarihi</label>
+                                        <label>Yayın Tarihi</label>
                                         <input type="datetime-local" name="yayin_tarihi" value="<?= h(date('Y-m-d\TH:i', strtotime($haber_d['yayin_tarihi'] ?? 'now'))) ?>">
                                     </div>
                                     <div class="form-grup" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-                                        <label style="margin-bottom:10px">Ozel Isaretler</label>
+                                        <label style="margin-bottom:10px">Özel Isaretler</label>
                                         <div style="display:flex;flex-direction:column;gap:10px">
                                             <label class="switch"><input type="checkbox" name="manset" <?= !empty($haber_d['manset']) ? 'checked' : '' ?>><span class="kutu"></span><span>Manset</span></label>
                                             <label class="switch"><input type="checkbox" name="one_cikan" <?= !empty($haber_d['one_cikan']) ? 'checked' : '' ?>><span class="kutu"></span><span>One Cikan</span></label>
@@ -1155,7 +1155,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                     <div class="form-grup">
                                         <label>Kategori *</label>
                                         <select name="kategori_id" required>
-                                            <option value="">Secin...</option>
+                                            <option value="">Seçin...</option>
                                             <?php foreach ($kategoriler_liste as $k): ?>
                                                 <option value="<?= $k['id'] ?>" <?= ($haber_d['kategori_id'] ?? 0) == $k['id'] ? 'selected' : '' ?>><?= h($k['ad']) ?></option>
                                             <?php endforeach; ?>
@@ -1199,7 +1199,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     $where = []; $params = [];
                     if ($arama)    { $where[] = 'n.baslik LIKE ?'; $params[] = "%$arama%"; }
                     if ($f_kat)    { $where[] = 'n.kategori_id = ?'; $params[] = $f_kat; }
-                    if ($f_durum && in_array($f_durum, ['yayinda','taslak','arsiv','beklemede'], true)) { $where[] = 'n.durum = ?'; $params[] = $f_durum; }
+                    if ($f_durum && in_array($f_durum, ['yayında','taslak','arsiv','beklemede'], true)) { $where[] = 'n.durum = ?'; $params[] = $f_durum; }
                     if ($f_kaynak) { $where[] = 'n.kaynak_id = ?'; $params[] = $f_kaynak; }
                     $sqlw = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
@@ -1216,7 +1216,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                         {$sqlw} ORDER BY n.yayin_tarihi DESC LIMIT {$limit_l} OFFSET {$offset_l}");
                     $st->execute($params);
                     $haber_liste = $st->fetchAll();
-                    $kategoriler_liste = $db->query("SELECT id, ad FROM {$prefix}categories ORDER BY sira, ad")->fetchAll();
+                    $kategoriler_liste = $db->query("SELECT id, ad FROM {$prefix}categories ORDER BY sıra, ad")->fetchAll();
                     $kaynaklar_liste   = $db->query("SELECT id, ad FROM {$prefix}sources ORDER BY ad")->fetchAll();
             ?>
                 <div class="icerik-bas">
@@ -1231,21 +1231,21 @@ function menu_aktif(string $mevcut, string $slug): string {
                     <div class="panel-bas">
                         <form class="filtre-cubuk" method="get">
                             <input type="hidden" name="sayfa" value="haberler">
-                            <input type="search" name="q" value="<?= h($arama) ?>" placeholder="Baslik ara...">
+                            <input type="search" name="q" value="<?= h($arama) ?>" placeholder="Başlık ara...">
                             <select name="kategori" onchange="this.form.submit()">
-                                <option value="0">Tum kategoriler</option>
+                                <option value="0">Tüm kategoriler</option>
                                 <?php foreach ($kategoriler_liste as $k): ?>
                                     <option value="<?= $k['id'] ?>" <?= $f_kat == $k['id'] ? 'selected' : '' ?>><?= h($k['ad']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                             <select name="durum" onchange="this.form.submit()">
-                                <option value="">Tum durumlar</option>
-                                <?php foreach (['yayinda'=>'Yayinda','taslak'=>'Taslak','beklemede'=>'Beklemede','arsiv'=>'Arsiv'] as $d => $l): ?>
+                                <option value="">Tüm durumlar</option>
+                                <?php foreach (['yayında'=>'Yayında','taslak'=>'Taslak','beklemede'=>'Beklemede','arsiv'=>'Arsiv'] as $d => $l): ?>
                                     <option value="<?= $d ?>" <?= $f_durum === $d ? 'selected' : '' ?>><?= $l ?></option>
                                 <?php endforeach; ?>
                             </select>
                             <select name="kaynak" onchange="this.form.submit()">
-                                <option value="0">Tum kaynaklar</option>
+                                <option value="0">Tüm kaynaklar</option>
                                 <?php foreach ($kaynaklar_liste as $kay): ?>
                                     <option value="<?= $kay['id'] ?>" <?= $f_kaynak == $kay['id'] ? 'selected' : '' ?>><?= h($kay['ad']) ?></option>
                                 <?php endforeach; ?>
@@ -1262,16 +1262,16 @@ function menu_aktif(string $mevcut, string $slug): string {
                                     <thead>
                                         <tr>
                                             <th style="width:30px"><input type="checkbox" onchange="this.closest('table').querySelectorAll('tbody input[type=checkbox]').forEach(c=>c.checked=this.checked)"></th>
-                                            <th>Baslik</th>
+                                            <th>Başlık</th>
                                             <th>Kategori</th>
                                             <th>Durum</th>
-                                            <th>Yayin</th>
+                                            <th>Yayın</th>
                                             <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     <?php if (empty($haber_liste)): ?>
-                                        <tr><td colspan="6" class="bos">Haber bulunamadi. <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" style="color:var(--brand)">Yeni ekle</a> veya RSS cron calissin (Asama 4).</td></tr>
+                                        <tr><td colspan="6" class="bos">Haber bulunamadı. <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" style="color:var(--brand)">Yeni ekle</a> veya RSS cron calissin (Asama 4).</td></tr>
                                     <?php else: foreach ($haber_liste as $h): ?>
                                         <tr>
                                             <td><input type="checkbox" name="secili[]" value="<?= $h['id'] ?>"></td>
@@ -1285,11 +1285,11 @@ function menu_aktif(string $mevcut, string $slug): string {
                                                 <div style="font-size:12px;color:var(--muted-light)"><?= h($h['kaynak_ad'] ?? 'Manuel') ?> · <?= (int)$h['okunma'] ?> okuma</div>
                                             </td>
                                             <td><?php if ($h['kategori_ad']): ?><span class="renk-nokta" style="background:<?= h($h['kategori_renk']) ?>"></span><?= h($h['kategori_ad']) ?><?php endif; ?></td>
-                                            <td><span class="rozet <?= $h['durum'] === 'yayinda' ? 'aktif' : ($h['durum'] === 'taslak' ? 'taslak' : 'pasif') ?>"><?= h($h['durum']) ?></span></td>
+                                            <td><span class="rozet <?= $h['durum'] === 'yayında' ? 'aktif' : ($h['durum'] === 'taslak' ? 'taslak' : 'pasif') ?>"><?= h($h['durum']) ?></span></td>
                                             <td style="font-size:12px;color:var(--muted)"><?= h(goreceli_zaman($h['yayin_tarihi'])) ?></td>
                                             <td class="islemler">
                                                 <a href="<?= h(haber_url($h)) ?>" target="_blank" title="Sitede gor"><?= ikon('arrow-up-right') ?></a>
-                                                <a href="<?= url('yonetim.php?sayfa=haberler&islem=duzenle&id=' . $h['id']) ?>" title="Duzenle"><?= ikon('edit') ?></a>
+                                                <a href="<?= url('yonetim.php?sayfa=haberler&islem=duzenle&id=' . $h['id']) ?>" title="Düzenle"><?= ikon('edit') ?></a>
                                                 <form method="post" action="<?= url('yonetim.php?sayfa=haberler&islem=sil&id=' . $h['id']) ?>" style="display:inline" onsubmit="return xadmin.silOnayla('Bu haberi silmek istediginize emin misiniz?')">
                                                     <?= csrf_input() ?>
                                                     <button class="sil" title="Sil"><?= ikon('trash') ?></button>
@@ -1307,12 +1307,12 @@ function menu_aktif(string $mevcut, string $slug): string {
                             <div style="display:flex;gap:10px;align-items:center">
                                 <select name="toplu_eylem" required style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px">
                                     <option value="">Toplu islem...</option>
-                                    <option value="yayinda">Yayinda yap</option>
+                                    <option value="yayında">Yayında yap</option>
                                     <option value="taslak">Taslaga al</option>
                                     <option value="arsiv">Arsivle</option>
                                     <option value="sil">Sil</option>
                                 </select>
-                                <button type="submit" class="buton sm" onclick="return confirm('Secili haberlere bu islemi uygulamak istediginize emin misiniz?')">Uygula</button>
+                                <button type="submit" class="buton sm" onclick="return confirm('Seçili haberlere bu islemi uygulamak istediginize emin misiniz?')">Uygula</button>
                             </div>
                             <?php if ($toplam_sayfa > 1): ?>
                             <div class="linkler">
@@ -1333,10 +1333,10 @@ function menu_aktif(string $mevcut, string $slug): string {
             // ====================================
             case 'reklamlar':
                 $konum_adlari = [
-                    'ust_banner'   => 'Ust Banner (970×90)',
-                    'sidebar_ust'  => 'Sidebar Ust (300×250)',
+                    'ust_banner'   => 'Üst Banner (970×90)',
+                    'sidebar_ust'  => 'Sidebar Üst (300×250)',
                     'sidebar_alt'  => 'Sidebar Alt (300×600)',
-                    'makale_ust'   => 'Makale Ust (728×90)',
+                    'makale_ust'   => 'Makale Üst (728×90)',
                     'makale_ic'    => 'Makale Ici (3. paragrafa enjekte)',
                     'makale_alt'   => 'Makale Alt (728×90)',
                     'alt_banner'   => 'Alt Banner (970×90)',
@@ -1349,12 +1349,12 @@ function menu_aktif(string $mevcut, string $slug): string {
                         $st = $db->prepare("SELECT * FROM {$prefix}ads WHERE id = ?");
                         $st->execute([$id]);
                         $reklam_d = $st->fetch();
-                        if (!$reklam_d) { flash('Reklam bulunamadi.', 'hata'); yonlendir(url('yonetim.php?sayfa=reklamlar')); }
+                        if (!$reklam_d) { flash('Reklam bulunamadı.', 'hata'); yonlendir(url('yonetim.php?sayfa=reklamlar')); }
                     }
             ?>
                 <div class="icerik-bas">
                     <div>
-                        <h1><?= $islem === 'ekle' ? 'Yeni Reklam' : 'Reklami Duzenle' ?></h1>
+                        <h1><?= $islem === 'ekle' ? 'Yeni Reklam' : 'Reklami Düzenle' ?></h1>
                         <div class="alt-metin"><?= $reklam_d ? h($reklam_d['ad']) : 'Site icinde reklam slotu tanimla' ?></div>
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=reklamlar') ?>" class="buton ikincil"><?= ikon('arrow-left') ?>Geri</a>
@@ -1372,7 +1372,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                             <div class="form-grup">
                                 <label>Konum *</label>
                                 <select name="konum" required>
-                                    <option value="">Secin...</option>
+                                    <option value="">Seçin...</option>
                                     <?php foreach ($konum_adlari as $k => $ad): ?>
                                         <option value="<?= $k ?>" <?= ($reklam_d['konum'] ?? '') === $k ? 'selected' : '' ?>><?= h($ad) ?></option>
                                     <?php endforeach; ?>
@@ -1382,7 +1382,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                         <div class="form-grup">
                             <label>Reklam Tipi *</label>
                             <select name="tip" id="reklam-tip" onchange="document.querySelectorAll('[data-tip]').forEach(el => el.style.display = el.dataset.tip === this.value ? 'block' : 'none')">
-                                <option value="gorsel"  <?= ($reklam_d['tip'] ?? 'gorsel') === 'gorsel'  ? 'selected' : '' ?>>Gorsel (URL)</option>
+                                <option value="gorsel"  <?= ($reklam_d['tip'] ?? 'gorsel') === 'gorsel'  ? 'selected' : '' ?>>Görsel (URL)</option>
                                 <option value="kod"     <?= ($reklam_d['tip'] ?? '') === 'kod'     ? 'selected' : '' ?>>HTML/JavaScript Kodu</option>
                                 <option value="adsense" <?= ($reklam_d['tip'] ?? '') === 'adsense' ? 'selected' : '' ?>>Google AdSense</option>
                             </select>
@@ -1390,7 +1390,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                         <div data-tip="gorsel" style="display:<?= ($reklam_d['tip'] ?? 'gorsel') === 'gorsel' ? 'block' : 'none' ?>">
                             <div class="form-satir">
                                 <div class="form-grup">
-                                    <label>Gorsel URL</label>
+                                    <label>Görsel URL</label>
                                     <input type="url" name="gorsel" value="<?= h($reklam_d['gorsel'] ?? '') ?>" placeholder="https://...">
                                 </div>
                                 <div class="form-grup">
@@ -1425,12 +1425,12 @@ function menu_aktif(string $mevcut, string $slug): string {
                         </div>
                         <div class="form-satir-3">
                             <div class="form-grup">
-                                <label>Baslangic Tarihi</label>
+                                <label>Başlangıç Tarihi</label>
                                 <input type="date" name="baslangic" value="<?= h($reklam_d['baslangic'] ?? '') ?>">
                                 <div class="ipucu">Bos birakilirsa hemen baslar</div>
                             </div>
                             <div class="form-grup">
-                                <label>Bitis Tarihi</label>
+                                <label>Bitiş Tarihi</label>
                                 <input type="date" name="bitis" value="<?= h($reklam_d['bitis'] ?? '') ?>">
                             </div>
                             <div class="form-grup">
@@ -1446,7 +1446,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     </div>
                     <div class="panel-ic" style="border-top:1px solid var(--border);background:#f8fafc">
                         <div style="display:flex;justify-content:flex-end;gap:10px">
-                            <a href="<?= url('yonetim.php?sayfa=reklamlar') ?>" class="buton ikincil">Iptal</a>
+                            <a href="<?= url('yonetim.php?sayfa=reklamlar') ?>" class="buton ikincil">İptal</a>
                             <button type="submit" class="buton"><?= ikon('save') ?>Kaydet</button>
                         </div>
                     </div>
@@ -1466,11 +1466,11 @@ function menu_aktif(string $mevcut, string $slug): string {
                         <div class="tablo-sarmal">
                             <table class="tablo">
                                 <thead>
-                                    <tr><th>Ad</th><th>Konum</th><th>Tip</th><th>Gosterim</th><th>Tiklanma</th><th>Durum</th><th></th></tr>
+                                    <tr><th>Ad</th><th>Konum</th><th>Tip</th><th>Gösterim</th><th>Tıklanma</th><th>Durum</th><th></th></tr>
                                 </thead>
                                 <tbody>
                                 <?php if (empty($reklam_liste)): ?>
-                                    <tr><td colspan="7" class="bos">Henuz reklam eklenmemis.</td></tr>
+                                    <tr><td colspan="7" class="bos">Henüz reklam eklenmemis.</td></tr>
                                 <?php else: foreach ($reklam_liste as $r): ?>
                                     <tr>
                                         <td><strong><?= h($r['ad']) ?></strong></td>
@@ -1480,7 +1480,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                         <td><?= number_format((int)$r['tiklanma'], 0, ',', '.') ?></td>
                                         <td><span class="rozet <?= $r['aktif'] ? 'aktif' : 'pasif' ?>"><?= $r['aktif'] ? 'Aktif' : 'Pasif' ?></span></td>
                                         <td class="islemler">
-                                            <a href="<?= url('yonetim.php?sayfa=reklamlar&islem=duzenle&id=' . $r['id']) ?>" title="Duzenle"><?= ikon('edit') ?></a>
+                                            <a href="<?= url('yonetim.php?sayfa=reklamlar&islem=duzenle&id=' . $r['id']) ?>" title="Düzenle"><?= ikon('edit') ?></a>
                                             <form method="post" action="<?= url('yonetim.php?sayfa=reklamlar&islem=sil&id=' . $r['id']) ?>" style="display:inline" onsubmit="return xadmin.silOnayla('Bu reklami silmek istediginize emin misiniz?')">
                                                 <?= csrf_input() ?><button class="sil" title="Sil"><?= ikon('trash') ?></button>
                                             </form>
@@ -1508,23 +1508,23 @@ function menu_aktif(string $mevcut, string $slug): string {
                         $st = $db->prepare("SELECT * FROM {$prefix}users WHERE id = ?");
                         $st->execute([$id]);
                         $usr_d = $st->fetch();
-                        if (!$usr_d) { flash('Kullanici bulunamadi.', 'hata'); yonlendir(url('yonetim.php?sayfa=kullanicilar')); }
+                        if (!$usr_d) { flash('Kullanıcı bulunamadı.', 'hata'); yonlendir(url('yonetim.php?sayfa=kullanicilar')); }
                     }
             ?>
                 <div class="icerik-bas">
                     <div>
-                        <h1><?= $islem === 'ekle' ? 'Yeni Kullanici' : 'Kullaniciyi Duzenle' ?></h1>
-                        <div class="alt-metin"><?= $usr_d ? h($usr_d['kullanici_adi']) : 'Yonetim paneline erisecek bir hesap olustur' ?></div>
+                        <h1><?= $islem === 'ekle' ? 'Yeni Kullanıcı' : 'Kullaniciyi Düzenle' ?></h1>
+                        <div class="alt-metin"><?= $usr_d ? h($usr_d['kullanici_adi']) : 'Yönetim paneline erisecek bir hesap olustur' ?></div>
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=kullanicilar') ?>" class="buton ikincil"><?= ikon('arrow-left') ?>Geri</a>
                 </div>
                 <form method="post" class="panel">
                     <?= csrf_input() ?>
-                    <div class="panel-bas"><h3>Kullanici Bilgileri</h3></div>
+                    <div class="panel-bas"><h3>Kullanıcı Bilgileri</h3></div>
                     <div class="panel-ic">
                         <div class="form-satir">
                             <div class="form-grup">
-                                <label>Kullanici Adi *</label>
+                                <label>Kullanıcı Adi *</label>
                                 <input type="text" name="kullanici_adi" value="<?= h($usr_d['kullanici_adi'] ?? '') ?>" minlength="4" required>
                             </div>
                             <div class="form-grup">
@@ -1550,7 +1550,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                 <?php endif; ?>
                             </div>
                             <div class="form-grup">
-                                <label>Sifre <?= $islem === 'ekle' ? '*' : '(degistirmek icin)' ?></label>
+                                <label>Şifre <?= $islem === 'ekle' ? '*' : '(degistirmek için)' ?></label>
                                 <input type="password" name="sifre" <?= $islem === 'ekle' ? 'required minlength="8"' : 'minlength="8"' ?> placeholder="<?= $islem === 'duzenle' ? 'Bos birakirsaniz degismez' : 'En az 8 karakter' ?>">
                             </div>
                         </div>
@@ -1563,7 +1563,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     </div>
                     <div class="panel-ic" style="border-top:1px solid var(--border);background:#f8fafc">
                         <div style="display:flex;justify-content:flex-end;gap:10px">
-                            <a href="<?= url('yonetim.php?sayfa=kullanicilar') ?>" class="buton ikincil">Iptal</a>
+                            <a href="<?= url('yonetim.php?sayfa=kullanicilar') ?>" class="buton ikincil">İptal</a>
                             <button type="submit" class="buton"><?= ikon('save') ?>Kaydet</button>
                         </div>
                     </div>
@@ -1573,17 +1573,17 @@ function menu_aktif(string $mevcut, string $slug): string {
             ?>
                 <div class="icerik-bas">
                     <div>
-                        <h1>Kullanicilar</h1>
-                        <div class="alt-metin"><?= count($usr_liste) ?> kullanici</div>
+                        <h1>Kullanıcılar</h1>
+                        <div class="alt-metin"><?= count($usr_liste) ?> kullanıcı</div>
                     </div>
-                    <a href="<?= url('yonetim.php?sayfa=kullanicilar&islem=ekle') ?>" class="buton"><?= ikon('plus') ?>Yeni Kullanici</a>
+                    <a href="<?= url('yonetim.php?sayfa=kullanicilar&islem=ekle') ?>" class="buton"><?= ikon('plus') ?>Yeni Kullanıcı</a>
                 </div>
                 <div class="panel">
                     <div class="panel-ic sikisik">
                         <div class="tablo-sarmal">
                             <table class="tablo">
                                 <thead>
-                                    <tr><th>Kullanici</th><th>Rol</th><th>Son Giris</th><th>Durum</th><th></th></tr>
+                                    <tr><th>Kullanıcı</th><th>Rol</th><th>Son Giriş</th><th>Durum</th><th></th></tr>
                                 </thead>
                                 <tbody>
                                 <?php foreach ($usr_liste as $u):
@@ -1603,7 +1603,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                         <td style="font-size:12px;color:var(--muted)"><?= $u['son_giris'] ? h(goreceli_zaman($u['son_giris'])) : 'Hic giris yapmadi' ?></td>
                                         <td><span class="rozet <?= $u['durum'] ? 'aktif' : 'pasif' ?>"><?= $u['durum'] ? 'Aktif' : 'Pasif' ?></span></td>
                                         <td class="islemler">
-                                            <a href="<?= url('yonetim.php?sayfa=kullanicilar&islem=duzenle&id=' . $u['id']) ?>" title="Duzenle"><?= ikon('edit') ?></a>
+                                            <a href="<?= url('yonetim.php?sayfa=kullanicilar&islem=duzenle&id=' . $u['id']) ?>" title="Düzenle"><?= ikon('edit') ?></a>
                                             <?php if ($u['id'] != $yonetici['id']): ?>
                                                 <form method="post" action="<?= url('yonetim.php?sayfa=kullanicilar&islem=sil&id=' . $u['id']) ?>" style="display:inline" onsubmit="return xadmin.silOnayla('Bu kullaniciyi silmek istediginize emin misiniz?')">
                                                     <?= csrf_input() ?><button class="sil" title="Sil"><?= ikon('trash') ?></button>
@@ -1632,7 +1632,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     'cron'        => 'RSS / Cron',
                     'reklam'      => 'Reklam',
                 ];
-                $stmt = $db->prepare("SELECT * FROM {$prefix}settings WHERE grup = ? ORDER BY sira, anahtar");
+                $stmt = $db->prepare("SELECT * FROM {$prefix}settings WHERE grup = ? ORDER BY sıra, anahtar");
                 $stmt->execute([$grup]);
                 $ayar_liste = $stmt->fetchAll();
             ?>
@@ -1711,7 +1711,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                         <form class="filtre-cubuk" method="get">
                             <input type="hidden" name="sayfa" value="loglar">
                             <select name="tip" onchange="this.form.submit()">
-                                <option value="">Tum tipler</option>
+                                <option value="">Tüm tipler</option>
                                 <?php foreach (['bilgi','uyari','hata','guvenlik','cron','islem'] as $t): ?>
                                     <option value="<?= $t ?>" <?= $tip_f === $t ? 'selected' : '' ?>><?= $t ?></option>
                                 <?php endforeach; ?>
@@ -1721,7 +1721,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     <div class="panel-ic sikisik">
                         <div class="tablo-sarmal">
                             <table class="tablo">
-                                <thead><tr><th>Tip</th><th>Baslik</th><th>Detay</th><th>Kullanici</th><th>IP</th><th>Tarih</th></tr></thead>
+                                <thead><tr><th>Tip</th><th>Başlık</th><th>Detay</th><th>Kullanıcı</th><th>IP</th><th>Tarih</th></tr></thead>
                                 <tbody>
                                 <?php if (empty($log_liste)): ?>
                                     <tr><td colspan="6" class="bos">Log kaydi yok.</td></tr>

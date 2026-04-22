@@ -1,6 +1,6 @@
 <?php
 /**
- * XNEWS - Public RSS Cikis Beslemesi
+ * XNEWS - Public RSS Çıkış Beslemesi
  * Kullanim:
  *   https://xnews.com.tr/rss.php                 (tum haberler)
  *   https://xnews.com.tr/rss.php?kategori=gundem (kategori bazli)
@@ -18,7 +18,7 @@ $prefix = DB_PREFIX;
 $kategori_slug = preg_replace('/[^a-z0-9-]/i', '', $_GET['kategori'] ?? '');
 $kaynak_slug   = preg_replace('/[^a-z0-9-]/i', '', $_GET['kaynak'] ?? '');
 $baslik_ek     = '';
-$where         = "n.durum = 'yayinda'";
+$where         = "n.durum = 'yayında'";
 $params        = [];
 
 if ($kategori_slug) {

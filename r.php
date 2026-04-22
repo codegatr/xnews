@@ -1,6 +1,6 @@
 <?php
 /**
- * XNEWS - Reklam Tiklama Sayaci + Yonlendirici
+ * XNEWS - Reklam Tıklama Sayaci + Yonlendirici
  * Kullanim: /r.php?id=REKLAM_ID
  * Tiklamayi sayar ve reklamin hedef_url'sine yonlendirir.
  */
@@ -16,14 +16,14 @@ $reklam = $stmt->fetch();
 
 if (!$reklam || !$reklam['aktif'] || empty($reklam['hedef_url'])) {
     http_response_code(404);
-    die('Reklam bulunamadi veya aktif degil.');
+    die('Reklam bulunamadı veya aktif degil.');
 }
 
 // Bot filtresi (basit)
 $ua = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
 $bot_mu = preg_match('#bot|crawler|spider|slurp|facebookexternalhit|headless#i', $ua);
 
-// Ayni IP 30 saniye icinde tekrar sayilmasin
+// Aynı IP 30 saniye icinde tekrar sayilmasin
 $ip = istemci_ip();
 $anahtar = 'r_' . $id . '_' . md5($ip);
 $simdi = time();

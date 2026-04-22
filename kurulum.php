@@ -13,8 +13,8 @@ ini_set('display_errors', '1');
 if (file_exists(__DIR__ . '/install.lock')) {
     die('<div style="font-family:system-ui;padding:40px;max-width:600px;margin:50px auto;background:#fef3c7;border:1px solid #f59e0b;border-radius:12px;color:#78350f">
     <h2 style="margin:0 0 12px">Kurulum zaten tamamlanmis</h2>
-    <p>Yeniden kurmak icin sunucudan <code>install.lock</code> dosyasini silin.</p>
-    <p><a href="yonetim.php">Yonetim paneline git &rarr;</a></p></div>');
+    <p>Yeniden kurmak için sunucudan <code>install.lock</code> dosyasini silin.</p>
+    <p><a href="yonetim.php">Yönetim paneline git &rarr;</a></p></div>');
 }
 
 session_start();
@@ -38,9 +38,9 @@ if ($adim === 4 && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $site_adi = trim($_POST['site_adi'] ?? 'XNEWS');
         $site_url = rtrim(trim($_POST['site_url'] ?? ''), '/');
 
-        if (strlen($admin_kullanici) < 4) throw new Exception('Kullanici adi en az 4 karakter olmali.');
-        if (!filter_var($admin_eposta, FILTER_VALIDATE_EMAIL)) throw new Exception('Gecerli bir e-posta girin.');
-        if (strlen($admin_sifre) < 8) throw new Exception('Sifre en az 8 karakter olmali.');
+        if (strlen($admin_kullanici) < 4) throw new Exception('Kullanıcı adı en az 4 karakter olmali.');
+        if (!filter_var($admin_eposta, FILTER_VALIDATE_EMAIL)) throw new Exception('Geçerli bir e-posta girin.');
+        if (strlen($admin_sifre) < 8) throw new Exception('Şifre en az 8 karakter olmali.');
         if (empty($site_url)) throw new Exception('Site URL zorunlu.');
 
         // DB'ye baglan
@@ -58,7 +58,7 @@ if ($adim === 4 && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($prefix !== 'xn_') { $schema = str_replace('xn_', $prefix, $schema); }
         $db->exec($schema);
 
-        // Kaynaklari ekle
+        // Kaynakları ekle
         $sources = file_get_contents(__DIR__ . '/sql/sources_seed.sql');
         if ($sources) {
             if ($prefix !== 'xn_') { $sources = str_replace('xn_', $prefix, $sources); }
@@ -74,7 +74,7 @@ if ($adim === 4 && $_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         // Site URL ve adi ayarlara yaz
-        $db->prepare("UPDATE `{$prefix}settings` SET deger = ? WHERE anahtar = 'site_adi'")->execute([$site_adi]);
+        $db->prepare("UPDATE `{$prefix}settings` SET değer = ? WHERE anahtar = 'site_adi'")->execute([$site_adi]);
 
         // config.php uret
         $guvenlik = bin2hex(random_bytes(32));
@@ -82,8 +82,8 @@ if ($adim === 4 && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $cron = bin2hex(random_bytes(16));
 
         $config = "<?php\n";
-        $config .= "/**\n * XNEWS - Konfigurasyon\n * Bu dosya kurulumda otomatik olusturuldu: " . date('Y-m-d H:i:s') . "\n */\n";
-        $config .= "if (!defined('XNEWS')) { http_response_code(403); die('Erisim reddedildi.'); }\n\n";
+        $config .= "/**\n * XNEWS - Konfigurasyon\n * Bu dosya kurulumda otomatik oluşturuldu: " . date('Y-m-d H:i:s') . "\n */\n";
+        $config .= "if (!defined('XNEWS')) { http_response_code(403); die('Erişim reddedildi.'); }\n\n";
         $config .= "// VERITABANI\n";
         $config .= "define('DB_HOST', " . var_export($k['db_host'], true) . ");\n";
         $config .= "define('DB_NAME', " . var_export($k['db_name'], true) . ");\n";
@@ -162,25 +162,25 @@ if ($adim === 3 && $_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: kurulum.php?adim=4');
             exit;
         } catch (PDOException $e) {
-            $hata = 'Baglanti basarisiz: ' . $e->getMessage();
+            $hata = 'Bağlantı başarısız: ' . $e->getMessage();
         }
     }
 }
 
 // -----------------------------------------------------
-// ADIM 2: Gereksinim kontrolu
+// ADIM 2: Gereksinim kontrolü
 // -----------------------------------------------------
 function ger_kontrol(): array {
     $r = [];
     $r[] = ['PHP 8.1+', version_compare(PHP_VERSION, '8.1.0', '>='), 'Mevcut: ' . PHP_VERSION];
     $r[] = ['PDO MySQL', extension_loaded('pdo_mysql'), 'PDO MySQL eklentisi gerekli'];
-    $r[] = ['cURL',      extension_loaded('curl'),      'RSS cekimi icin'];
-    $r[] = ['mbstring',  extension_loaded('mbstring'),  'Cok dilli metinler icin'];
-    $r[] = ['SimpleXML', extension_loaded('SimpleXML'), 'RSS ayristirma icin'];
-    $r[] = ['ZipArchive',class_exists('ZipArchive'),    'Guncelleme sistemi icin'];
-    $r[] = ['JSON',      extension_loaded('json'),      'JSON islemleri icin'];
-    $r[] = ['GD veya Imagick', extension_loaded('gd') || extension_loaded('imagick'), 'Gorsel isleme icin'];
-    $r[] = ['Yazma izni (kok)', is_writable(__DIR__), 'config.php yazimi icin'];
+    $r[] = ['cURL',      extension_loaded('curl'),      'RSS çekimi için'];
+    $r[] = ['mbstring',  extension_loaded('mbstring'),  'Çok dilli metinler için'];
+    $r[] = ['SimpleXML', extension_loaded('SimpleXML'), 'RSS ayristirma için'];
+    $r[] = ['ZipArchive',class_exists('ZipArchive'),    'Güncelleme sistemi için'];
+    $r[] = ['JSON',      extension_loaded('json'),      'JSON islemleri için'];
+    $r[] = ['GD veya Imagick', extension_loaded('gd') || extension_loaded('imagick'), 'Görsel isleme için'];
+    $r[] = ['Yazma izni (kok)', is_writable(__DIR__), 'config.php yazimi için'];
     $r[] = ['Yazma izni (uploads/)', is_writable(__DIR__ . '/uploads') || @chmod(__DIR__ . '/uploads', 0755), 'Yukleme klasoru'];
     return $r;
 }
@@ -247,13 +247,13 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
 <div class="kutu">
     <div class="baslik">
         <h1>XNEWS Kurulum Sihirbazi</h1>
-        <p>Surum 1.0.0 · CODEGA · PHP <?= PHP_VERSION ?></p>
+        <p>Sürüm 1.0.0 · CODEGA · PHP <?= PHP_VERSION ?></p>
     </div>
     <div class="adimlar">
         <div class="adim <?= $adim === 1 ? 'aktif' : ($adim > 1 ? 'tamam' : '') ?>">1. Karsilama</div>
         <div class="adim <?= $adim === 2 ? 'aktif' : ($adim > 2 ? 'tamam' : '') ?>">2. Gereksinim</div>
         <div class="adim <?= $adim === 3 ? 'aktif' : ($adim > 3 ? 'tamam' : '') ?>">3. Veritabani</div>
-        <div class="adim <?= $adim === 4 ? 'aktif' : ($adim > 4 ? 'tamam' : '') ?>">4. Yonetici</div>
+        <div class="adim <?= $adim === 4 ? 'aktif' : ($adim > 4 ? 'tamam' : '') ?>">4. Yönetici</div>
         <div class="adim <?= $adim === 5 ? 'aktif tamam' : '' ?>">5. Bitti</div>
     </div>
     <div class="icerik">
@@ -263,19 +263,19 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
             <h2>XNEWS'e Hosgeldiniz</h2>
             <p class="alt">Bu sihirbaz XNEWS kurulumunu 4 adimda tamamlayacaktir.</p>
             <div style="line-height:1.8;font-size:14px;color:#475569">
-                <p><strong>Baslamadan once hazirlayin:</strong></p>
+                <p><strong>Baslamadan önce hazirlayin:</strong></p>
                 <ul style="margin-left:20px;margin-top:8px">
                     <li>DirectAdmin veya hosting panelinizden olusturulmus bir MySQL veritabani</li>
-                    <li>Veritabani kullanici adi ve sifresi</li>
+                    <li>Veritabani kullanıcı adi ve sifresi</li>
                     <li>Site URL (ornek: https://xnews.com.tr)</li>
-                    <li>Yonetici paneli icin kullanici adi/sifre</li>
+                    <li>Yönetici paneli için kullanıcı adi/sifre</li>
                 </ul>
             </div>
             <div class="butonlar"><span></span><a href="?adim=2" class="buton">Baslayalim &rarr;</a></div>
 
         <?php elseif ($adim === 2): ?>
             <h2>Sunucu Gereksinimleri</h2>
-            <p class="alt">Kuruluma devam edebilmek icin asagidaki gereksinimlerin hepsi OK olmali.</p>
+            <p class="alt">Kuruluma devam edebilmek için asagidaki gereksinimlerin hepsi OK olmali.</p>
             <div class="kontrol">
                 <?php $hepsi_ok = true; foreach (ger_kontrol() as [$ad, $durum, $acik]): ?>
                 <div class="satir">
@@ -309,7 +309,7 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
                     <div class="grup">
                         <label>Tablo Onek (Prefix)</label>
                         <input type="text" name="db_prefix" value="<?= htmlspecialchars($_POST['db_prefix'] ?? 'xn_') ?>" pattern="[a-z0-9_]+" required>
-                        <div class="ipucu">Onerilen: xn_</div>
+                        <div class="ipucu">Önerilen: xn_</div>
                     </div>
                 </div>
                 <div class="grup">
@@ -319,11 +319,11 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
                 </div>
                 <div class="grid-2">
                     <div class="grup">
-                        <label>Kullanici Adi</label>
+                        <label>Kullanıcı Adi</label>
                         <input type="text" name="db_user" value="<?= htmlspecialchars($_POST['db_user'] ?? '') ?>" required>
                     </div>
                     <div class="grup">
-                        <label>Sifre</label>
+                        <label>Şifre</label>
                         <input type="password" name="db_pass" value="">
                     </div>
                 </div>
@@ -335,8 +335,8 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
 
         <?php elseif ($adim === 4): ?>
             <?php if (empty($_SESSION['kurulum'])) { header('Location: ?adim=3'); exit; } ?>
-            <h2>Yonetici Hesabi ve Site Bilgileri</h2>
-            <p class="alt">Bu bilgilerle yonetim paneline giriş yapacaksınız.</p>
+            <h2>Yönetici Hesabi ve Site Bilgileri</h2>
+            <p class="alt">Bu bilgilerle yönetim paneline giriş yapacaksınız.</p>
             <form method="post">
                 <div class="grid-2">
                     <div class="grup">
@@ -356,7 +356,7 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
                 </div>
                 <div class="grid-2">
                     <div class="grup">
-                        <label>Kullanici Adi</label>
+                        <label>Kullanıcı Adi</label>
                         <input type="text" name="admin_kullanici" value="<?= htmlspecialchars($_POST['admin_kullanici'] ?? '') ?>" minlength="4" required>
                     </div>
                     <div class="grup">
@@ -365,7 +365,7 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
                     </div>
                 </div>
                 <div class="grup">
-                    <label>Sifre (en az 8 karakter)</label>
+                    <label>Şifre (en az 8 karakter)</label>
                     <input type="password" name="admin_sifre" minlength="8" required>
                 </div>
                 <div class="butonlar">
@@ -380,17 +380,17 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
                 <h2>Kurulum Tamamlandi!</h2>
                 <p style="color:#475569">XNEWS artik kullanima hazir.</p>
                 <div class="bilgi-kart">
-                    <strong>⚠ Guvenlik icin simdi yapmaniz gerekenler:</strong>
+                    <strong>⚠ Güvenlik için simdi yapmaniz gerekenler:</strong>
                     <ol style="margin-left:20px;margin-top:10px">
                         <li><code>kurulum.php</code> dosyasini FTP'den silin</li>
-                        <li><code>config.php</code> izinlerini 644 yapin (yazmaya kapali)</li>
+                        <li><code>config.php</code> izinlerini 644 yapin (yazmaya kapalı)</li>
                         <li>DirectAdmin'den cron job ekleyin:<br>
                             <code style="font-size:11px">*/10 * * * * wget -q -O /dev/null "https://xnews.com.tr/cron.php?anahtar=CRON_ANAHTARI"</code>
                         </li>
                     </ol>
                 </div>
                 <div class="butonlar" style="justify-content:center">
-                    <a href="yonetim.php" class="buton">Yonetim Paneline Giris Yap →</a>
+                    <a href="yonetim.php" class="buton">Yönetim Paneline Giriş Yap →</a>
                 </div>
             </div>
         <?php endif; ?>

@@ -1,18 +1,18 @@
 <?php
 /**
- * XNEWS - GitHub Guncelleme Sistemi
+ * XNEWS - GitHub Güncelleme Sistemi
  *
  * Sadece admin yetkili kullanicilar erisebilir.
  * Kullanim: https://xnews.com.tr/guncelle.php
  *
  * Akis:
- *   1. manifest.json'dan mevcut surum okunur
+ *   1. manifest.json'dan mevcut sürüm okunur
  *   2. GitHub API'den son release bilgisi alinir
- *   3. Yeni surum varsa admin'e "Guncelle" butonu gosterilir
+ *   3. Yeni sürüm varsa admin'e "Güncelle" butonu gosterilir
  *   4. Butona basinca ZIP indirilir -> yedek alinir -> dosyalar degistirilir
  *   5. config.php, uploads/, install.lock korunur (manifest'teki "korunan_dosyalar")
  *
- * GitHub Public repo icin token gerekmez. Private icin config.php'deki GITHUB_TOKEN kullanilir.
+ * GitHub Public repo için token gerekmez. Private için config.php'deki GITHUB_TOKEN kullanilir.
  */
 define('XNEWS', true);
 require __DIR__ . '/baglan.php';
@@ -20,9 +20,9 @@ require __DIR__ . '/baglan.php';
 // Yetki
 $yonetici = admin_zorunlu();
 
-// Guncelleme aktif mi?
+// Güncelleme aktif mi?
 if (!defined('GUNCELLEME_AKTIF') || !GUNCELLEME_AKTIF) {
-    die('Guncelleme sistemi devre disi (config.php).');
+    die('Güncelleme sistemi devre disi (config.php).');
 }
 
 $islem     = $_GET['islem'] ?? '';
@@ -35,7 +35,7 @@ $mesaj_tip = '';
 
 function manifest_oku(): array {
     $yol = __DIR__ . '/manifest.json';
-    if (!file_exists($yol)) throw new RuntimeException('manifest.json bulunamadi.');
+    if (!file_exists($yol)) throw new RuntimeException('manifest.json bulunamadı.');
     $veri = json_decode(file_get_contents($yol), true);
     if (!$veri) throw new RuntimeException('manifest.json gecersiz.');
     return $veri;
@@ -49,7 +49,7 @@ function github_son_release(string $repo): array {
     }
     $r = http_getir($url, 15, $ek_baslik);
     if ($r['kod'] === 404) {
-        throw new RuntimeException('Repo bulunamadi veya henuz release yok: ' . $repo);
+        throw new RuntimeException('Repo bulunamadı veya henüz release yok: ' . $repo);
     }
     if ($r['kod'] !== 200) {
         throw new RuntimeException('GitHub API hatasi: HTTP ' . $r['kod']);
@@ -86,7 +86,7 @@ function zip_indir(string $url, string $hedef): void {
 }
 
 /**
- * Guncelleme oncesi mevcut dosyalari yedekle
+ * Güncelleme oncesi mevcut dosyalari yedekle
  */
 function yedek_al(array $korunan): string {
     $zaman = date('Y-m-d_H-i-s');
@@ -144,7 +144,7 @@ function guncelleme_uygula(string $zip_yolu, array $korunan): int {
     $gecici = __DIR__ . '/uploads/guncelleme_gecici';
     if (is_dir($gecici)) klasor_sil($gecici);
     if (!mkdir($gecici, 0755, true)) {
-        throw new RuntimeException('Gecici klasor olusturulamadi.');
+        throw new RuntimeException('Geçici klasor olusturulamadi.');
     }
 
     $zip->extractTo($gecici);
@@ -188,7 +188,7 @@ function guncelleme_uygula(string $zip_yolu, array $korunan): int {
         }
     }
 
-    // Gecici klasoru temizle
+    // Geçici klasoru temizle
     klasor_sil($gecici);
     @unlink($zip_yolu);
 
@@ -228,11 +228,11 @@ try {
     }
 
     if ($islem === 'guncelle' && post()) {
-        if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
-            throw new RuntimeException('Guvenlik dogrulamasi basarisiz.');
+        if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+            throw new RuntimeException('Güvenlik doğrulaması başarısız.');
         }
         if (!$yeni_surum_var) {
-            throw new RuntimeException('Yeni surum bulunamadi.');
+            throw new RuntimeException('Yeni sürüm bulunamadı.');
         }
 
         $zip_url = $release_bilgi['zipball_url'] ?? '';
@@ -245,7 +245,7 @@ try {
                 }
             }
         }
-        if (empty($zip_url)) throw new RuntimeException('Release icinde ZIP bulunamadi.');
+        if (empty($zip_url)) throw new RuntimeException('Release icinde ZIP bulunamadı.');
 
         @set_time_limit(300);
         @ini_set('memory_limit', '256M');
@@ -254,18 +254,18 @@ try {
         zip_indir($zip_url, $zip_yolu);
 
         $yedek_yolu = yedek_al($korunan);
-        log_ekle('islem', 'Guncelleme yedegi alindi', $yedek_yolu, $yonetici['id']);
+        log_ekle('islem', 'Güncelleme yedegi alindi', $yedek_yolu, $yonetici['id']);
 
         $dosya_sayisi = guncelleme_uygula($zip_yolu, $korunan);
 
-        // manifest.json'un yeni surumu yansittigini dogrula
+        // manifest.json'un yeni sürümü yansittigini dogrula
         $yeni_manifest = manifest_oku();
         ayar_guncelle('mevcut_surum', $yeni_manifest['surum']);
 
-        log_ekle('islem', 'Guncelleme tamamlandi',
+        log_ekle('islem', 'Güncelleme tamamlandi',
             'v' . $mevcut_surum . ' -> v' . $yeni_manifest['surum'] . ' (' . $dosya_sayisi . ' dosya)', $yonetici['id']);
 
-        $mesaj = 'Guncelleme basariyla uygulandi. v' . $mevcut_surum . ' → v' . $yeni_manifest['surum'] . ' (' . $dosya_sayisi . ' dosya). Yedek: ' . basename($yedek_yolu);
+        $mesaj = 'Güncelleme başarıyla uygulandi. v' . $mevcut_surum . ' → v' . $yeni_manifest['surum'] . ' (' . $dosya_sayisi . ' dosya). Yedek: ' . basename($yedek_yolu);
         $mesaj_tip = 'basari';
         $mevcut_surum = $yeni_manifest['surum'];
         $yeni_surum_var = false;
@@ -273,7 +273,7 @@ try {
 } catch (Throwable $e) {
     $mesaj = $e->getMessage();
     $mesaj_tip = 'hata';
-    log_ekle('hata', 'Guncelleme hatasi', $e->getMessage(), $yonetici['id']);
+    log_ekle('hata', 'Güncelleme hatasi', $e->getMessage(), $yonetici['id']);
 }
 
 ?>
@@ -283,10 +283,10 @@ try {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Guncelleme - XNEWS</title>
+<title>Güncelleme - XNEWS</title>
 <link rel="icon" type="image/svg+xml" href="<?= url('favicon.svg') ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&subset=latin-ext&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= url('assets/css/admin.css') ?>">
 <style>
 body { background: #f5f7fa; padding: 40px 20px; }
@@ -311,10 +311,10 @@ body { background: #f5f7fa; padding: 40px 20px; }
 </head>
 <body>
 <div class="gun-kapsayici">
-    <a href="<?= url('yonetim.php') ?>" class="back">← Yonetim Paneline Don</a>
+    <a href="<?= url('yonetim.php') ?>" class="back">← Yönetim Paneline Don</a>
 
     <div class="gun-bas">
-        <h1>🔄 Guncelleme Sistemi</h1>
+        <h1>🔄 Güncelleme Sistemi</h1>
         <p class="alt">GitHub Releases tabanli otomatik guncelleme · Repo: <code><?= h($repo) ?></code></p>
     </div>
 
@@ -324,8 +324,8 @@ body { background: #f5f7fa; padding: 40px 20px; }
 
     <?php if ($islem === '' || ($islem === 'kontrol' && empty($release_bilgi))): ?>
         <div class="gun-bas">
-            <h2 style="font-size:18px;margin-bottom:8px">Mevcut Surum</h2>
-            <p style="color:var(--muted);margin-bottom:20px">Sunucunuzda yuklu olan XNEWS surumu.</p>
+            <h2 style="font-size:18px;margin-bottom:8px">Mevcut Sürüm</h2>
+            <p style="color:var(--muted);margin-bottom:20px">Sunucunuzda yüklü olan XNEWS sürümü.</p>
             <div class="surum-kart">
                 <div class="surum-kutu">
                     <div class="etiket">Yuklu</div>
@@ -339,17 +339,17 @@ body { background: #f5f7fa; padding: 40px 20px; }
             </div>
             <form method="get" action="" style="text-align:center">
                 <input type="hidden" name="islem" value="kontrol">
-                <button type="submit" class="buton" style="padding:12px 32px;font-size:14px">GitHub'dan Guncelleme Kontrol Et</button>
+                <button type="submit" class="buton" style="padding:12px 32px;font-size:14px">GitHub'dan Güncelleme Kontrol Et</button>
             </form>
             <div class="bilgi-liste">
-                <strong>Son kontrol:</strong> <?= ayar('son_guncelleme_kontrol') ? h(ayar('son_guncelleme_kontrol')) : 'Henuz kontrol edilmedi' ?>
+                <strong>Son kontrol:</strong> <?= ayar('son_guncelleme_kontrol') ? h(ayar('son_guncelleme_kontrol')) : 'Henüz kontrol edilmedi' ?>
             </div>
         </div>
 
     <?php elseif (!empty($release_bilgi) && $yeni_surum_var): ?>
         <div class="gun-bas">
-            <h2 style="font-size:20px;color:var(--brand);margin-bottom:8px">🎉 Yeni Surum Mevcut!</h2>
-            <p style="color:var(--muted)">Guvenli guncelleme icin yedek otomatik alinir.</p>
+            <h2 style="font-size:20px;color:var(--brand);margin-bottom:8px">🎉 Yeni Sürüm Mevcut!</h2>
+            <p style="color:var(--muted)">Guvenli guncelleme için yedek otomatik alinir.</p>
 
             <div class="surum-kart">
                 <div class="surum-kutu">
@@ -371,19 +371,19 @@ body { background: #f5f7fa; padding: 40px 20px; }
             <?php endif; ?>
 
             <div class="bilgi-liste">
-                <strong>Guncelleme yapilirken:</strong>
+                <strong>Güncelleme yapilirken:</strong>
                 <ul style="margin-left:20px">
                     <li>✓ Mevcut dosyalarin tamami otomatik yedeklenir (<code>uploads/yedek/</code>)</li>
                     <li>✓ <code>config.php</code> ve <code>uploads/</code> korunur</li>
                     <li>✓ Veritabani degismez</li>
-                    <li>⚠ Islem sirasinda site kisa bir sure erisilemeyebilir</li>
+                    <li>⚠ İşlem sirasinda site kısa bir sure erisilemeyebilir</li>
                 </ul>
             </div>
 
             <form method="post" action="?islem=guncelle" onsubmit="return confirm('Guncellemeyi baslatmak istediginize emin misiniz?\n\nBu islem birkac dakika surer. Tamamlanmadan sayfayi kapatmayin.')">
                 <?= csrf_input() ?>
                 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
-                    <a href="<?= url('guncelle.php') ?>" class="buton ikincil">Iptal</a>
+                    <a href="<?= url('guncelle.php') ?>" class="buton ikincil">İptal</a>
                     <button type="submit" class="buton" style="padding:12px 28px">Guncellemeyi Baslat</button>
                 </div>
             </form>
@@ -393,7 +393,7 @@ body { background: #f5f7fa; padding: 40px 20px; }
         <div class="gun-bas">
             <div class="surum-kart">
                 <div class="surum-kutu yeni">
-                    <div class="etiket">Yuklu Surum</div>
+                    <div class="etiket">Yuklu Sürüm</div>
                     <div class="numara">v<?= h($mevcut_surum) ?></div>
                 </div>
                 <div class="ok-ikon" style="background:var(--success)">✓</div>
@@ -403,7 +403,7 @@ body { background: #f5f7fa; padding: 40px 20px; }
                 </div>
             </div>
             <p style="text-align:center;color:var(--success);font-weight:600;font-size:16px;margin:10px 0">
-                ✓ En guncel surumu kullaniyorsunuz.
+                ✓ En guncel sürümü kullaniyorsunuz.
             </p>
             <p style="text-align:center;color:var(--muted);font-size:13px">
                 Son kontrol: <?= date('d.m.Y H:i') ?>

@@ -44,12 +44,12 @@ foreach ($kategoriler as $k) {
 // 4) Haberler (son 5000)
 $stmt = $db->query("SELECT id, slug, yayin_tarihi, guncelleme
     FROM {$prefix}news
-    WHERE durum = 'yayinda'
+    WHERE durum = 'yayında'
     ORDER BY yayin_tarihi DESC LIMIT 5000");
 foreach ($stmt as $h) {
     $url = url('haber/' . $h['id'] . '-' . $h['slug']);
     $lastmod = $h['guncelleme'] ?: $h['yayin_tarihi'];
-    // Son 48 saat icindeyse yuksek oncelik
+    // Son 48 saat icindeyse yüksek oncelik
     $oncelik = (time() - strtotime($h['yayin_tarihi'])) < 172800 ? '0.9' : '0.6';
     su($url, $lastmod, 'weekly', $oncelik);
 }
