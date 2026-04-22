@@ -197,17 +197,19 @@ window.xnews = (function() {
     }
 
     // ==================================================
-    // DARK MODE
+    // DARK MODE (sadece manuel - default acik)
     // ==================================================
     const TEMA_KEY = 'xn_tema';
     function temaUygula() {
-        const mevcut = localStorage.getItem(TEMA_KEY) || 'oto';
-        document.body.classList.remove('tema-oto', 'tema-koyu', 'tema-acik');
-        document.body.classList.add('tema-' + mevcut);
+        // Default: acik. Sadece kullanici 'koyu' secerse koyu.
+        const mevcut = localStorage.getItem(TEMA_KEY) || 'acik';
+        document.body.classList.remove('tema-koyu', 'tema-acik');
+        if (mevcut === 'koyu') document.body.classList.add('tema-koyu');
+        else document.body.classList.add('tema-acik');
     }
     function temaDegistir() {
-        const mevcut = localStorage.getItem(TEMA_KEY) || 'oto';
-        const sonraki = mevcut === 'oto' ? 'koyu' : (mevcut === 'koyu' ? 'acik' : 'oto');
+        const mevcut = localStorage.getItem(TEMA_KEY) || 'acik';
+        const sonraki = mevcut === 'koyu' ? 'acik' : 'koyu';
         localStorage.setItem(TEMA_KEY, sonraki);
         temaUygula();
     }

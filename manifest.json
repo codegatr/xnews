@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.0.10",
+    "surum": "1.0.11",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,6 +17,7 @@
         "install.lock"
     ],
     "degisiklikler": [
+        "1.0.11 - HOTFIX: Dark mode otomatik sistem tercihi kaldirildi. Kullanicilarin tarayici/OS dark mode ayari olanlarda site siyah aciliyor ve haber basligi siyah metin koyu arkaplan uzerinde OKUNMAZ oluyordu. Artik default: acik tema. Kullanici manuel olarak Tema butonuna basinca koyu aktif olur. Ayrica koyu temada tum metin renkleri duzeltildi (basik, ozet, meta, breadcrumb, kaynak-atfi, populer, trend etiketler).",
         "1.0.10 - HOTFIX: /cerez /kvkk /kunye /yayin-ilkeleri /kaldirma-talebi sayfalari 404 veriyordu - .htaccess routing kurallari eklendi. Haber resimleri kayip bugu: NTV/Milliyet gibi feedlerde resim description icindeki <img> tag olarak geliyor ama SimpleXML (string) cast HTML taglari siler. Ham item XML uzerinde de arama eklendi (6 oncelik). URL entity decode + protokolsuz URL https fix.",
         "1.0.9 - YASAL ALTYAPI + PROFESYONEL TASARIM: KVKK aydınlatma, Çerez politikası, Künye (Basın Kanunu uyumlu), Yayın İlkeleri, Kaldırma Talebi formu (takedown) + xn_takedown tablosu, çerez onay banner (3 kategori), Open Graph + Schema.org NewsArticle JSON-LD, breadcrumb, haber detay araç çubuğu (font size, yazdır, dinle, tema), dark mode (sistem + manuel), mobil sabit banner, trend etiketler widget, En Çok Okunan widget modernize.",
         "1.0.8 - Eksik kategoriler için 5 yeni test edilmiş kaynak: Sabah Magazin/Sağlık/Yaşam/Eğitim + Takvim Magazin. Magazin 1->3, Sağlık 2->3, Yaşam 1->2, Eğitim 1->2. Toplam 72 -> 77.",

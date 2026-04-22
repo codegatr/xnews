@@ -821,26 +821,46 @@ body.fs-kucuk .hd-icerik { font-size: 16px; }
 .trend-etiket:hover::before { color: #fff; }
 
 /* ===================================================
-   DARK MODE (prefers-color-scheme)
+   DARK MODE (sadece manuel seçim - sistem otomatik KAPALI)
    =================================================== */
-@media (prefers-color-scheme: dark) {
-    body.tema-oto {
-        --paper: #0f172a; --paper-dark: #1e293b; --paper-border: #334155;
-        --ink: #f1f5f9; --ink-muted: #cbd5e1; --muted: #94a3b8;
-        --white: #f8fafc; --black: #020617;
-        background: var(--paper); color: var(--ink);
-    }
-    body.tema-oto .sidebar-blok, body.tema-oto footer { background: #1e293b; }
-    body.tema-oto .logo-metin { color: #f8fafc; }
-    body.tema-oto .kat-menu { background: #020617; }
-    body.tema-oto img { filter: brightness(.9); }
-}
 body.tema-koyu {
     --paper: #0f172a; --paper-dark: #1e293b; --paper-border: #334155;
     --ink: #f1f5f9; --ink-muted: #cbd5e1; --muted: #94a3b8;
     --white: #f8fafc; --black: #020617;
     background: var(--paper); color: var(--ink);
 }
-body.tema-koyu .sidebar-blok, body.tema-koyu footer { background: #1e293b; }
+body.tema-koyu .sidebar-blok,
+body.tema-koyu footer { background: #1e293b; }
 body.tema-koyu .logo-metin { color: #f8fafc; }
 body.tema-koyu .kat-menu { background: #020617; }
+body.tema-koyu .hd-baslik,
+body.tema-koyu .hd-icerik,
+body.tema-koyu .hd-icerik h2,
+body.tema-koyu .hd-icerik h3,
+body.tema-koyu .bolum-baslik h2,
+body.tema-koyu .haber-kart h3,
+body.tema-koyu .manset-buyuk h1,
+body.tema-koyu .manset-kucuk h3,
+body.tema-koyu .mini-kart h4,
+body.tema-koyu .populer-icerik a { color: #f1f5f9; }
+body.tema-koyu .hd-ozet { color: #cbd5e1; }
+body.tema-koyu .hd-meta,
+body.tema-koyu .haber-kart-meta,
+body.tema-koyu .populer-meta,
+body.tema-koyu .breadcrumb { color: #94a3b8; }
+body.tema-koyu .breadcrumb .son { color: #e2e8f0; }
+body.tema-koyu .kaynak-atfi { background: #1e293b; color: #cbd5e1; }
+body.tema-koyu .hd-araclar { border-color: #334155; }
+body.tema-koyu .hd-arac-btn { background: #1e293b; color: #e2e8f0; border-color: #334155; }
+body.tema-koyu .hd-arac-btn:hover { background: var(--brand); color: #fff; }
+body.tema-koyu .trend-etiket { background: #1e293b; color: #cbd5e1; }
+body.tema-koyu .son-dakika-serit { background: #020617; }
+body.tema-koyu .ust-bar { background: #020617; color: #cbd5e1; }
+body.tema-koyu img:not(.logo-metin) { filter: brightness(.92); }
+body.tema-koyu .bolum-baslik { border-color: #334155; }
+body.tema-koyu .haber-kart,
+body.tema-koyu .kat-kart { background: #1e293b; }
+body.tema-koyu .haber-kart:hover,
+body.tema-koyu .kat-kart:hover { background: #273448; }
+body.tema-koyu a { color: inherit; }
+body.tema-koyu a:hover { color: var(--brand); }
