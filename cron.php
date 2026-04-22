@@ -186,6 +186,11 @@ function rss_oge_cikar(SimpleXMLElement $item, string $format): array {
     // GORSEL CIKARMA (oncelik sirasi)
     $resim = '';
 
+    // 0) Ham item XML (SimpleXML CDATA dışındaki <img> tag'leri (string) cast ile
+    //    siliniyor. Bu yüzden ham XML üzerinde de arayacağız.)
+    $item_ham = '';
+    try { $item_ham = $item->asXML() ?: ''; } catch (Throwable $e) {}
+
     // 1) media:content
     if ($media && !empty($media->content)) {
         foreach ($media->content as $mc) {
@@ -213,7 +218,12 @@ function rss_oge_cikar(SimpleXMLElement $item, string $format): array {
             }
         }
     }
-    // 4) açıklama icindeki ilk <img src=...>
+    // 4) <image> alt etiket
+    if (empty($resim) && !empty($item->image)) {
+        if (!empty($item->image->url)) $resim = (string)$item->image->url;
+        elseif (is_string((string)$item->image)) $resim = trim((string)$item->image);
+    }
+    // 5) açıklama/içerik icindeki ilk <img src=...>
     if (empty($resim) && !empty($icerik)) {
         if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $icerik, $m)) {
             $resim = $m[1];
@@ -223,6 +233,23 @@ function rss_oge_cikar(SimpleXMLElement $item, string $format): array {
         if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $ozet, $m)) {
             $resim = $m[1];
         }
+    }
+    // 6) HAM item XML üzerinde son çare arama
+    //    (NTV, Milliyet gibi feed'lerde description içindeki <img> tag'leri SimpleXML
+    //    cast sırasında silindiği için bu adım gerekli)
+    if (empty($resim) && !empty($item_ham)) {
+        if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $item_ham, $m)) {
+            $resim = $m[1];
+        } elseif (preg_match('/&lt;img[^&]+src=&quot;([^&]+)&quot;/i', $item_ham, $m)) {
+            // Double-encoded img (bazı feed'lerde)
+            $resim = $m[1];
+        }
+    }
+    // URL'yi decode et (&amp; gibi entity'leri çöz, URL parametrelerini bozmasın)
+    if (!empty($resim)) {
+        $resim = html_entity_decode($resim, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // Protokolsüz (//...) URL'leri https'e çevir
+        if (str_starts_with($resim, '//')) $resim = 'https:' . $resim;
     }
 
     return [

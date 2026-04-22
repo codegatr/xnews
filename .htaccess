@@ -121,7 +121,15 @@ AddType font/woff2 .woff2
     RewriteRule ^iletisim/?$ index.php?sayfa=iletisim [L,QSA]
     RewriteRule ^reklam/?$ index.php?sayfa=reklam [L,QSA]
     RewriteRule ^gizlilik/?$ index.php?sayfa=gizlilik [L,QSA]
+    RewriteRule ^gizlilik-politikasi/?$ index.php?sayfa=gizlilik [L,QSA]
+    RewriteRule ^kullanim/?$ index.php?sayfa=kullanim [L,QSA]
     RewriteRule ^kullanim-sartlari/?$ index.php?sayfa=kullanim [L,QSA]
+    RewriteRule ^kvkk/?$ index.php?sayfa=kvkk [L,QSA]
+    RewriteRule ^cerez/?$ index.php?sayfa=cerez [L,QSA]
+    RewriteRule ^cerez-politikasi/?$ index.php?sayfa=cerez [L,QSA]
+    RewriteRule ^kunye/?$ index.php?sayfa=kunye [L,QSA]
+    RewriteRule ^yayin-ilkeleri/?$ index.php?sayfa=yayin-ilkeleri [L,QSA]
+    RewriteRule ^kaldirma-talebi/?$ index.php?sayfa=kaldirma-talebi [L,QSA]
 
     # Ana sayfa ve fallback
     RewriteRule ^sayfa/([0-9]+)/?$ index.php?sayfa=anasayfa&sayfa_no=$1 [L,QSA]
