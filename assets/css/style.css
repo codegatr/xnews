@@ -878,93 +878,141 @@ body.tema-koyu a { color: inherit; }
 body.tema-koyu a:hover { color: var(--brand); }
 
 /* ===================================================
-   BÜYÜK SON DAKİKA SLIDER
+   BÜYÜK SON DAKİKA SLIDER (Mynet tarzı)
    =================================================== */
 .sd-slider {
     display: grid;
-    grid-template-columns: 54px 1fr;
-    gap: 12px;
-    margin-bottom: 40px;
+    grid-template-columns: 64px 1fr;
+    gap: 14px;
+    margin-bottom: 48px;
     position: relative;
 }
 .sd-slider-numaralar {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 .sd-num {
-    width: 44px; height: 44px;
+    width: 54px; height: 54px;
     display: flex; align-items: center; justify-content: center;
     font-family: var(--font-display);
-    font-size: 20px; font-weight: 700;
-    background: #f1f5f9;
+    font-size: 24px; font-weight: 700;
+    background: #1e293b;
     border: none;
-    color: var(--ink-muted);
+    color: #cbd5e1;
     cursor: pointer;
-    border-radius: 3px;
+    border-radius: 4px;
     transition: all .25s ease;
     position: relative;
+    overflow: hidden;
 }
-.sd-num:hover {
-    background: #e2e8f0;
-    color: var(--ink);
-    transform: translateX(2px);
+.sd-num::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--brand), #a30d26);
+    opacity: 0;
+    transition: opacity .3s ease;
+    z-index: 0;
 }
+.sd-num span { position: relative; z-index: 1; }
+.sd-num:hover { color: #fff; transform: translateX(3px); }
+.sd-num:hover::before { opacity: .7; }
 .sd-num.aktif {
-    background: var(--brand);
     color: #fff;
-    transform: translateX(4px);
-    box-shadow: 0 4px 14px rgba(200, 16, 46, .35);
+    transform: translateX(6px);
+    box-shadow: 0 6px 20px rgba(200, 16, 46, .5);
 }
+.sd-num.aktif::before { opacity: 1; }
 .sd-num.aktif::after {
     content: '';
     position: absolute;
-    left: -4px;
-    top: 0; bottom: 0;
-    width: 3px;
+    left: -6px;
+    top: 8px; bottom: 8px;
+    width: 4px;
     background: var(--brand);
     border-radius: 2px;
+    z-index: 2;
 }
 
+/* Ana slider paneli */
 .sd-slider-panel {
     position: relative;
-    aspect-ratio: 16 / 8;
-    max-height: 480px;
+    aspect-ratio: 16 / 9;
+    max-height: 580px;
+    min-height: 420px;
     overflow: hidden;
-    border-radius: 4px;
-    background: var(--black);
-}
-.sd-slider-etiket {
-    position: absolute;
-    top: 20px; left: 20px;
-    z-index: 10;
-    background: var(--brand);
-    color: #fff;
-    padding: 8px 16px;
-    font-family: var(--font-ui);
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .14em;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    border-radius: 3px;
-    box-shadow: 0 4px 16px rgba(200, 16, 46, .35);
-}
-.sd-dot {
-    width: 8px; height: 8px;
-    background: #fff;
-    border-radius: 50%;
-    animation: pulse 1.5s infinite;
+    border-radius: 6px;
+    background: #020617;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
 }
 
+/* Son Dakika rozeti (sol üst) */
+.sd-slider-etiket {
+    position: absolute;
+    top: 22px; left: 22px;
+    z-index: 20;
+    background: var(--brand);
+    color: #fff;
+    padding: 10px 18px;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 3px;
+    box-shadow: 0 6px 24px rgba(200, 16, 46, .5);
+    animation: sdEtiketIn .6s ease-out;
+}
+@keyframes sdEtiketIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+.sd-dot {
+    width: 10px; height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    animation: pulse 1.2s infinite;
+    box-shadow: 0 0 0 0 rgba(255,255,255,.8);
+}
+
+/* Önceki/Sonraki Ok Butonları */
+.sd-ok {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px; height: 52px;
+    background: rgba(0,0,0,.55);
+    border: 2px solid rgba(255,255,255,.3);
+    color: #fff;
+    cursor: pointer;
+    z-index: 15;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .25s ease;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+}
+.sd-slider-panel:hover .sd-ok { opacity: 1; }
+.sd-ok:hover {
+    background: var(--brand);
+    border-color: var(--brand);
+    transform: translateY(-50%) scale(1.1);
+}
+.sd-ok.prev { left: 16px; }
+.sd-ok.next { right: 16px; }
+.sd-ok svg { width: 22px; height: 22px; }
+
+/* Her bir slide */
 .sd-slide {
     position: absolute;
     inset: 0;
     opacity: 0;
     pointer-events: none;
-    transition: opacity .5s ease;
+    transition: opacity .6s ease;
     display: block;
     color: #fff;
 }
@@ -972,6 +1020,7 @@ body.tema-koyu a:hover { color: var(--brand); }
     opacity: 1;
     pointer-events: auto;
 }
+
 .sd-slide-gorsel {
     position: absolute;
     inset: 0;
@@ -980,53 +1029,64 @@ body.tema-koyu a:hover { color: var(--brand); }
 .sd-slide-gorsel img {
     width: 100%; height: 100%;
     object-fit: cover;
-    transition: transform 8s linear;
+    transition: transform 10s linear;
 }
 .sd-slide.aktif .sd-slide-gorsel img {
-    transform: scale(1.08);
+    transform: scale(1.15);
 }
 .sd-slide-overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(
         to top,
-        rgba(0, 0, 0, .92) 0%,
-        rgba(0, 0, 0, .7) 40%,
-        rgba(0, 0, 0, .1) 75%,
+        rgba(0, 0, 0, .95) 0%,
+        rgba(0, 0, 0, .75) 35%,
+        rgba(0, 0, 0, .15) 70%,
         transparent 100%
     );
 }
 
+/* Metin katmanı - Mynet tarzı büyük */
 .sd-slide-metin {
     position: absolute;
     left: 0; right: 0; bottom: 0;
-    padding: 32px 40px 28px;
-    z-index: 5;
+    padding: 40px 56px 36px;
+    z-index: 10;
     color: #fff;
 }
 .sd-slide-kat {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: var(--brand);
     color: #fff;
-    padding: 5px 12px;
+    padding: 7px 14px;
     font-family: var(--font-ui);
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: .12em;
-    margin-bottom: 12px;
+    letter-spacing: .16em;
+    margin-bottom: 14px;
     border-radius: 2px;
+    box-shadow: 0 4px 14px rgba(200, 16, 46, .4);
 }
+.sd-slide-kat::before {
+    content: '▶';
+    font-size: 8px;
+    opacity: .8;
+}
+
+/* Başlık — Mynet tarzı dramatic */
 .sd-slide-baslik {
     font-family: var(--font-display);
-    font-size: clamp(22px, 3.2vw, 40px);
+    font-size: clamp(26px, 3.8vw, 48px);
     font-weight: 700;
-    line-height: 1.15;
+    line-height: 1.08;
     text-transform: uppercase;
     letter-spacing: -.5px;
     color: #fff;
-    margin-bottom: 12px;
-    text-shadow: 0 2px 12px rgba(0,0,0,.5);
+    margin-bottom: 14px;
+    text-shadow: 0 3px 16px rgba(0,0,0,.7);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -1034,45 +1094,67 @@ body.tema-koyu a:hover { color: var(--brand); }
 }
 .sd-slide-ozet {
     font-family: var(--font-body);
-    font-size: 15px;
+    font-size: 17px;
     line-height: 1.55;
-    color: #e2e8f0;
-    margin-bottom: 12px;
-    max-width: 85%;
+    color: #f1f5f9;
+    margin-bottom: 14px;
+    max-width: 78%;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-shadow: 0 1px 8px rgba(0,0,0,.5);
 }
 .sd-slide-meta {
     font-family: var(--font-ui);
     font-size: 12px;
-    color: #cbd5e1;
+    color: #e2e8f0;
     text-transform: uppercase;
-    letter-spacing: .08em;
+    letter-spacing: .1em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 .sd-slide-kaynak {
-    color: #fff;
-    font-weight: 700;
+    color: var(--warm-yellow);
+    font-weight: 800;
+    letter-spacing: .12em;
 }
 
+/* Sağ alt köşeye slide sayacı (Mynet'tekine benzer) */
+.sd-slayt-sayac {
+    position: absolute;
+    top: 28px; right: 28px;
+    z-index: 15;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(0,0,0,.5);
+    padding: 8px 14px;
+    border-radius: 30px;
+    letter-spacing: .08em;
+    border: 1px solid rgba(255,255,255,.2);
+}
+.sd-slayt-sayac b { color: var(--brand); font-size: 18px; }
+
+/* İlerleme çubuğu (altta kalın) */
 .sd-slider-ilerleme {
     position: absolute;
     bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: rgba(255,255,255,.15);
-    z-index: 8;
+    height: 4px;
+    background: rgba(255,255,255,.12);
+    z-index: 12;
 }
 .sd-slider-ilerleme-dolgu {
     height: 100%;
-    background: var(--brand);
+    background: linear-gradient(90deg, var(--brand), #ff3858);
     width: 0%;
     transition: width .1s linear;
+    box-shadow: 0 -2px 8px rgba(255, 56, 88, .5);
 }
-
-/* Duraklatılmış (hover) */
 .sd-slider.duraklatildi .sd-slider-ilerleme-dolgu {
-    background: var(--warm-yellow);
+    background: linear-gradient(90deg, var(--warm-yellow), #ffd838);
 }
 
 /* Responsive */
@@ -1083,21 +1165,26 @@ body.tema-koyu a:hover { color: var(--brand); }
         justify-content: center;
         order: 2;
         flex-wrap: wrap;
+        gap: 6px;
     }
-    .sd-num { width: 36px; height: 36px; font-size: 15px; }
-    .sd-num.aktif { transform: translateY(-3px); }
+    .sd-num { width: 42px; height: 42px; font-size: 17px; }
+    .sd-num.aktif { transform: translateY(-4px); }
     .sd-num.aktif::after { display: none; }
-    .sd-slider-panel { aspect-ratio: 4 / 3; max-height: none; }
-    .sd-slide-metin { padding: 24px 20px 22px; }
-    .sd-slide-ozet { display: none; }
+    .sd-slider-panel { aspect-ratio: 4 / 3; max-height: none; min-height: 360px; }
+    .sd-slide-metin { padding: 26px 22px 24px; }
+    .sd-slide-ozet { font-size: 15px; max-width: 100%; -webkit-line-clamp: 2; }
+    .sd-ok { width: 40px; height: 40px; opacity: .8; }
+    .sd-slayt-sayac { top: 18px; right: 18px; font-size: 12px; padding: 6px 12px; }
 }
 
 @media (max-width: 600px) {
-    .sd-slide-baslik { font-size: 20px; -webkit-line-clamp: 4; }
-    .sd-slider-etiket { top: 14px; left: 14px; padding: 6px 12px; font-size: 10px; }
+    .sd-slide-baslik { font-size: 22px; -webkit-line-clamp: 4; }
+    .sd-slide-ozet { display: none; }
+    .sd-slider-etiket { top: 14px; left: 14px; padding: 7px 12px; font-size: 11px; }
+    .sd-slide-kat { padding: 5px 10px; font-size: 10px; margin-bottom: 10px; }
 }
 
 /* Dark tema */
-body.tema-koyu .sd-num { background: #1e293b; color: #94a3b8; }
-body.tema-koyu .sd-num:hover { background: #334155; color: #e2e8f0; }
-body.tema-koyu .sd-num.aktif { background: var(--brand); color: #fff; }
+body.tema-koyu .sd-num { background: #0b1220; color: #94a3b8; }
+body.tema-koyu .sd-num:hover { color: #fff; }
+body.tema-koyu .sd-num.aktif { color: #fff; }

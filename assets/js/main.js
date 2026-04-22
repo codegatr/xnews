@@ -254,25 +254,30 @@ window.xnews = (function() {
         const numaralar = slider.querySelectorAll('.sd-num');
         const slaytlar  = slider.querySelectorAll('.sd-slide');
         const ilerleme  = slider.querySelector('.sd-slider-ilerleme-dolgu');
+        const sayac     = slider.querySelector('#sdAktifNo');
+        const okPrev    = slider.querySelector('#sdOkPrev');
+        const okNext    = slider.querySelector('#sdOkNext');
         const SURE = 7000;
         let aktifIdx = 0;
-        let sayac = 0;
+        let sayim = 0;
         let duraklatildi = false;
 
         function goster(idx) {
+            idx = ((idx % adet) + adet) % adet; // negatif guvenlikli modulo
             numaralar.forEach((n, i) => n.classList.toggle('aktif', i === idx));
             slaytlar.forEach((s, i) => s.classList.toggle('aktif', i === idx));
+            if (sayac) sayac.textContent = idx + 1;
             aktifIdx = idx;
-            sayac = 0;
+            sayim = 0;
             if (ilerleme) ilerleme.style.width = '0%';
         }
 
         function sonraki() {
             if (duraklatildi) return;
-            sayac += 100;
-            if (ilerleme) ilerleme.style.width = (sayac / SURE * 100) + '%';
-            if (sayac >= SURE) {
-                goster((aktifIdx + 1) % adet);
+            sayim += 100;
+            if (ilerleme) ilerleme.style.width = (sayim / SURE * 100) + '%';
+            if (sayim >= SURE) {
+                goster(aktifIdx + 1);
             }
         }
 
@@ -281,8 +286,18 @@ window.xnews = (function() {
             n.addEventListener('mouseenter', () => goster(i));
         });
 
+        if (okPrev) okPrev.addEventListener('click', (e) => { e.preventDefault(); goster(aktifIdx - 1); });
+        if (okNext) okNext.addEventListener('click', (e) => { e.preventDefault(); goster(aktifIdx + 1); });
+
         slider.addEventListener('mouseenter', () => { duraklatildi = true; slider.classList.add('duraklatildi'); });
         slider.addEventListener('mouseleave', () => { duraklatildi = false; slider.classList.remove('duraklatildi'); });
+
+        // Klavye (slider görünürse)
+        document.addEventListener('keydown', (e) => {
+            if (!slider.getBoundingClientRect().bottom > 0) return;
+            if (e.key === 'ArrowRight' && document.activeElement.tagName !== 'INPUT') goster(aktifIdx + 1);
+            else if (e.key === 'ArrowLeft' && document.activeElement.tagName !== 'INPUT') goster(aktifIdx - 1);
+        });
 
         setInterval(sonraki, 100);
     }

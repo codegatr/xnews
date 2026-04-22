@@ -443,11 +443,11 @@ case 'anasayfa':
     <?php else: ?>
 
     <?php if (!empty($sd_slider) && count($sd_slider) >= 2): ?>
-    <!-- BÜYÜK SON DAKİKA SLIDER -->
+    <!-- BÜYÜK SON DAKİKA SLIDER (Mynet tarzı) -->
     <section class="sd-slider" id="sdSlider" data-adet="<?= count($sd_slider) ?>">
         <div class="sd-slider-numaralar">
             <?php foreach ($sd_slider as $i => $h): ?>
-                <button class="sd-num <?= $i === 0 ? 'aktif' : '' ?>" data-slide="<?= $i ?>" aria-label="Slide <?= $i + 1 ?>"><?= $i + 1 ?></button>
+                <button class="sd-num <?= $i === 0 ? 'aktif' : '' ?>" data-slide="<?= $i ?>" aria-label="Slide <?= $i + 1 ?>"><span><?= $i + 1 ?></span></button>
             <?php endforeach; ?>
         </div>
         <div class="sd-slider-panel">
@@ -455,6 +455,16 @@ case 'anasayfa':
                 <span class="sd-dot"></span>
                 SON DAKİKA
             </div>
+
+            <div class="sd-slayt-sayac"><b id="sdAktifNo">1</b> / <?= count($sd_slider) ?></div>
+
+            <button class="sd-ok prev" id="sdOkPrev" aria-label="Önceki haber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="sd-ok next" id="sdOkNext" aria-label="Sonraki haber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+
             <?php foreach ($sd_slider as $i => $h): ?>
             <a href="<?= h(haber_url($h)) ?>" class="sd-slide <?= $i === 0 ? 'aktif' : '' ?>" data-slide="<?= $i ?>">
                 <div class="sd-slide-gorsel">
@@ -467,7 +477,7 @@ case 'anasayfa':
                     <?php endif; ?>
                     <h2 class="sd-slide-baslik"><?= h($h['baslik']) ?></h2>
                     <?php if (!empty($h['ozet'])): ?>
-                        <p class="sd-slide-ozet"><?= h(kisalt($h['ozet'], 140)) ?></p>
+                        <p class="sd-slide-ozet"><?= h(kisalt($h['ozet'], 160)) ?></p>
                     <?php endif; ?>
                     <div class="sd-slide-meta">
                         <?php if (!empty($h['kaynak_ad'])): ?><span class="sd-slide-kaynak"><?= h($h['kaynak_ad']) ?></span> · <?php endif; ?>

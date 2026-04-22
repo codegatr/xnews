@@ -67,9 +67,17 @@ if (session_status() === PHP_SESSION_NONE) {
  * XSS korumasi - HTML ciktisi için
  */
 function h(?string $s): string {
+    $s = (string)$s;
+    // Görünmez kontrol karakterlerini temizle (kart bug'ı: renkli kutular)
+    // Tab (0x09), Newline (0x0A), Carriage Return (0x0D) hariç
+    $s = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $s);
+    // Zero-width karakterler (invisible, kopya/yapıştır kirliliği)
+    $s = preg_replace('/[\x{200B}-\x{200F}\x{2028}\x{2029}\x{FEFF}]/u', '', $s);
+    // Replacement character U+FFFD (bozuk encoding göstergesi) da temizle
+    $s = str_replace("\u{FFFD}", '', $s);
     // Önce HTML entity'leri cöz (RSS'ten gelen çift-escape sorunu: &apos;in → 'in),
     // sonra güvenli escape uygula. XSS koruması korunur.
-    $s = html_entity_decode((string)$s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $s = html_entity_decode($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     return htmlspecialchars($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
