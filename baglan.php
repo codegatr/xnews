@@ -67,7 +67,10 @@ if (session_status() === PHP_SESSION_NONE) {
  * XSS korumasi - HTML ciktisi için
  */
 function h(?string $s): string {
-    return htmlspecialchars((string)$s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    // Önce HTML entity'leri cöz (RSS'ten gelen çift-escape sorunu: &apos;in → 'in),
+    // sonra güvenli escape uygula. XSS koruması korunur.
+    $s = html_entity_decode((string)$s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    return htmlspecialchars($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
 /**

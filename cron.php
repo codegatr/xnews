@@ -226,13 +226,13 @@ function rss_oge_cikar(SimpleXMLElement $item, string $format): array {
     }
 
     return [
-        'başlık'   => trim($baslik),
+        'baslik'   => trim(html_entity_decode((string)$baslik, ENT_QUOTES | ENT_HTML5, 'UTF-8')),
         'link'     => trim($link),
-        'ozet'     => $ozet,
-        'icerik'   => $icerik,
+        'ozet'     => html_entity_decode($ozet, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+        'icerik'   => html_entity_decode($icerik, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
         'tarih'    => $tarih,
         'guid'     => $guid,
-        'yazar'    => trim($yazar),
+        'yazar'    => trim(html_entity_decode((string)$yazar, ENT_QUOTES | ENT_HTML5, 'UTF-8')),
         'kategori' => trim($kategori),
         'resim'    => trim($resim),
     ];

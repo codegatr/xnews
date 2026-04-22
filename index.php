@@ -119,7 +119,7 @@ function sayfa_basla(array $opt): void {
 
 <nav class="kat-menu"><div class="kapsayici">
     <ul class="kat-liste">
-        <li class="<?= $aktif === 'anasayfa' ? 'aktif' : '' ?>"><a href="<?= url() ?>">Anasayfa</a></li>
+        <li class="<?= $aktif === 'anasayfa' ? 'aktif' : '' ?>"><a href="<?= url() ?>">Ana Sayfa</a></li>
         <?php foreach ($menu_kategoriler as $kat): ?>
             <li class="<?= ($aktif_kat && ($aktif_kat['id'] ?? 0) == $kat['id']) ? 'aktif' : '' ?>">
                 <a href="<?= h(kategori_url($kat)) ?>"><?= h($kat['ad']) ?></a>
@@ -127,7 +127,7 @@ function sayfa_basla(array $opt): void {
         <?php endforeach; ?>
     </ul>
     <div class="kat-menu-sag">
-        <span class="canli-rozet">Canli</span>
+        <span class="canli-rozet">CANLI</span>
         <span class="mono"><?= date('H:i') ?></span>
     </div>
 </div></nav>
@@ -138,7 +138,7 @@ function sayfa_basla(array $opt): void {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <ul>
-        <li><a href="<?= url() ?>">Anasayfa</a></li>
+        <li><a href="<?= url() ?>">Ana Sayfa</a></li>
         <?php foreach ($menu_kategoriler as $kat): ?><li><a href="<?= h(kategori_url($kat)) ?>"><?= h($kat['ad']) ?></a></li><?php endforeach; ?>
         <li><a href="<?= url('hakkimizda') ?>">Hakkımızda</a></li>
         <li><a href="<?= url('iletisim') ?>">İletişim</a></li>

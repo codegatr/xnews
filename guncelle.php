@@ -262,10 +262,34 @@ try {
         $yeni_manifest = manifest_oku();
         ayar_guncelle('mevcut_surum', $yeni_manifest['surum']);
 
-        log_ekle('islem', 'Güncelleme tamamlandi',
-            'v' . $mevcut_surum . ' -> v' . $yeni_manifest['surum'] . ' (' . $dosya_sayisi . ' dosya)', $yonetici['id']);
+        // OTOMATIK DB MIGRATION: sql/migration_v*.sql dosyasi varsa calistir
+        $migration_sayisi = 0;
+        $migration_yolu = __DIR__ . '/sql/migration_v' . $yeni_manifest['surum'] . '.sql';
+        if (file_exists($migration_yolu)) {
+            try {
+                $sql_icerik = file_get_contents($migration_yolu);
+                // SQL yorumlarini kaldir, noktali virgulle bol
+                $sql_icerik = preg_replace('/--[^\n]*/', '', $sql_icerik);
+                $komutlar = array_filter(array_map('trim', explode(';', $sql_icerik)));
+                foreach ($komutlar as $komut) {
+                    if (stripos($komut, 'SELECT') === 0) continue; // informational
+                    if (empty($komut)) continue;
+                    $db->exec($komut);
+                    $migration_sayisi++;
+                }
+                log_ekle('islem', 'DB Migration uygulandi', 'v' . $yeni_manifest['surum'] . ': ' . $migration_sayisi . ' komut', $yonetici['id']);
+            } catch (Throwable $e) {
+                log_ekle('uyari', 'Migration hatasi (guncelleme yine de tamamlandi)', $e->getMessage(), $yonetici['id']);
+            }
+        }
 
-        $mesaj = 'Güncelleme başarıyla uygulandi. v' . $mevcut_surum . ' → v' . $yeni_manifest['surum'] . ' (' . $dosya_sayisi . ' dosya). Yedek: ' . basename($yedek_yolu);
+        log_ekle('islem', 'Güncelleme tamamlandi',
+            'v' . $mevcut_surum . ' -> v' . $yeni_manifest['surum'] . ' (' . $dosya_sayisi . ' dosya' .
+            ($migration_sayisi ? ', ' . $migration_sayisi . ' DB migration' : '') . ')', $yonetici['id']);
+
+        $mesaj = 'Güncelleme başarıyla uygulandı. v' . $mevcut_surum . ' → v' . $yeni_manifest['surum'] .
+                 ' (' . $dosya_sayisi . ' dosya' . ($migration_sayisi ? ' + ' . $migration_sayisi . ' DB migration' : '') .
+                 '). Yedek: ' . basename($yedek_yolu);
         $mesaj_tip = 'basari';
         $mevcut_surum = $yeni_manifest['surum'];
         $yeni_surum_var = false;
