@@ -1543,3 +1543,35 @@ body.tema-koyu .sd-num.aktif { color: #fff; }
 @media (max-width: 768px) {
     .kapsayici { padding-left: 14px; padding-right: 14px; }
 }
+
+/* ===================================================
+   FOOTER OTOMATİK GÜNCELLEME BİLDİRİMİ
+   =================================================== */
+.footer-otomatik-bildirim {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 16px;
+    margin: 8px 0 12px;
+    font-size: 12px;
+    color: #a0a0a0;
+    border-top: 1px dashed rgba(255, 255, 255, .08);
+}
+.footer-otomatik-bildirim .foe-ikon {
+    width: 16px; height: 16px;
+    color: var(--brand);
+    animation: foe-spin 3s linear infinite;
+    flex-shrink: 0;
+}
+.footer-otomatik-bildirim strong {
+    color: #d0d0d0;
+    font-weight: 600;
+}
+@keyframes foe-spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@media (max-width: 768px) {
+    .footer-otomatik-bildirim { font-size: 11px; padding: 10px; }
+}
