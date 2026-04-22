@@ -654,17 +654,20 @@ function menu_aktif(string $mevcut, string $slug): string {
                     LEFT JOIN {$prefix}sources s ON s.id = c.kaynak_id
                     ORDER BY c.olusturma DESC LIMIT 6")->fetchAll();
             ?>
-                <div class="hosgeldin-kart">
-                    <h2>Hoş geldin, <?= h(explode(' ', $yonetici['ad_soyad'] ?: $yonetici['kullanici_adi'])[0]) ?> 👋</h2>
-                    <p>XNEWS yönetim paneline eriştin. Aşağıdaki istatistiklerden sistemin genel durumunu görüntüleyebilirsin.</p>
-                    <div class="butonlar">
-                        <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton">RSS Kaynakları</a>
-                        <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" class="buton ikincil">Manuel Haber Ekle</a>
-                        <form method="post" action="<?= url('yonetim.php?sayfa=cekim-tetik') ?>" style="display:inline">
-                            <?= csrf_input() ?>
-                            <button type="submit" class="buton ikincil" title="cron.php'yi çağırır"><?= ikon('activity') ?>RSS Çekimini Tetikle</button>
-                        </form>
-                    </div>
+                <div class="saray-hosgeldin">
+                    <h1>Hoş geldiniz, <span class="altin"><?= h(explode(' ', $yonetici['ad_soyad'] ?: $yonetici['kullanici_adi'])[0]) ?></span> 👋</h1>
+                    <p>XNEWS Haber İmparatorluğu yönetim sarayına eriştiniz.<br>Aşağıdan tüm imparatorluğunuzu görüntüleyebilirsiniz.</p>
+                    <span class="tarih"><?= h(tr_tarih(date('Y-m-d H:i:s'))) ?> · <?= h(date('l')) ?></span>
+                </div>
+
+                <div class="hosgeldin-kart" style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                    <strong style="color:var(--saray-koyu);font-size:14px">⚡ Hızlı Eylemler:</strong>
+                    <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton">RSS Kaynakları</a>
+                    <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" class="buton ikincil">Manuel Haber Ekle</a>
+                    <form method="post" action="<?= url('yonetim.php?sayfa=cekim-tetik') ?>" style="display:inline">
+                        <?= csrf_input() ?>
+                        <button type="submit" class="buton ikincil" title="cron.php'yi çağırır"><?= ikon('activity') ?>RSS Çekimini Tetikle</button>
+                    </form>
                 </div>
 
                 <div class="stat-grid">

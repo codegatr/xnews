@@ -328,22 +328,24 @@ function sayfa_bitis(string $aktif = ''): void {
 function haber_karti(array $h, string $tip = 'normal'): void {
 ?>
 <article class="haber-kart <?= $tip === 'yatay' ? 'yatay' : '' ?>">
-    <a href="<?= h(haber_url($h)) ?>" class="gorsel">
-        <img src="<?= h(haber_gorsel($h['resim'] ?? null)) ?>" alt="<?= h($h['baslik']) ?>" loading="lazy">
+    <a href="<?= h(haber_url($h)) ?>" class="hk-link">
+        <span class="hk-gorsel">
+            <img src="<?= h(haber_gorsel($h['resim'] ?? null)) ?>" alt="<?= h($h['baslik']) ?>" loading="lazy">
+        </span>
+        <span class="hk-metin">
+            <?php if (!empty($h['kat_ad'])): ?>
+                <span class="hk-kat"><?= h($h['kat_ad']) ?></span>
+            <?php endif; ?>
+            <span class="hk-baslik"><?= h($h['baslik']) ?></span>
+            <?php if ($tip !== 'yatay' && !empty($h['ozet'])): ?>
+                <span class="hk-ozet"><?= h(kisalt($h['ozet'], 110)) ?></span>
+            <?php endif; ?>
+            <span class="hk-meta">
+                <?php if (!empty($h['kaynak_ad'])): ?><span class="hk-kaynak"><?= h($h['kaynak_ad']) ?></span><?php endif; ?>
+                <span class="hk-zaman"><?= h(goreceli_zaman($h['yayin_tarihi'])) ?></span>
+            </span>
+        </span>
     </a>
-    <div class="metin">
-        <?php if (!empty($h['kat_ad'])): ?>
-            <a href="<?= h(url('kategori/' . $h['kat_slug'])) ?>" class="kat-etiket"><?= h($h['kat_ad']) ?></a>
-        <?php endif; ?>
-        <h3><a href="<?= h(haber_url($h)) ?>"><?= h($h['baslik']) ?></a></h3>
-        <?php if ($tip !== 'yatay' && !empty($h['ozet'])): ?>
-            <p class="ozet"><?= h(kisalt($h['ozet'], 120)) ?></p>
-        <?php endif; ?>
-        <div class="meta">
-            <?php if (!empty($h['kaynak_ad'])): ?><span class="kaynak"><?= h($h['kaynak_ad']) ?></span><span>·</span><?php endif; ?>
-            <span><?= h(goreceli_zaman($h['yayin_tarihi'])) ?></span>
-        </div>
-    </div>
 </article>
 <?php
 }

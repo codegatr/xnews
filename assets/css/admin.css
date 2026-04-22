@@ -474,3 +474,363 @@ table.tablo .bos {
     opacity: 0; pointer-events: none; transition: opacity .2s;
 }
 .karartma.acik { opacity: 1; pointer-events: all; }
+
+/* =====================================================
+   🏛 SARAY TEMASI (v1.2.0)
+   Lüks admin panel - koyu lacivert + altın + cam efekt
+   ===================================================== */
+
+:root {
+    /* Saray paleti */
+    --saray-koyu:   #0a0e27;   /* Gece gökyüzü */
+    --saray-lacivert: #131744;  /* Kraliyet lacivert */
+    --saray-altin:  #d4af37;   /* Altın */
+    --saray-altin-parlak: #f4d76e;
+    --saray-cam:    rgba(255, 255, 255, .04);
+    --saray-cam-hover: rgba(255, 255, 255, .08);
+    --saray-aksan:  #8b5cf6;   /* Mor-lacivert aksan */
+    --saray-bordo:  #8b0028;
+}
+
+/* Arka plan */
+body {
+    background:
+        radial-gradient(ellipse at top left, rgba(200, 16, 46, .04), transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(139, 92, 246, .03), transparent 50%),
+        linear-gradient(180deg, #fafbfc 0%, #f5f7fa 100%);
+    min-height: 100vh;
+}
+
+/* ---- SIDEBAR: Saray Sütunu ---- */
+.yp-sidebar, aside.sidebar, .admin-sidebar {
+    background:
+        linear-gradient(180deg, var(--saray-koyu) 0%, var(--saray-lacivert) 100%) !important;
+    border-right: 1px solid rgba(212, 175, 55, .15);
+    position: relative;
+    box-shadow: 4px 0 24px rgba(10, 14, 39, .15);
+}
+.yp-sidebar::before, aside.sidebar::before, .admin-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--saray-altin), transparent);
+    opacity: .6;
+}
+
+/* Sidebar logo */
+.yp-logo, .sidebar-logo, .admin-logo {
+    padding: 24px 20px !important;
+    border-bottom: 1px solid rgba(212, 175, 55, .15) !important;
+    position: relative;
+}
+.yp-logo::after, .sidebar-logo::after, .admin-logo::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--saray-altin), transparent);
+}
+
+/* Sidebar logo yazı */
+.yp-logo-metin, .sidebar-logo span:not(.x), .admin-logo-title {
+    color: #fff !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.yp-logo .x, .sidebar-logo .x {
+    color: var(--saray-altin) !important;
+    filter: drop-shadow(0 2px 6px rgba(212, 175, 55, .5));
+}
+
+/* Sidebar menü */
+.yp-menu a, .admin-menu a, .sidebar-menu a {
+    color: rgba(255, 255, 255, .7) !important;
+    transition: all .25s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+}
+.yp-menu a:hover, .admin-menu a:hover, .sidebar-menu a:hover {
+    background: rgba(212, 175, 55, .08) !important;
+    color: #fff !important;
+    border-left-color: var(--saray-altin) !important;
+    padding-left: calc(20px + 4px) !important;
+}
+.yp-menu a.aktif, .admin-menu a.aktif, .sidebar-menu a.aktif,
+.yp-menu a.active, .admin-menu a.active {
+    background: linear-gradient(90deg, rgba(212, 175, 55, .15), transparent) !important;
+    color: #fff !important;
+    border-left-color: var(--saray-altin) !important;
+    box-shadow: inset 0 0 20px rgba(212, 175, 55, .08);
+}
+.yp-menu a.aktif::before, .admin-menu a.aktif::before {
+    content: '';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--saray-altin);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--saray-altin);
+}
+
+/* Sidebar bölüm başlıkları */
+.yp-menu-baslik, .sidebar-section {
+    color: var(--saray-altin) !important;
+    font-size: 10px !important;
+    letter-spacing: .14em !important;
+    opacity: .7;
+}
+
+/* ---- HEADER (Saray girişi) ---- */
+.yp-ust, .admin-header {
+    background: rgba(255, 255, 255, .7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(10, 14, 39, .08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .03);
+}
+
+/* ---- DASHBOARD HOSGELDIN ---- */
+.saray-hosgeldin {
+    background:
+        linear-gradient(135deg, var(--saray-koyu) 0%, var(--saray-lacivert) 100%);
+    color: #fff;
+    padding: 32px 36px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(10, 14, 39, .15);
+}
+.saray-hosgeldin::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -20%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(212, 175, 55, .15), transparent 70%);
+    pointer-events: none;
+}
+.saray-hosgeldin::after {
+    content: '👑';
+    position: absolute;
+    top: 28px; right: 36px;
+    font-size: 48px;
+    opacity: .4;
+    animation: sarayDalganma 3s ease-in-out infinite;
+}
+@keyframes sarayDalganma {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-4px) rotate(3deg); }
+}
+.saray-hosgeldin h1 {
+    font-family: 'IBM Plex Sans', serif;
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    letter-spacing: -.5px;
+    position: relative;
+    z-index: 1;
+}
+.saray-hosgeldin h1 .altin {
+    color: var(--saray-altin);
+    background: linear-gradient(90deg, var(--saray-altin), var(--saray-altin-parlak), var(--saray-altin));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: altinAkis 3s linear infinite;
+}
+@keyframes altinAkis {
+    to { background-position: 200% center; }
+}
+.saray-hosgeldin p {
+    opacity: .8;
+    font-size: 15px;
+    margin: 0;
+    line-height: 1.55;
+    position: relative;
+    z-index: 1;
+}
+.saray-hosgeldin .tarih {
+    margin-top: 14px;
+    padding: 8px 14px;
+    background: rgba(212, 175, 55, .12);
+    border: 1px solid rgba(212, 175, 55, .3);
+    border-radius: 50px;
+    display: inline-block;
+    font-size: 12px;
+    color: var(--saray-altin-parlak);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+/* ---- STAT KARTLAR (Cam Efekti) ---- */
+.yp-stat-grid, .stat-grid, .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+.yp-stat, .stat-kart, .dashboard-stat {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px !important;
+    padding: 22px 24px !important;
+    position: relative;
+    overflow: hidden;
+    transition: all .3s ease;
+    box-shadow: 0 2px 8px rgba(10, 14, 39, .04);
+}
+.yp-stat::before, .stat-kart::before, .dashboard-stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--brand), var(--saray-altin));
+    transform: scaleX(.3);
+    transform-origin: left;
+    transition: transform .3s ease;
+}
+.yp-stat:hover, .stat-kart:hover, .dashboard-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(10, 14, 39, .1);
+    border-color: rgba(212, 175, 55, .3);
+}
+.yp-stat:hover::before, .stat-kart:hover::before, .dashboard-stat:hover::before {
+    transform: scaleX(1);
+}
+
+.yp-stat-val, .stat-kart .deger, .dashboard-stat-value {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, var(--saray-koyu), var(--saray-lacivert));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1 !important;
+}
+
+/* ---- PANEL (ana içerik kutusu) ---- */
+.panel {
+    border-radius: 14px !important;
+    box-shadow: 0 2px 12px rgba(10, 14, 39, .04);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: #fff;
+}
+.panel:hover {
+    border-color: var(--border-hover);
+}
+.panel-bas {
+    background: linear-gradient(180deg, #fafbfc, #fff);
+    border-bottom: 1px solid var(--border);
+}
+
+/* ---- ANA BUTON — Altın (tema için) ---- */
+.btn-altin, .saray-buton {
+    background: linear-gradient(135deg, var(--saray-altin), var(--saray-altin-parlak)) !important;
+    color: var(--saray-koyu) !important;
+    font-weight: 700;
+    border: none;
+    box-shadow: 0 4px 14px rgba(212, 175, 55, .3);
+    transition: all .2s ease;
+}
+.btn-altin:hover, .saray-buton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, .5);
+}
+
+/* ---- FORM INPUTLAR (rafine) ---- */
+input[type="text"], input[type="email"], input[type="password"], input[type="url"],
+input[type="number"], input[type="search"], textarea, select {
+    border: 1.5px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    font-size: 14px !important;
+    transition: all .2s ease;
+    background: #fff;
+}
+input:focus, textarea:focus, select:focus {
+    border-color: var(--saray-lacivert) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(19, 23, 68, .08) !important;
+}
+
+/* ---- TABLO ---- */
+table thead th {
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9) !important;
+    color: var(--saray-koyu) !important;
+    font-weight: 700 !important;
+    letter-spacing: .04em;
+    border-bottom: 2px solid var(--border) !important;
+}
+table tbody tr:hover {
+    background: rgba(212, 175, 55, .04) !important;
+}
+
+/* ---- MOBİL ADMIN (sidebar drawer) ---- */
+@media (max-width: 1024px) {
+    .yp-sidebar, aside.sidebar, .admin-sidebar {
+        position: fixed !important;
+        top: 0; left: 0;
+        height: 100vh;
+        width: 280px;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform .3s ease;
+    }
+    .yp-sidebar.acik, aside.sidebar.acik, .admin-sidebar.acik {
+        transform: translateX(0);
+    }
+    .yp-govde, .admin-body, .admin-container {
+        margin-left: 0 !important;
+        padding: 16px !important;
+    }
+    .yp-ust, .admin-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 12px 16px;
+    }
+    .yp-mobil-menu-btn, .admin-menu-toggle {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 40px; height: 40px;
+        background: var(--saray-koyu);
+        color: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .admin-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 14, 39, .6);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .3s;
+    }
+    .admin-overlay.acik {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .saray-hosgeldin { padding: 24px 20px; }
+    .saray-hosgeldin h1 { font-size: 22px; }
+    .saray-hosgeldin::after { font-size: 32px; top: 20px; right: 20px; }
+    .yp-stat-grid, .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .yp-stat-val, .stat-kart .deger { font-size: 24px !important; }
+}
+
+@media (max-width: 640px) {
+    .yp-stat-grid, .stat-grid { grid-template-columns: 1fr; }
+    .saray-hosgeldin h1 { font-size: 20px; }
+}

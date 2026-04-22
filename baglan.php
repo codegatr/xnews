@@ -68,23 +68,25 @@ if (session_status() === PHP_SESSION_NONE) {
  */
 function h(?string $s): string {
     $s = (string)$s;
-    // Unicode \p{Cf} = Format kategorisi TAMAMI (tüm zero-width, bidi markers,
-    // word joiner, invisible separator, variation selector, vs.)
-    // Bu, manuel karakter listelerinden çok daha kapsamlı.
-    $s = preg_replace('/\p{Cf}/u', '', $s);
-    // ASCII kontrol karakterleri (tab, LF, CR hariç — whitespace doğal)
+    // 1. Unicode \p{Cf} = Format kategorisi (zero-width, bidi markers, vs)
+    // 2. Variation Selectors FE00-FE0F (text/emoji presentation)
+    // 3. Variation Selectors Supplement E0100-E01EF
+    // 4. Tag characters E0020-E007F
+    // 5. Interlinear Annotation FFF9-FFFB
+    $s = preg_replace('/\p{Cf}|[\x{FE00}-\x{FE0F}]|[\x{E0100}-\x{E01EF}]|[\x{E0020}-\x{E007F}]|[\x{FFF9}-\x{FFFB}]/u', '', $s);
+    // ASCII kontrol karakterleri (tab, LF, CR hariç)
     $s = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $s);
-    // Replacement character U+FFFD (bozuk encoding göstergesi)
+    // Replacement character U+FFFD (bozuk encoding)
     $s = str_replace("\u{FFFD}", '', $s);
     // HTML entity decode + escape
     $s = html_entity_decode($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     return htmlspecialchars($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
-// Veritabanı için ham temizlik (DB'ye yazmadan önce)
+// Veritabanı için ham temizlik (escape'siz)
 function temizle_metin(?string $s): string {
     $s = (string)$s;
-    $s = preg_replace('/\p{Cf}/u', '', $s);
+    $s = preg_replace('/\p{Cf}|[\x{FE00}-\x{FE0F}]|[\x{E0100}-\x{E01EF}]|[\x{E0020}-\x{E007F}]|[\x{FFF9}-\x{FFFB}]/u', '', $s);
     $s = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $s);
     $s = str_replace("\u{FFFD}", '', $s);
     return trim($s);
