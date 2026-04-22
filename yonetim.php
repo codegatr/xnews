@@ -663,7 +663,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     <span class="tarih"><?= h(tr_tarih(date('Y-m-d H:i:s'))) ?> · <?= h(date('l')) ?></span>
                 </div>
 
-                <div class="hosgeldin-kart" style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                <div class="hizli-eylemler" style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
                     <strong style="color:var(--saray-koyu);font-size:14px">⚡ Hızlı Eylemler:</strong>
                     <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton">RSS Kaynakları</a>
                     <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" class="buton ikincil">Manuel Haber Ekle</a>
@@ -1759,9 +1759,9 @@ function menu_aktif(string $mevcut, string $slug): string {
                             <?php else: foreach ($ayar_liste as $a): ?>
                                 <div class="form-grup">
                                     <label><?= h($a['etiket'] ?: $a['anahtar']) ?></label>
-                                    <?php if ($a['tip'] === 'html' || ($a['aciklama'] && stripos($a['aciklama'], 'kod') !== false)): ?>
+                                    <?php if ($a['tip'] === 'html' || $a['tip'] === 'metin-uzun' || ($a['aciklama'] && stripos($a['aciklama'], 'kod') !== false)): ?>
                                         <textarea name="ayar[<?= h($a['anahtar']) ?>]" rows="5" style="font-family:'IBM Plex Mono',monospace;font-size:12px"><?= h($a['deger']) ?></textarea>
-                                    <?php elseif ($a['tip'] === 'boolean'): ?>
+                                    <?php elseif ($a['tip'] === 'boolean' || $a['tip'] === 'onoff'): ?>
                                         <label class="switch">
                                             <input type="hidden" name="ayar[<?= h($a['anahtar']) ?>]" value="0">
                                             <input type="checkbox" name="ayar[<?= h($a['anahtar']) ?>]" value="1" <?= $a['deger'] ? 'checked' : '' ?>>

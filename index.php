@@ -106,6 +106,19 @@ function sayfa_basla(array $opt): void {
 <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>?v=<?= h(ayar('mevcut_surum', '1.0.0')) ?>">
 <link rel="alternate" type="application/rss+xml" title="<?= h(ayar('site_adi')) ?>" href="<?= url('rss') ?>">
 <?php if ($gsc = ayar('google_site_verification')): ?><meta name="google-site-verification" content="<?= h($gsc) ?>"><?php endif; ?>
+<?php
+// Google AdSense otomatik entegrasyon
+$adsense_id = trim(ayar('adsense_client_id', ''));
+if (!empty($adsense_id) && preg_match('/^ca-pub-\d{10,20}$/', $adsense_id)):
+?>
+<meta name="google-adsense-account" content="<?= h($adsense_id) ?>">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<?= h($adsense_id) ?>" crossorigin="anonymous"></script>
+<?php if (ayar('adsense_auto_ads', '0') === '1'): ?>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({ google_ad_client: "<?= h($adsense_id) ?>", enable_page_level_ads: true });
+</script>
+<?php endif; ?>
+<?php endif; ?>
 <?= ayar('google_analytics', '') ?>
 <?= ayar('head_kod', '') ?>
 </head>
@@ -368,6 +381,22 @@ switch ($sayfa) {
 // -----------------------------------------------------
 // ANA SAYFA
 // -----------------------------------------------------
+case 'ads-txt':
+    header('Content-Type: text/plain; charset=UTF-8');
+    $ads = trim(ayar('ads_txt_icerik', ''));
+    $client = trim(ayar('adsense_client_id', ''));
+    if (empty($ads) && !empty($client) && preg_match('/^ca-pub-(\d+)$/', $client, $m)) {
+        // Auto-generate default ads.txt
+        $ads = "# Otomatik olusturuldu\ngoogle.com, pub-{$m[1]}, DIRECT, f08c47fec0942fa0";
+    }
+    if (empty($ads)) {
+        http_response_code(404);
+        echo "# ads.txt henuz yapilandirilmadi.\n# Yonetim > Ayarlar > Reklam bolumunden AdSense Client ID'nizi girin.";
+    } else {
+        echo $ads;
+    }
+    exit;
+
 case 'anasayfa':
     $manset_adet = (int)ayar('anasayfa_manset_adet', 5);
 

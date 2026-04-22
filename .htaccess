@@ -133,6 +133,7 @@ AddType font/woff2 .woff2
 
     # Ana sayfa ve fallback
     RewriteRule ^sayfa/([0-9]+)/?$ index.php?sayfa=anasayfa&sayfa_no=$1 [L,QSA]
+    RewriteRule ^ads\.txt$ index.php?sayfa=ads-txt [L]
     RewriteRule ^$ index.php [L]
 </IfModule>
 
