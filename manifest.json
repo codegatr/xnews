@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.2.1",
+    "surum": "1.2.2",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,6 +17,7 @@
         "install.lock"
     ],
     "degisiklikler": [
+        "1.2.2 - Kaldirma Talepleri admin sayfasi + Footer yasal uyari (RSS agregatoru bildirimi)",
         "1.2.1 HOTFIX - Guncelleme sistemi duzeltildi: Surum artik GitHub tag'inden aliniyor, manifest.json'a bagli degil. v1.2.0 tag'i yanlis commit'e baglanmisti (manifest eski surumdeydi), kullanicilar guncelleme yapsa bile DB'de surum degismeden kaliyordu. Artik tag'den alinan surum DB'ye yazilir + manifest.json dosyasi da otomatik esitlenir.",
         "1.2.0 MAJOR - Saray admin temasi + tam mobil responsive + kart HTML yeniden yazildi + h() agresiflestirildi",
         "1.1.2 - Guclu karakter temizligi + admin toplu temizlik araci. h() icinde Unicode p{Cf} Format kategorisi (tum zero-width, bidi, word joiner). temizle_metin() helper. Yonetim -> Araclar sekmesi + toplu temizleme butonu.",

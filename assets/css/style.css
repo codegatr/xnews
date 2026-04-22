@@ -1438,3 +1438,48 @@ body.tema-koyu .sd-num.aktif { color: #fff; }
     .hd-arac-btn { min-height: 40px; }
     .cb-btn { min-height: 44px; }
 }
+
+/* ===================================================
+   FOOTER YASAL UYARI (RSS agregatörü bildirimi)
+   =================================================== */
+.footer-yasal-uyari {
+    background: rgba(255, 255, 255, .03);
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    padding: 18px 0;
+    margin: 24px 0 20px;
+    color: #a0a0a0;
+    font-size: 12px;
+    line-height: 1.65;
+}
+.footer-yasal-uyari .fyu-ic {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+.footer-yasal-uyari .fyu-ikon {
+    width: 22px; height: 22px;
+    flex-shrink: 0;
+    color: var(--brand);
+    margin-top: 2px;
+}
+.footer-yasal-uyari strong {
+    color: #d0d0d0;
+    font-weight: 700;
+}
+.footer-yasal-uyari a {
+    color: var(--warm-yellow, #fbbf24);
+    text-decoration: underline;
+    text-decoration-color: rgba(251, 191, 36, .4);
+    text-underline-offset: 2px;
+}
+.footer-yasal-uyari a:hover {
+    color: #fff;
+    text-decoration-color: #fff;
+}
+
+@media (max-width: 768px) {
+    .footer-yasal-uyari { padding: 14px 0; font-size: 11px; }
+    .footer-yasal-uyari .fyu-ikon { width: 18px; height: 18px; }
+    .footer-yasal-uyari .fyu-ic { gap: 10px; }
+}

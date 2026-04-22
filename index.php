@@ -244,8 +244,17 @@ function sayfa_bitis(string $aktif = ''): void {
             </a>
         </div>
     </div>
+    <div class="footer-yasal-uyari">
+        <div class="fyu-ic">
+            <svg class="fyu-ikon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div>
+                <strong>Yasal Bildirim:</strong>
+                <?= h(ayar('site_adi', 'XNEWS')) ?>, Türkiye'nin önde gelen haber kuruluşlarının halka açık RSS beslemelerini derleyen bir <strong>haber agregatörüdür</strong>. Sitemizde yayınlanan tüm haber içerikleri, görseller ve video malzemeler üzerindeki telif hakları ve yayın sorumluluğu, kaynak atfında belirtilen orijinal yayın organlarına aittir. Bir haberle ilgili itirazınız, şikayetiniz veya kaldırma talebiniz varsa lütfen önce <strong>orijinal yayın kuruluşuyla</strong> iletişime geçiniz; bunun yanı sıra <a href="<?= url('kaldirma-talebi') ?>">kaldırma talebi</a> formumuzu da kullanabilirsiniz. Bu site 5187 sayılı Basın Kanunu ve 5651 sayılı İnternet Ortamında Yayın Kanunu çerçevesinde faaliyet göstermektedir.
+            </div>
+        </div>
+    </div>
     <div class="footer-alt">
-        <div>© <?= date('Y') ?> <?= h(ayar('site_adi', 'XNEWS')) ?>. Tüm hakları saklıdır.</div>
+        <div>© <?= date('Y') ?> <?= h(ayar('site_adi', 'XNEWS')) ?>. İçerikler kaynak kuruluşlara aittir.</div>
         <div><a href="https://codega.com.tr" target="_blank" rel="noopener">Powered by CODEGA</a></div>
     </div>
 <?php reklam_goster('alt_banner'); ?>

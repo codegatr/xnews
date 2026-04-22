@@ -492,6 +492,7 @@ $menu = [
     'ICERIK' => [
         ['haberler',   'Haberler',    'newspaper'],
         ['kategoriler','Kategoriler', 'folder'],
+        ['talepler',   'Kaldırma Talepleri','shield'],
     ],
     'SISTEM' => [
         ['kaynaklar',  'RSS Kaynakları','rss'],
@@ -512,6 +513,7 @@ $sayfa_adlari = [
     'kullanicilar' => 'Kullanıcılar',
     'loglar'       => 'Loglar',
     'etiketler'    => 'Etiketler',
+    'talepler'     => 'Kaldırma Talepleri',
 ];
 $sayfa_basligi = $sayfa_adlari[$sayfa] ?? 'Yönetim';
 
@@ -537,6 +539,7 @@ function ikon(string $ad): string {
         'check'            => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
         'save'             => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
         'activity'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+        'shield'           => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
     ];
     return $ikonlar[$ad] ?? '';
 }
@@ -1781,6 +1784,210 @@ function menu_aktif(string $mevcut, string $slug): string {
                         </div>
                         <?php endif; ?>
                     </form>
+                </div>
+                <?php break;
+
+            // ====================================
+            // KALDIRMA TALEPLERİ (Takedown)
+            // ====================================
+            case 'talepler':
+                // Durum güncelleme
+                if (($_POST['islem'] ?? '') === 'durum_guncelle' && csrf_dogrula($_POST['_csrf'] ?? '')) {
+                    $tid = (int)($_POST['id'] ?? 0);
+                    $yeni_durum = in_array($_POST['durum'] ?? '', ['bekliyor', 'inceleniyor', 'kabul', 'red', 'bilgi_istendi'], true) ? $_POST['durum'] : 'bekliyor';
+                    $admin_not = trim($_POST['admin_not'] ?? '');
+                    $st = $db->prepare("UPDATE {$prefix}takedown SET durum=?, admin_not=?, islem_tarihi=NOW(), islem_yapan_id=? WHERE id=?");
+                    $st->execute([$yeni_durum, $admin_not, $yonetici['id'], $tid]);
+                    flash('Talep güncellendi (#' . $tid . ' → ' . $yeni_durum . ').', 'basari');
+                    yonlendir(url('yonetim.php?sayfa=talepler' . (($_POST['geri'] ?? '') ? '&id=' . $tid : '')));
+                }
+
+                // Tek talep detay
+                $detay_id = (int)($_GET['id'] ?? 0);
+                if ($detay_id) {
+                    $st = $db->prepare("SELECT t.*, n.baslik AS haber_baslik, n.slug AS haber_slug
+                        FROM {$prefix}takedown t LEFT JOIN {$prefix}news n ON n.id = t.haber_id
+                        WHERE t.id = ?");
+                    $st->execute([$detay_id]);
+                    $talep = $st->fetch();
+                    if (!$talep) { flash('Talep bulunamadı.', 'hata'); yonlendir(url('yonetim.php?sayfa=talepler')); }
+
+                    $iliski_ad = [
+                        'hak_sahibi' => 'Hak Sahibi', 'yayin_sahibi' => 'Yayın Sahibi',
+                        'avukat' => 'Avukat/Temsilci', 'kisisel' => 'Kişisel',
+                        'diger' => 'Diğer',
+                    ][$talep['iliski']] ?? $talep['iliski'];
+                    $sebep_ad = [
+                        'telif' => 'Telif Hakkı İhlali', 'kisilik' => 'Kişilik Hakkı İhlali',
+                        'kvkk' => 'KVKK - Kişisel Veri', 'yanlis' => 'Yanlış/Yanıltıcı Bilgi',
+                        'itibar' => 'İtibar Zedeleyici', 'diger' => 'Diğer',
+                    ][$talep['sebep']] ?? $talep['sebep'];
+                    $durum_renk = ['bekliyor'=>'#f59e0b','inceleniyor'=>'#3b82f6','kabul'=>'#16a34a','red'=>'#dc2626','bilgi_istendi'=>'#8b5cf6'];
+                ?>
+                    <div class="icerik-bas">
+                        <div>
+                            <h1>Kaldırma Talebi #<?= $detay_id ?></h1>
+                            <div class="alt-metin"><?= h(tr_tarih($talep['olusturma_tarihi'])) ?></div>
+                        </div>
+                        <a href="<?= url('yonetim.php?sayfa=talepler') ?>" class="buton ikincil"><?= ikon('arrow-left') ?>Tüm Talepler</a>
+                    </div>
+
+                    <div class="panel" style="margin-bottom:20px">
+                        <div class="panel-ic">
+                            <div style="display:flex;flex-wrap:wrap;gap:20px 40px;margin-bottom:18px">
+                                <div><span style="color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Durum</span><br><strong style="color:<?= $durum_renk[$talep['durum']] ?? '#000' ?>;font-size:16px"><?= h(mb_strtoupper($talep['durum'], 'UTF-8')) ?></strong></div>
+                                <div><span style="color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em">İlişki</span><br><strong><?= h($iliski_ad) ?></strong></div>
+                                <div><span style="color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Sebep</span><br><strong><?= h($sebep_ad) ?></strong></div>
+                                <div><span style="color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em">IP</span><br><code><?= h($talep['ip'] ?? '') ?></code></div>
+                            </div>
+
+                            <h3 style="margin:0 0 6px">Başvuran Kişi</h3>
+                            <table style="width:100%;margin-bottom:18px">
+                                <tr><td style="padding:6px 0;color:var(--muted);width:140px">Ad Soyad:</td><td><strong><?= h($talep['ad_soyad']) ?></strong></td></tr>
+                                <tr><td style="padding:6px 0;color:var(--muted)">E-posta:</td><td><a href="mailto:<?= h($talep['eposta']) ?>"><?= h($talep['eposta']) ?></a></td></tr>
+                                <?php if (!empty($talep['telefon'])): ?><tr><td style="padding:6px 0;color:var(--muted)">Telefon:</td><td><?= h($talep['telefon']) ?></td></tr><?php endif; ?>
+                                <?php if (!empty($talep['kurum'])): ?><tr><td style="padding:6px 0;color:var(--muted)">Kurum:</td><td><?= h($talep['kurum']) ?></td></tr><?php endif; ?>
+                            </table>
+
+                            <h3 style="margin:0 0 6px">Şikayet Edilen İçerik</h3>
+                            <?php if (!empty($talep['haber_baslik'])): ?>
+                                <p style="margin:0 0 6px"><a href="<?= url('haber/' . (int)$talep['haber_id'] . '-' . h($talep['haber_slug'] ?? 'haber')) ?>" target="_blank" style="font-weight:600"><?= h($talep['haber_baslik']) ?></a> <span style="color:var(--muted)">#<?= (int)$talep['haber_id'] ?></span></p>
+                            <?php endif; ?>
+                            <?php if (!empty($talep['url'])): ?>
+                                <p style="margin:0 0 12px;font-size:13px;color:var(--muted)">URL: <a href="<?= h($talep['url']) ?>" target="_blank"><?= h($talep['url']) ?></a></p>
+                            <?php endif; ?>
+
+                            <h3 style="margin:16px 0 6px">Açıklama</h3>
+                            <div style="background:#f8fafc;padding:14px 18px;border-radius:8px;border-left:3px solid var(--brand);white-space:pre-wrap;font-size:14px;line-height:1.6"><?= h($talep['aciklama']) ?></div>
+
+                            <?php if (!empty($talep['kanit_url'])): ?>
+                                <h3 style="margin:16px 0 6px">Kanıt Belge URL</h3>
+                                <p><a href="<?= h($talep['kanit_url']) ?>" target="_blank"><?= h($talep['kanit_url']) ?></a></p>
+                            <?php endif; ?>
+
+                            <?php if (!empty($talep['admin_not'])): ?>
+                                <h3 style="margin:16px 0 6px">Yönetim Notu</h3>
+                                <div style="background:#fef3c7;padding:14px 18px;border-radius:8px;border-left:3px solid #f59e0b;white-space:pre-wrap;font-size:14px;line-height:1.6"><?= h($talep['admin_not']) ?></div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-bas"><h3 style="margin:0">Durum Güncelle</h3></div>
+                        <form method="post" class="panel-ic">
+                            <?= csrf_input() ?>
+                            <input type="hidden" name="islem" value="durum_guncelle">
+                            <input type="hidden" name="id" value="<?= $detay_id ?>">
+                            <input type="hidden" name="geri" value="1">
+
+                            <div class="form-grup">
+                                <label>Yeni Durum</label>
+                                <select name="durum" required>
+                                    <option value="bekliyor" <?= $talep['durum']==='bekliyor'?'selected':'' ?>>🟡 Bekliyor</option>
+                                    <option value="inceleniyor" <?= $talep['durum']==='inceleniyor'?'selected':'' ?>>🔵 İnceleniyor</option>
+                                    <option value="bilgi_istendi" <?= $talep['durum']==='bilgi_istendi'?'selected':'' ?>>🟣 Bilgi İstendi</option>
+                                    <option value="kabul" <?= $talep['durum']==='kabul'?'selected':'' ?>>🟢 Kabul Edildi</option>
+                                    <option value="red" <?= $talep['durum']==='red'?'selected':'' ?>>🔴 Reddedildi</option>
+                                </select>
+                            </div>
+
+                            <div class="form-grup">
+                                <label>Yönetim Notu / Talep Sahibine Yanıt</label>
+                                <textarea name="admin_not" rows="5" placeholder="Karar gerekçesi, başvurana iletilecek mesaj vb."><?= h($talep['admin_not'] ?? '') ?></textarea>
+                                <small style="color:var(--muted);font-size:12px">Bu not sadece yönetici tarafında görünür. Talep sahibine cevap yazacaksanız e-postayla iletiniz.</small>
+                            </div>
+
+                            <button type="submit" class="buton">💾 Durumu Güncelle</button>
+                        </form>
+                    </div>
+                <?php break;
+                } // detay sonu
+
+                // LİSTE GÖRÜNÜMÜ
+                $f_durum = $_GET['durum'] ?? '';
+                $where_t = []; $params_t = [];
+                if ($f_durum && in_array($f_durum, ['bekliyor','inceleniyor','kabul','red','bilgi_istendi'], true)) {
+                    $where_t[] = 't.durum = ?'; $params_t[] = $f_durum;
+                }
+                $wq = $where_t ? ('WHERE ' . implode(' AND ', $where_t)) : '';
+
+                $toplam_t = (int)$db->query("SELECT COUNT(*) FROM {$prefix}takedown t $wq")->fetchColumn();
+                $st = $db->prepare("SELECT t.*, n.baslik AS haber_baslik
+                    FROM {$prefix}takedown t LEFT JOIN {$prefix}news n ON n.id = t.haber_id
+                    $wq ORDER BY t.olusturma_tarihi DESC LIMIT 100");
+                $st->execute($params_t);
+                $talepler = $st->fetchAll();
+
+                $sayim = $db->query("SELECT durum, COUNT(*) adet FROM {$prefix}takedown GROUP BY durum")->fetchAll(PDO::FETCH_KEY_PAIR);
+            ?>
+                <div class="icerik-bas">
+                    <div>
+                        <h1>Kaldırma Talepleri</h1>
+                        <div class="alt-metin"><?= (int)($sayim['bekliyor'] ?? 0) ?> talep incelenmeyi bekliyor</div>
+                    </div>
+                </div>
+
+                <!-- Durum filtreleri -->
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">
+                    <a href="<?= url('yonetim.php?sayfa=talepler') ?>" class="buton <?= !$f_durum ? '' : 'ikincil' ?>" style="padding:8px 14px;font-size:13px">Tümü (<?= array_sum($sayim) ?>)</a>
+                    <a href="<?= url('yonetim.php?sayfa=talepler&durum=bekliyor') ?>" class="buton <?= $f_durum==='bekliyor' ? '' : 'ikincil' ?>" style="padding:8px 14px;font-size:13px;background:<?= $f_durum==='bekliyor' ? '#f59e0b' : '' ?>">🟡 Bekliyor (<?= (int)($sayim['bekliyor'] ?? 0) ?>)</a>
+                    <a href="<?= url('yonetim.php?sayfa=talepler&durum=inceleniyor') ?>" class="buton <?= $f_durum==='inceleniyor' ? '' : 'ikincil' ?>" style="padding:8px 14px;font-size:13px;background:<?= $f_durum==='inceleniyor' ? '#3b82f6' : '' ?>">🔵 İnceleniyor (<?= (int)($sayim['inceleniyor'] ?? 0) ?>)</a>
+                    <a href="<?= url('yonetim.php?sayfa=talepler&durum=kabul') ?>" class="buton <?= $f_durum==='kabul' ? '' : 'ikincil' ?>" style="padding:8px 14px;font-size:13px;background:<?= $f_durum==='kabul' ? '#16a34a' : '' ?>">🟢 Kabul (<?= (int)($sayim['kabul'] ?? 0) ?>)</a>
+                    <a href="<?= url('yonetim.php?sayfa=talepler&durum=red') ?>" class="buton <?= $f_durum==='red' ? '' : 'ikincil' ?>" style="padding:8px 14px;font-size:13px;background:<?= $f_durum==='red' ? '#dc2626' : '' ?>">🔴 Red (<?= (int)($sayim['red'] ?? 0) ?>)</a>
+                </div>
+
+                <div class="panel">
+                    <?php if (empty($talepler)): ?>
+                        <div class="panel-ic" style="text-align:center;padding:60px 20px;color:var(--muted)">
+                            <div style="font-size:48px;margin-bottom:12px">🛡️</div>
+                            <h3 style="margin:0 0 6px">Henüz talep yok</h3>
+                            <p style="margin:0">Kullanıcılar <code>/kaldirma-talebi</code> sayfasından başvuru yapabilir.</p>
+                        </div>
+                    <?php else: ?>
+                    <table class="tablo">
+                        <thead>
+                            <tr>
+                                <th style="width:60px">#</th>
+                                <th>Ad Soyad / E-posta</th>
+                                <th>Şikayet</th>
+                                <th style="width:140px">Sebep</th>
+                                <th style="width:120px">Durum</th>
+                                <th style="width:140px">Tarih</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $sebep_kisa = ['telif'=>'Telif','kisilik'=>'Kişilik','kvkk'=>'KVKK','yanlis'=>'Yanlış','itibar'=>'İtibar','diger'=>'Diğer'];
+                            $durum_renk = ['bekliyor'=>'#f59e0b','inceleniyor'=>'#3b82f6','kabul'=>'#16a34a','red'=>'#dc2626','bilgi_istendi'=>'#8b5cf6'];
+                            foreach ($talepler as $t):
+                            ?>
+                            <tr>
+                                <td>#<?= (int)$t['id'] ?></td>
+                                <td>
+                                    <strong><?= h($t['ad_soyad']) ?></strong><br>
+                                    <small style="color:var(--muted)"><?= h($t['eposta']) ?></small>
+                                </td>
+                                <td>
+                                    <?php if (!empty($t['haber_baslik'])): ?>
+                                        <span style="font-size:13px"><?= h(mb_substr($t['haber_baslik'], 0, 70, 'UTF-8')) ?><?= mb_strlen($t['haber_baslik'], 'UTF-8') > 70 ? '...' : '' ?></span>
+                                    <?php elseif (!empty($t['url'])): ?>
+                                        <small style="color:var(--muted)">URL: <?= h(mb_substr($t['url'], 0, 60, 'UTF-8')) ?></small>
+                                    <?php else: ?>
+                                        <em style="color:var(--muted)">Genel</em>
+                                    <?php endif; ?>
+                                </td>
+                                <td><span style="background:#f1f5f9;padding:3px 8px;border-radius:4px;font-size:12px"><?= h($sebep_kisa[$t['sebep']] ?? $t['sebep']) ?></span></td>
+                                <td>
+                                    <span style="background:<?= $durum_renk[$t['durum']] ?? '#64748b' ?>;color:#fff;padding:4px 10px;border-radius:30px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em"><?= h($t['durum']) ?></span>
+                                </td>
+                                <td><small style="color:var(--muted)"><?= h(tr_tarih($t['olusturma_tarihi'])) ?></small></td>
+                                <td><a href="<?= url('yonetim.php?sayfa=talepler&id=' . (int)$t['id']) ?>" class="buton ikincil" style="padding:6px 12px;font-size:12px">Aç →</a></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <?php endif; ?>
                 </div>
                 <?php break;
 
