@@ -725,7 +725,50 @@ function menu_aktif(string $mevcut, string $slug): string {
                 </div>
 
                 <?php
-                // AdSense entegrasyon durumu
+                // SISTEM SAĞLIK PANELİ - tek bakışta her şey
+                $son_cron = ayar('son_cron_tarihi', '');
+                $cron_dk = $son_cron ? (time() - strtotime($son_cron)) / 60 : null;
+                $cron_durum = $cron_dk === null ? 'yok' : ($cron_dk < 30 ? 'iyi' : ($cron_dk < 180 ? 'uyari' : 'sorun'));
+
+                $hatali_rss = (int)$db->query("SELECT COUNT(*) FROM {$prefix}sources WHERE aktif=1 AND (son_hata IS NOT NULL AND son_hata != '')")->fetchColumn();
+                $toplam_rss = (int)$db->query("SELECT COUNT(*) FROM {$prefix}sources WHERE aktif=1")->fetchColumn();
+                $rss_durum = $hatali_rss == 0 ? 'iyi' : ($hatali_rss < 5 ? 'uyari' : 'sorun');
+
+                $ssl_aktif = ($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['SERVER_PORT'] ?? '') == 443;
+                $cron_anahtar_mevcut = defined('CRON_ANAHTARI') && !empty(CRON_ANAHTARI);
+                $bekleyen_talep = (int)$db->query("SELECT COUNT(*) FROM {$prefix}takedown WHERE durum='bekliyor'")->fetchColumn();
+                $ads_txt_var = file_exists(__DIR__ . '/ads.txt');
+
+                $durumlar = [
+                    ['ad' => 'Cron Görev',    'durum' => $cron_durum, 'deger' => $son_cron ? goreceli_zaman($son_cron) : 'Çalışmadı', 'link' => 'yonetim.php?sayfa=cron-rehber'],
+                    ['ad' => 'RSS Kaynakları','durum' => $rss_durum,  'deger' => $hatali_rss ? "$hatali_rss hatalı / $toplam_rss" : "$toplam_rss aktif",  'link' => 'yonetim.php?sayfa=kaynaklar'],
+                    ['ad' => 'SSL',           'durum' => $ssl_aktif ? 'iyi' : 'uyari', 'deger' => $ssl_aktif ? 'HTTPS' : 'HTTP', 'link' => null],
+                    ['ad' => 'Cron Anahtarı', 'durum' => $cron_anahtar_mevcut ? 'iyi' : 'sorun', 'deger' => $cron_anahtar_mevcut ? 'Tanımlı' : 'Eksik!', 'link' => 'yonetim.php?sayfa=cron-rehber'],
+                    ['ad' => 'Kaldırma Talepleri', 'durum' => $bekleyen_talep == 0 ? 'iyi' : 'uyari', 'deger' => $bekleyen_talep ? "$bekleyen_talep bekliyor" : 'Temiz', 'link' => 'yonetim.php?sayfa=talepler'],
+                    ['ad' => 'ads.txt',       'durum' => $ads_txt_var ? 'iyi' : 'uyari', 'deger' => $ads_txt_var ? 'Mevcut' : 'Yok', 'link' => 'yonetim.php?sayfa=adsense-rehber'],
+                ];
+                $renk = ['iyi' => '#10b981', 'uyari' => '#f59e0b', 'sorun' => '#dc2626', 'yok' => '#94a3b8'];
+                $emoji = ['iyi' => '✓', 'uyari' => '!', 'sorun' => '×', 'yok' => '?'];
+                ?>
+                <div class="panel" style="margin-bottom:20px">
+                    <div class="panel-bas" style="display:flex;align-items:center;justify-content:space-between">
+                        <h3 style="margin:0">🩺 Sistem Sağlık Paneli</h3>
+                        <small style="color:var(--muted)">Tek bakışta sistem durumu</small>
+                    </div>
+                    <div class="panel-ic">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+                            <?php foreach ($durumlar as $d): ?>
+                            <a href="<?= $d['link'] ? url($d['link']) : '#' ?>" style="text-decoration:none;color:inherit;display:block;padding:12px 14px;border:1px solid var(--border);border-radius:10px;border-left:4px solid <?= $renk[$d['durum']] ?>;background:#fff;transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,.06)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+                                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                                    <strong style="font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em"><?= h($d['ad']) ?></strong>
+                                    <span style="width:22px;height:22px;border-radius:50%;background:<?= $renk[$d['durum']] ?>;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700"><?= $emoji[$d['durum']] ?></span>
+                                </div>
+                                <div style="font-size:14px;font-weight:600;color:#1f2937"><?= h($d['deger']) ?></div>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
                 $as_id = trim(ayar('adsense_client_id', ''));
                 $as_auto = ayar('adsense_auto_ads', '0') === '1';
                 $as_valid = !empty($as_id) && preg_match('/^ca-pub-\d{10,20}$/', $as_id);
