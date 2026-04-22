@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.2.7",
+    "surum": "1.2.8",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,6 +17,7 @@
         "install.lock"
     ],
     "degisiklikler": [
+        "1.2.8 HOTFIX - Cron anahtari BUG FIX: Rehber 'ayar(cron_anahtar)' yerine 'CRON_ANAHTARI' sabitinden okuyor artik. Bu yuzden v1.2.6 ve v1.2.7 rehberlerinde komut sonunda anahtar gorunmuyordu. CRON_ANAHTARI tanimli degilse kirmizi kritik uyari + config.php duzeltme talimati.",
         "1.2.7 HOTFIX - Cron rehberi duzeltildi: DirectAdmin'de kullanilan PHP CLI formati (/usr/local/bin/php /yol/cron.php ANAHTAR) artik ana gosterim. wget alternatif olarak kaldi. PHP binary + script tam yolu + anahtar otomatik hesaplanir ve tek komut olarak kopyalanir.",
         "1.2.6 - Bozuk RSS URL fix (Haberturk/Haber7/T24 URL degisiklikleri + Chrome UA ile bot koruma bypass), Scroll-to-Top butonu (mobil+desktop), .kapsayici max-width:1280 ortalama, 12 kullanici rolu (Imtiyaz Sahibi, Yazi Isleri Muduru, Haber Sorumlusu, Muhabir, Kose Yazari vs.) + telefon + gorev tanimi alanlari, Cron Zamanlanmis Gorev Rehberi sayfasi (DirectAdmin icin 3 adimli).",
         "1.2.5 - Google AdSense tam entegrasyon: Dashboard durum karti (Client ID, Auto Ads, ads.txt, manuel reklam sayisi), AdSense Kurulum Rehberi sayfasi (4 adim + slot konum tablosu + politika uyarilari), Reklamlar listesi basinda AdSense hizli kurulum karti (reklam birimi ekleme workflow), direkt AdSense paneline birim olusturma linki.",

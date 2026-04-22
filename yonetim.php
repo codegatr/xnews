@@ -2167,7 +2167,8 @@ function menu_aktif(string $mevcut, string $slug): string {
             // ====================================
             case 'cron-rehber':
                 $site = $_SERVER['HTTP_HOST'] ?? 'xnews.com.tr';
-                $cron_anahtar = ayar('cron_anahtar', '');
+                // Cron anahtarı config.php'de CRON_ANAHTARI sabiti olarak tanımlı
+                $cron_anahtar = defined('CRON_ANAHTARI') ? CRON_ANAHTARI : '';
                 $son_cekim = ayar('son_cron_tarihi', '');
                 // Proje kök dizinini tespit et (/home/kullanici/domains/site.com/public_html/)
                 $dokuman_kok = rtrim(str_replace('\\', '/', __DIR__), '/');
@@ -2215,8 +2216,13 @@ function menu_aktif(string $mevcut, string $slug): string {
                             <strong>Bileşenleri:</strong>
                             <div style="margin-top:4px">PHP Binary: <code><?= h($php_yolu) ?></code></div>
                             <div>Script Yolu: <code><?= h($cron_php_yolu) ?></code></div>
-                            <div>Anahtar: <code><?= h(substr($cron_anahtar, 0, 8)) ?>...</code> (güvenlik için gizlendi)</div>
+                            <div>Anahtar: <code><?= $cron_anahtar ? h($cron_anahtar) : '<em style=\"color:#dc2626\">BULUNAMADI! config.php içinde CRON_ANAHTARI tanımlı değil</em>' ?></code></div>
                         </div>
+                        <?php if (empty($cron_anahtar)): ?>
+                        <div style="background:#fee2e2;border-left:3px solid #dc2626;padding:10px 14px;margin-top:10px;border-radius:4px;font-size:13px;color:#991b1b">
+                            <strong>⚠ Kritik Uyarı:</strong> <code>config.php</code> dosyasında <code>CRON_ANAHTARI</code> sabiti tanımlı değil. Kurulum eksik kalmış olabilir. FTP/SSH ile <code>public_html/config.php</code>'yi aç ve içinde <code>define('CRON_ANAHTARI', '...')</code> satırı olmalı. Yoksa <code>config.sample.php</code>'den kopyala.
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
