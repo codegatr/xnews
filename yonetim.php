@@ -404,7 +404,13 @@ if ($sayfa === 'kullanicilar' && post()) {
             $k_ad    = trim($_POST['kullanici_adi'] ?? '');
             $eposta  = trim($_POST['eposta'] ?? '');
             $ad_soy  = trim($_POST['ad_soyad'] ?? '');
-            $rol     = in_array($_POST['rol'] ?? '', ['admin','editor','yazar'], true) ? $_POST['rol'] : 'editor';
+            $rol     = in_array($_POST['rol'] ?? '', [
+                'admin','yonetici','genel_yayin_yonetmeni','yazi_isleri_muduru',
+                'sorumlu_mudur','editor','haber_sorumlusu','haber_muhabiri',
+                'muhabir','fotograf_editoru','yazar','stajyer'
+            ], true) ? $_POST['rol'] : 'editor';
+            $telefon     = trim($_POST['telefon'] ?? '');
+            $gorev_tanim = trim($_POST['gorev_tanimi'] ?? '');
             $sifre   = $_POST['sifre'] ?? '';
             $aktif   = isset($_POST['durum']) ? 1 : 0;
 
@@ -414,19 +420,19 @@ if ($sayfa === 'kullanicilar' && post()) {
 
             if ($islem === 'ekle') {
                 if (strlen($sifre) < 8) throw new Exception('Şifre en az 8 karakter.');
-                $stmt = $db->prepare("INSERT INTO {$prefix}users (kullanici_adi, eposta, sifre_hash, ad_soyad, rol, durum) VALUES (?,?,?,?,?,?)");
-                $stmt->execute([$k_ad, $eposta, password_hash($sifre, PASSWORD_BCRYPT), $ad_soy, $rol, $aktif]);
+                $stmt = $db->prepare("INSERT INTO {$prefix}users (kullanici_adi, eposta, sifre_hash, ad_soyad, rol, telefon, gorev_tanimi, durum) VALUES (?,?,?,?,?,?,?,?)");
+                $stmt->execute([$k_ad, $eposta, password_hash($sifre, PASSWORD_BCRYPT), $ad_soy, $rol, $telefon ?: null, $gorev_tanim ?: null, $aktif]);
                 flash('Kullanıcı eklendi.', 'basari');
             } else {
                 if ($id < 1) throw new Exception('Gecersiz kullanici.');
                 if ($id == $yonetici['id'] && $rol !== 'admin') throw new Exception('Kendi rolunuzu degistiremezsiniz.');
                 if (!empty($sifre)) {
                     if (strlen($sifre) < 8) throw new Exception('Şifre en az 8 karakter.');
-                    $db->prepare("UPDATE {$prefix}users SET kullanici_adi=?, eposta=?, ad_soyad=?, rol=?, durum=?, sifre_hash=? WHERE id=?")
-                       ->execute([$k_ad, $eposta, $ad_soy, $rol, $aktif, password_hash($sifre, PASSWORD_BCRYPT), $id]);
+                    $db->prepare("UPDATE {$prefix}users SET kullanici_adi=?, eposta=?, ad_soyad=?, rol=?, telefon=?, gorev_tanimi=?, durum=?, sifre_hash=? WHERE id=?")
+                       ->execute([$k_ad, $eposta, $ad_soy, $rol, $telefon ?: null, $gorev_tanim ?: null, $aktif, password_hash($sifre, PASSWORD_BCRYPT), $id]);
                 } else {
-                    $db->prepare("UPDATE {$prefix}users SET kullanici_adi=?, eposta=?, ad_soyad=?, rol=?, durum=? WHERE id=?")
-                       ->execute([$k_ad, $eposta, $ad_soy, $rol, $aktif, $id]);
+                    $db->prepare("UPDATE {$prefix}users SET kullanici_adi=?, eposta=?, ad_soyad=?, rol=?, telefon=?, gorev_tanimi=?, durum=? WHERE id=?")
+                       ->execute([$k_ad, $eposta, $ad_soy, $rol, $telefon ?: null, $gorev_tanim ?: null, $aktif, $id]);
                 }
                 flash('Kullanıcı güncellendi.', 'basari');
             }
@@ -518,6 +524,7 @@ $menu = [
         ['reklamlar',  'Reklamlar',   'megaphone'],
         ['kullanicilar','Kullanıcılar','users'],
         ['ayarlar',    'Ayarlar',     'settings'],
+        ['cron-rehber','Cron Görevi', 'activity'],
         ['loglar',     'Loglar',      'file-text'],
     ],
 ];
@@ -534,6 +541,7 @@ $sayfa_adlari = [
     'etiketler'    => 'Etiketler',
     'talepler'     => 'Kaldırma Talepleri',
     'adsense-rehber' => 'AdSense Rehberi',
+    'cron-rehber' => 'Cron Zamanlanmış Görev',
 ];
 $sayfa_basligi = $sayfa_adlari[$sayfa] ?? 'Yönetim';
 
@@ -1643,9 +1651,24 @@ function menu_aktif(string $mevcut, string $slug): string {
                             <div class="form-grup">
                                 <label>Rol *</label>
                                 <select name="rol" <?= ($usr_d && $usr_d['id'] == $yonetici['id']) ? 'disabled' : '' ?>>
-                                    <option value="admin"  <?= ($usr_d['rol'] ?? '') === 'admin'  ? 'selected' : '' ?>>Admin (tam yetki)</option>
-                                    <option value="editor" <?= ($usr_d['rol'] ?? 'editor') === 'editor' ? 'selected' : '' ?>>Editor</option>
-                                    <option value="yazar"  <?= ($usr_d['rol'] ?? '') === 'yazar'  ? 'selected' : '' ?>>Yazar</option>
+                                    <optgroup label="🔴 Yönetim Kadrosu">
+                                        <option value="admin"                  <?= ($usr_d['rol'] ?? '') === 'admin' ? 'selected' : '' ?>>Admin / İmtiyaz Sahibi</option>
+                                        <option value="yonetici"               <?= ($usr_d['rol'] ?? '') === 'yonetici' ? 'selected' : '' ?>>Yönetici / İşletme Müdürü</option>
+                                        <option value="genel_yayin_yonetmeni"  <?= ($usr_d['rol'] ?? '') === 'genel_yayin_yonetmeni' ? 'selected' : '' ?>>Genel Yayın Yönetmeni</option>
+                                        <option value="yazi_isleri_muduru"     <?= ($usr_d['rol'] ?? '') === 'yazi_isleri_muduru' ? 'selected' : '' ?>>Yazı İşleri Müdürü</option>
+                                        <option value="sorumlu_mudur"          <?= ($usr_d['rol'] ?? '') === 'sorumlu_mudur' ? 'selected' : '' ?>>Sorumlu Müdür</option>
+                                    </optgroup>
+                                    <optgroup label="📝 Editörlük">
+                                        <option value="editor"                 <?= ($usr_d['rol'] ?? 'editor') === 'editor' ? 'selected' : '' ?>>Editör</option>
+                                        <option value="haber_sorumlusu"        <?= ($usr_d['rol'] ?? '') === 'haber_sorumlusu' ? 'selected' : '' ?>>Haber Sorumlusu</option>
+                                        <option value="fotograf_editoru"       <?= ($usr_d['rol'] ?? '') === 'fotograf_editoru' ? 'selected' : '' ?>>Fotoğraf Editörü</option>
+                                    </optgroup>
+                                    <optgroup label="🖊 Muhabir / Yazar">
+                                        <option value="haber_muhabiri"         <?= ($usr_d['rol'] ?? '') === 'haber_muhabiri' ? 'selected' : '' ?>>Haber Muhabiri</option>
+                                        <option value="muhabir"                <?= ($usr_d['rol'] ?? '') === 'muhabir' ? 'selected' : '' ?>>Muhabir</option>
+                                        <option value="yazar"                  <?= ($usr_d['rol'] ?? '') === 'yazar' ? 'selected' : '' ?>>Köşe Yazarı</option>
+                                        <option value="stajyer"                <?= ($usr_d['rol'] ?? '') === 'stajyer' ? 'selected' : '' ?>>Stajyer</option>
+                                    </optgroup>
                                 </select>
                                 <?php if ($usr_d && $usr_d['id'] == $yonetici['id']): ?>
                                     <input type="hidden" name="rol" value="admin">
@@ -1655,6 +1678,16 @@ function menu_aktif(string $mevcut, string $slug): string {
                             <div class="form-grup">
                                 <label>Şifre <?= $islem === 'ekle' ? '*' : '(degistirmek için)' ?></label>
                                 <input type="password" name="sifre" <?= $islem === 'ekle' ? 'required minlength="8"' : 'minlength="8"' ?> placeholder="<?= $islem === 'duzenle' ? 'Bos birakirsaniz degismez' : 'En az 8 karakter' ?>">
+                            </div>
+                        </div>
+                        <div class="form-satir">
+                            <div class="form-grup">
+                                <label>Telefon <small style="color:var(--muted)">(opsiyonel)</small></label>
+                                <input type="tel" name="telefon" value="<?= h($usr_d['telefon'] ?? '') ?>" placeholder="0 532 123 45 67">
+                            </div>
+                            <div class="form-grup">
+                                <label>Görev Tanımı / Uzmanlık <small style="color:var(--muted)">(künyede gösterilir)</small></label>
+                                <input type="text" name="gorev_tanimi" value="<?= h($usr_d['gorev_tanimi'] ?? '') ?>" placeholder="Siyaset Editörü, Spor Muhabiri, vb." maxlength="200">
                             </div>
                         </div>
                         <div class="form-grup">
@@ -1672,12 +1705,35 @@ function menu_aktif(string $mevcut, string $slug): string {
                     </div>
                 </form>
                 <?php else:
-                    $usr_liste = $db->query("SELECT * FROM {$prefix}users ORDER BY rol, kullanici_adi")->fetchAll();
+                    $usr_liste = $db->query("SELECT * FROM {$prefix}users ORDER BY
+                        FIELD(rol,'admin','yonetici','genel_yayin_yonetmeni','yazi_isleri_muduru','sorumlu_mudur','editor','haber_sorumlusu','fotograf_editoru','haber_muhabiri','muhabir','yazar','stajyer'),
+                        kullanici_adi")->fetchAll();
+                    $rol_adlari = [
+                        'admin' => 'Admin / İmtiyaz Sahibi',
+                        'yonetici' => 'Yönetici',
+                        'genel_yayin_yonetmeni' => 'Genel Yayın Yönetmeni',
+                        'yazi_isleri_muduru' => 'Yazı İşleri Müdürü',
+                        'sorumlu_mudur' => 'Sorumlu Müdür',
+                        'editor' => 'Editör',
+                        'haber_sorumlusu' => 'Haber Sorumlusu',
+                        'fotograf_editoru' => 'Fotoğraf Editörü',
+                        'haber_muhabiri' => 'Haber Muhabiri',
+                        'muhabir' => 'Muhabir',
+                        'yazar' => 'Köşe Yazarı',
+                        'stajyer' => 'Stajyer',
+                    ];
+                    $rol_renkleri = [
+                        'admin' => '#dc2626', 'yonetici' => '#b91c1c',
+                        'genel_yayin_yonetmeni' => '#7c2d12', 'yazi_isleri_muduru' => '#9a3412', 'sorumlu_mudur' => '#c2410c',
+                        'editor' => '#2563eb', 'haber_sorumlusu' => '#1d4ed8', 'fotograf_editoru' => '#7c3aed',
+                        'haber_muhabiri' => '#0891b2', 'muhabir' => '#0e7490',
+                        'yazar' => '#6b21a8', 'stajyer' => '#6b7280',
+                    ];
             ?>
                 <div class="icerik-bas">
                     <div>
                         <h1>Kullanıcılar</h1>
-                        <div class="alt-metin"><?= count($usr_liste) ?> kullanıcı</div>
+                        <div class="alt-metin"><?= count($usr_liste) ?> kullanıcı · Gazete künyesindeki yayın kadrosu buradan yönetilir</div>
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=kullanicilar&islem=ekle') ?>" class="buton"><?= ikon('plus') ?>Yeni Kullanıcı</a>
                 </div>
@@ -1686,23 +1742,34 @@ function menu_aktif(string $mevcut, string $slug): string {
                         <div class="tablo-sarmal">
                             <table class="tablo">
                                 <thead>
-                                    <tr><th>Kullanıcı</th><th>Rol</th><th>Son Giriş</th><th>Durum</th><th></th></tr>
+                                    <tr><th>Kullanıcı</th><th>Rol / Görev</th><th>İletişim</th><th>Son Giriş</th><th>Durum</th><th></th></tr>
                                 </thead>
                                 <tbody>
                                 <?php foreach ($usr_liste as $u):
                                     $av = mb_strtoupper(mb_substr($u['ad_soyad'] ?: $u['kullanici_adi'], 0, 1, 'UTF-8'), 'UTF-8');
+                                    $rol_ad = $rol_adlari[$u['rol']] ?? $u['rol'];
+                                    $rol_rnk = $rol_renkleri[$u['rol']] ?? '#64748b';
                                 ?>
                                     <tr>
                                         <td>
                                             <div style="display:flex;gap:10px;align-items:center">
-                                                <div class="avatar" style="width:36px;height:36px;font-size:14px"><?= h($av) ?></div>
+                                                <div class="avatar" style="width:36px;height:36px;font-size:14px;background:<?= $rol_rnk ?>;color:#fff"><?= h($av) ?></div>
                                                 <div>
                                                     <strong><?= h($u['ad_soyad'] ?: $u['kullanici_adi']) ?></strong>
-                                                    <div style="font-size:12px;color:var(--muted)">@<?= h($u['kullanici_adi']) ?> · <?= h($u['eposta']) ?></div>
+                                                    <div style="font-size:12px;color:var(--muted)">@<?= h($u['kullanici_adi']) ?></div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td><span class="rozet <?= $u['rol'] === 'admin' ? 'hata' : 'aktif' ?>"><?= h($u['rol']) ?></span></td>
+                                        <td>
+                                            <span style="background:<?= $rol_rnk ?>;color:#fff;padding:3px 10px;border-radius:30px;font-size:11px;font-weight:600;letter-spacing:.02em"><?= h($rol_ad) ?></span>
+                                            <?php if (!empty($u['gorev_tanimi'])): ?>
+                                                <div style="font-size:12px;color:var(--muted);margin-top:3px"><?= h($u['gorev_tanimi']) ?></div>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="font-size:12px">
+                                            <?= h($u['eposta']) ?>
+                                            <?php if (!empty($u['telefon'])): ?><br><span style="color:var(--muted)"><?= h($u['telefon']) ?></span><?php endif; ?>
+                                        </td>
                                         <td style="font-size:12px;color:var(--muted)"><?= $u['son_giris'] ? h(goreceli_zaman($u['son_giris'])) : 'Hic giris yapmadi' ?></td>
                                         <td><span class="rozet <?= $u['durum'] ? 'aktif' : 'pasif' ?>"><?= $u['durum'] ? 'Aktif' : 'Pasif' ?></span></td>
                                         <td class="islemler">
@@ -2094,6 +2161,140 @@ function menu_aktif(string $mevcut, string $slug): string {
                 </div>
                 <?php break;
 
+
+            // ====================================
+            // DIRECTADMIN CRON ZAMANLANMIŞ GÖREV REHBERİ
+            // ====================================
+            case 'cron-rehber':
+                $site = $_SERVER['HTTP_HOST'] ?? 'xnews.com.tr';
+                $cron_anahtar = ayar('cron_anahtar', '');
+                $son_cekim = ayar('son_cron_tarihi', '');
+            ?>
+                <div class="icerik-bas">
+                    <div>
+                        <h1>⏰ Cron Zamanlanmış Görev</h1>
+                        <div class="alt-metin">DirectAdmin panelinde RSS otomatik çekimi için adım adım rehber</div>
+                    </div>
+                </div>
+
+                <!-- Durum -->
+                <div class="panel" style="margin-bottom:18px;background:<?= $son_cekim ? 'linear-gradient(135deg,#ecfdf5,#fff)' : 'linear-gradient(135deg,#fef3c7,#fff)' ?>;border-left:4px solid <?= $son_cekim ? '#10b981' : '#f59e0b' ?>">
+                    <div class="panel-ic">
+                        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                            <div style="font-size:38px"><?= $son_cekim ? '⏰' : '⚠️' ?></div>
+                            <div style="flex:1;min-width:260px">
+                                <h3 style="margin:0 0 4px;color:<?= $son_cekim ? '#065f46' : '#92400e' ?>">
+                                    Cron Durumu: <?= $son_cekim ? 'Çalışıyor ✓' : 'Henüz kurulmadı' ?>
+                                </h3>
+                                <div style="font-size:13px;color:var(--muted)">
+                                    <?= $son_cekim ? ('Son çekim: ' . h(goreceli_zaman($son_cekim))) : 'Cron.php henüz çalıştırılmadı. Aşağıdaki adımları takip edin.' ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cron URL + Anahtar -->
+                <div class="panel" style="margin-bottom:18px">
+                    <div class="panel-bas"><h3 style="margin:0">📋 Kopyalanacak Bilgiler</h3></div>
+                    <div class="panel-ic">
+                        <div class="form-grup" style="margin-bottom:14px">
+                            <label style="font-weight:600">Cron URL (Chip + wget yöntemi için):</label>
+                            <div style="display:flex;gap:8px;align-items:stretch">
+                                <input type="text" readonly value="https://<?= h($site) ?>/cron.php?anahtar=<?= h($cron_anahtar) ?>" style="flex:1;font-family:monospace;font-size:12px" id="cronUrl">
+                                <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('cronUrl').value).then(()=>this.innerText='✓ Kopyalandı')" class="buton ikincil" style="white-space:nowrap">📋 Kopyala</button>
+                            </div>
+                        </div>
+                        <div class="form-grup">
+                            <label style="font-weight:600">Tam Cron Komutu (DirectAdmin için):</label>
+                            <div style="display:flex;gap:8px;align-items:stretch">
+                                <input type="text" readonly value="wget -q -O /dev/null 'https://<?= h($site) ?>/cron.php?anahtar=<?= h($cron_anahtar) ?>' >/dev/null 2>&amp;1" style="flex:1;font-family:monospace;font-size:12px" id="cronCmd">
+                                <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('cronCmd').value).then(()=>this.innerText='✓ Kopyalandı')" class="buton" style="white-space:nowrap">📋 Kopyala</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adım 1: DirectAdmin Giriş -->
+                <div class="panel" style="margin-bottom:18px">
+                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
+                        <div style="width:36px;height:36px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">1</div>
+                        <h3 style="margin:0">DirectAdmin Paneline Giriş</h3>
+                    </div>
+                    <div class="panel-ic">
+                        <ol style="margin:0;padding-left:22px;line-height:1.8">
+                            <li>Hosting sağlayıcının DirectAdmin paneline giriş yap (genelde: <code>https://sunucu:2222</code>)</li>
+                            <li>Ana menüden <strong>"Advanced Features"</strong> veya <strong>"Gelişmiş Özellikler"</strong> bölümüne git</li>
+                            <li><strong>"Cron Jobs"</strong> veya <strong>"Zamanlanmış Görevler"</strong> linkine tıkla</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Adım 2: Yeni Cron -->
+                <div class="panel" style="margin-bottom:18px">
+                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
+                        <div style="width:36px;height:36px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">2</div>
+                        <h3 style="margin:0">Yeni Cron Oluştur</h3>
+                    </div>
+                    <div class="panel-ic">
+                        <p style="margin:0 0 12px">DirectAdmin Cron Jobs sayfasında aşağıdaki zamanlama tablosunu doldur:</p>
+                        <table class="tablo" style="margin:0">
+                            <thead>
+                                <tr><th>Alan</th><th>Değer (5 dakikada bir)</th><th>Açıklama</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>Minute</strong></td><td><code>*/5</code></td><td>Her 5 dakikada</td></tr>
+                                <tr><td><strong>Hour</strong></td><td><code>*</code></td><td>Tüm saatlerde</td></tr>
+                                <tr><td><strong>Day of Month</strong></td><td><code>*</code></td><td>Her gün</td></tr>
+                                <tr><td><strong>Month</strong></td><td><code>*</code></td><td>Her ay</td></tr>
+                                <tr><td><strong>Day of Week</strong></td><td><code>*</code></td><td>Her gün</td></tr>
+                                <tr><td><strong>Command</strong></td><td><code style="font-size:11px">wget -q -O /dev/null 'https://<?= h($site) ?>/cron.php?anahtar=<?= h(substr($cron_anahtar, 0, 8)) ?>...'</code></td><td>Yukarıdan tam komutu kopyala</td></tr>
+                            </tbody>
+                        </table>
+                        <p style="margin:14px 0 0;color:var(--muted);font-size:13px">
+                            <strong>Diğer sıklık seçenekleri:</strong><br>
+                            • Her 10 dakikada → Minute: <code>*/10</code><br>
+                            • Her saat başı → Minute: <code>0</code>, Hour: <code>*</code><br>
+                            • Günde 4 kez (6/12/18/0 saat) → Minute: <code>0</code>, Hour: <code>0,6,12,18</code>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Adım 3: Test -->
+                <div class="panel" style="margin-bottom:18px">
+                    <div class="panel-bas" style="display:flex;align-items:center;gap:12px">
+                        <div style="width:36px;height:36px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">3</div>
+                        <h3 style="margin:0">Test Et</h3>
+                    </div>
+                    <div class="panel-ic">
+                        <ol style="margin:0;padding-left:22px;line-height:1.8">
+                            <li><strong>Create</strong> veya <strong>Oluştur</strong> butonuna bas</li>
+                            <li>5 dakika bekle, Dashboard'a dön</li>
+                            <li>"Toplam haber" rakamının arttığını veya "Son RSS çekimleri" listesinde yeni zaman görmen gerekli</li>
+                            <li>Ayrıca burada <strong>"Manuel Çekim Tetikle"</strong> butonuyla anlık test edebilirsin:</li>
+                        </ol>
+                        <form method="post" action="<?= url('yonetim.php?sayfa=cekim-tetik') ?>" style="margin-top:14px">
+                            <?= csrf_input() ?>
+                            <button type="submit" class="buton">⚡ Manuel RSS Çekimini Tetikle</button>
+                            <a href="<?= url('yonetim.php?sayfa=loglar&tip=cron') ?>" class="buton ikincil">📋 Cron Logları</a>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Sorun Giderme -->
+                <div class="panel" style="background:#fef3c7;border-left:4px solid #f59e0b">
+                    <div class="panel-ic">
+                        <h3 style="margin:0 0 10px;color:#92400e">🔧 Sorun Giderme</h3>
+                        <ul style="margin:0;padding-left:22px;line-height:1.7;color:#78350f;font-size:13px">
+                            <li><strong>Cron çalışmıyor:</strong> Hosting panelindeki e-posta adresine cron çıktısı gönderilir, kontrol et.</li>
+                            <li><strong>wget komutu bulunamadı:</strong> Bazı hostinglerde <code>curl</code> kullan: <code>curl -s 'URL'</code></li>
+                            <li><strong>SSL hatası:</strong> URL'i <code>http://</code> olarak yaz veya <code>--no-check-certificate</code> ekle.</li>
+                            <li><strong>Anahtar değiştirmek istiyorsan:</strong> <a href="<?= url('yonetim.php?sayfa=ayarlar&grup=guvenlik') ?>">Ayarlar → Güvenlik</a></li>
+                            <li><strong>DirectAdmin dışında (Plesk/cPanel):</strong> Aynı mantık, sadece menü adları farklı.</li>
+                        </ul>
+                    </div>
+                </div>
+                <?php break;
 
             // ====================================
             // KALDIRMA TALEPLERİ (Takedown)

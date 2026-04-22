@@ -354,3 +354,21 @@ window.xnews = (function() {
         mobilBannerKapat,
     };
 })();
+
+// =====================================================
+// YUKARI CIK BUTONU (Scroll to Top)
+// =====================================================
+(function () {
+    var btn = document.getElementById('xn-yukariCik');
+    if (!btn) return;
+    var esik = 400; // kac px'den sonra gorunsun
+    function kontrol() {
+        if (window.scrollY > esik) btn.classList.add('gorunur');
+        else btn.classList.remove('gorunur');
+    }
+    window.addEventListener('scroll', kontrol, { passive: true });
+    btn.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    kontrol();
+})();

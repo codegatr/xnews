@@ -274,6 +274,11 @@ function sayfa_bitis(string $aktif = ''): void {
 
 </div></footer>
 
+<!-- Yukarı Çık Butonu -->
+<button id="xn-yukariCik" class="xn-yukari-cik" aria-label="Sayfanın başına dön" title="Yukarı Çık">
+    <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></svg>
+</button>
+
 <!-- Mobil Sabit Banner (alta yapışık) -->
 <div class="reklam-mobil-sabit">
     <button class="kapat" onclick="xnews.mobilBannerKapat()" aria-label="Kapat">×</button>

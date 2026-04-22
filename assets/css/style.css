@@ -1483,3 +1483,63 @@ body.tema-koyu .sd-num.aktif { color: #fff; }
     .footer-yasal-uyari .fyu-ikon { width: 18px; height: 18px; }
     .footer-yasal-uyari .fyu-ic { gap: 10px; }
 }
+
+/* ===================================================
+   YUKARI ÇIK BUTONU (Scroll to Top)
+   =================================================== */
+.xn-yukari-cik {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,.18), 0 0 0 4px rgba(200,16,46,.08);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(14px) scale(.9);
+    transition: all .28s cubic-bezier(.4,0,.2,1);
+    z-index: 998;
+}
+.xn-yukari-cik.gorunur {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+.xn-yukari-cik:hover {
+    background: #a00d26;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 28px rgba(200,16,46,.3);
+}
+.xn-yukari-cik svg {
+    width: 22px; height: 22px;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+@media (max-width: 768px) {
+    .xn-yukari-cik { width: 44px; height: 44px; right: 16px; bottom: 82px; }
+}
+
+/* ===================================================
+   ANA KAPSAYICI ORTALAMASI
+   =================================================== */
+.kapsayici {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+@media (max-width: 768px) {
+    .kapsayici { padding-left: 14px; padding-right: 14px; }
+}

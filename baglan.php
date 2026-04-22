@@ -390,9 +390,15 @@ function reklam_icerige_enjekte(string $html, int $paragraf_sonra = 3): string {
 
 function http_getir(string $url, int $zaman_asimi = 15, array $ek_baslik = []): array {
     $ch = curl_init();
+    // Büyük siteler (Cloudflare/WAF) bot user-agent'leri bloklar — tarayıcı gibi görünelim
     $baslik = array_merge([
-        'Accept: application/rss+xml, application/xml, text/xml, */*',
-        'Accept-Language: tr-TR,tr;q=0.9,en;q=0.8',
+        'Accept: application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.8',
+        'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Accept-Encoding: gzip, deflate, br',
+        'Cache-Control: no-cache',
+        'Pragma: no-cache',
+        'DNT: 1',
+        'Upgrade-Insecure-Requests: 1',
     ], $ek_baslik);
 
     curl_setopt_array($ch, [
@@ -402,11 +408,11 @@ function http_getir(string $url, int $zaman_asimi = 15, array $ek_baslik = []): 
         CURLOPT_MAXREDIRS      => 5,
         CURLOPT_TIMEOUT        => $zaman_asimi,
         CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_USERAGENT      => 'XNEWS-Bot/1.0 (+https://xnews.com.tr)',
+        CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_SSL_VERIFYHOST => 0,
         CURLOPT_HTTPHEADER     => $baslik,
-        CURLOPT_ENCODING       => '',
+        CURLOPT_ENCODING       => '', // otomatik gzip/deflate decode
     ]);
     $icerik = curl_exec($ch);
     $kod    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
