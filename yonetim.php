@@ -45,10 +45,10 @@ if ($sayfa === 'giris' || !giris_kontrol()) {
     if (post()) {
         $k = trim($_POST['kullanici'] ?? '');
         $s = $_POST['sifre'] ?? '';
-        if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+        if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
             $hata = 'Güvenlik doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin.';
         } elseif (empty($k) || empty($s)) {
-            $hata = 'Kullanıcı adı ve sifre zorunludur.';
+            $hata = 'Kullanıcı adı ve şifre zorunludur.';
         } else {
             $stmt = $db->prepare("SELECT * FROM " . DB_PREFIX . "users WHERE (kullanici_adi = ? OR eposta = ?) AND durum = 1 LIMIT 1");
             $stmt->execute([$k, $k]);
@@ -71,7 +71,7 @@ if ($sayfa === 'giris' || !giris_kontrol()) {
                 log_ekle('bilgi', 'Yönetici girisi', $kullanici['kullanici_adi'], $kullanici['id']);
                 yonlendir(url('yonetim.php'));
             } else {
-                $hata = 'Kullanıcı adı veya sifre hatali.';
+                $hata = 'Kullanıcı adı veya şifre hatali.';
                 $deneme['sayi']++;
                 $deneme['son'] = time();
                 $_SESSION[$limit_anahtar] = $deneme;
@@ -102,7 +102,7 @@ if ($sayfa === 'giris' || !giris_kontrol()) {
     <form class="login-form" method="post" autocomplete="on">
         <?= csrf_input() ?>
         <h2>Giriş Yap</h2>
-        <p class="alt">Devam etmek için hesabinizla giris yapin.</p>
+        <p class="alt">Devam etmek için hesabinizla giriş yapin.</p>
         <?php if ($hata): ?>
             <div class="login-giris-uyari">&#9888; <?= h($hata) ?></div>
         <?php endif; ?>
@@ -136,7 +136,7 @@ $prefix = DB_PREFIX;
 // POST ISLEMLER - KAYNAKLAR
 // =====================================================
 if ($sayfa === 'kaynaklar' && post()) {
-    if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+    if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
         flash('Güvenlik doğrulaması başarısız.', 'hata');
         yonlendir(url('yonetim.php?sayfa=kaynaklar'));
     }
@@ -199,7 +199,7 @@ if ($sayfa === 'kaynaklar' && post()) {
 // POST ISLEMLER - KATEGORILER
 // =====================================================
 if ($sayfa === 'kategoriler' && post()) {
-    if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+    if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
         flash('Güvenlik doğrulaması başarısız.', 'hata');
         yonlendir(url('yonetim.php?sayfa=kategoriler'));
     }
@@ -252,7 +252,7 @@ if ($sayfa === 'kategoriler' && post()) {
 // POST ISLEMLER - HABERLER
 // =====================================================
 if ($sayfa === 'haberler' && post()) {
-    if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+    if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
         flash('Güvenlik doğrulaması başarısız.', 'hata');
         yonlendir(url('yonetim.php?sayfa=haberler'));
     }
@@ -346,7 +346,7 @@ if ($sayfa === 'haberler' && post()) {
 // POST ISLEMLER - REKLAMLAR
 // =====================================================
 if ($sayfa === 'reklamlar' && post()) {
-    if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+    if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
         flash('Güvenlik doğrulaması başarısız.', 'hata');
         yonlendir(url('yonetim.php?sayfa=reklamlar'));
     }
@@ -398,7 +398,7 @@ if ($sayfa === 'reklamlar' && post()) {
 // =====================================================
 if ($sayfa === 'kullanicilar' && post()) {
     if ($yonetici['rol'] !== 'admin') { flash('Bu islem için admin yetkisi gerekli.', 'hata'); yonlendir(url('yonetim.php')); }
-    if (!csrf_doğrula($_POST['_csrf'] ?? '')) { flash('Güvenlik doğrulaması başarısız.', 'hata'); yonlendir(url('yonetim.php?sayfa=kullanicilar')); }
+    if (!csrf_dogrula($_POST['_csrf'] ?? '')) { flash('Güvenlik doğrulaması başarısız.', 'hata'); yonlendir(url('yonetim.php?sayfa=kullanicilar')); }
     try {
         if ($islem === 'ekle' || $islem === 'duzenle') {
             $k_ad    = trim($_POST['kullanici_adi'] ?? '');
@@ -449,7 +449,7 @@ if ($sayfa === 'kullanicilar' && post()) {
 // POST ISLEMLER - AYARLAR
 // =====================================================
 if ($sayfa === 'ayarlar' && post()) {
-    if (!csrf_doğrula($_POST['_csrf'] ?? '')) { flash('Güvenlik doğrulaması başarısız.', 'hata'); yonlendir(url('yonetim.php?sayfa=ayarlar')); }
+    if (!csrf_dogrula($_POST['_csrf'] ?? '')) { flash('Güvenlik doğrulaması başarısız.', 'hata'); yonlendir(url('yonetim.php?sayfa=ayarlar')); }
     try {
         $ayarlar = $_POST['ayar'] ?? [];
         foreach ($ayarlar as $anahtar => $deger) {
@@ -469,7 +469,7 @@ if ($sayfa === 'ayarlar' && post()) {
 // MANUEL RSS CEKIMI (cron.php'yi cagir)
 // =====================================================
 if ($sayfa === 'cekim-tetik' && post()) {
-    if (!csrf_doğrula($_POST['_csrf'] ?? '')) { flash('Güvenlik hatasi.', 'hata'); yonlendir(url('yonetim.php')); }
+    if (!csrf_dogrula($_POST['_csrf'] ?? '')) { flash('Güvenlik hatasi.', 'hata'); yonlendir(url('yonetim.php')); }
     $cron_url = url('cron.php?anahtar=' . CRON_ANAHTARI . '&manuel=1');
     $r = http_getir($cron_url, 60);
     if ($r['kod'] === 200) {
@@ -656,7 +656,7 @@ function menu_aktif(string $mevcut, string $slug): string {
             ?>
                 <div class="hosgeldin-kart">
                     <h2>Hoş geldin, <?= h(explode(' ', $yonetici['ad_soyad'] ?: $yonetici['kullanici_adi'])[0]) ?> 👋</h2>
-                    <p>XNEWS yonetim paneline eriştin. Aşağıdaki istatistiklerden sistemin genel durumunu görüntüleyebilirsin.</p>
+                    <p>XNEWS yönetim paneline eriştin. Aşağıdaki istatistiklerden sistemin genel durumunu görüntüleyebilirsin.</p>
                     <div class="butonlar">
                         <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton">RSS Kaynakları</a>
                         <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" class="buton ikincil">Manuel Haber Ekle</a>
@@ -978,7 +978,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                 <input type="color" name="renk" value="<?= h($kat_d['renk'] ?? '#c8102e') ?>">
                             </div>
                             <div class="form-grup">
-                                <label>Sira</label>
+                                <label>Sıra</label>
                                 <input type="number" name="sira" value="<?= (int)($kat_d['sira'] ?? 0) ?>">
                                 <div class="ipucu">Dusuk = onde</div>
                             </div>
@@ -1016,7 +1016,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                         <div class="tablo-sarmal">
                             <table class="tablo">
                                 <thead>
-                                    <tr><th>Ad</th><th>Slug</th><th>Haber</th><th>Sira</th><th>Durum</th><th></th></tr>
+                                    <tr><th>Ad</th><th>Slug</th><th>Haber</th><th>Sıra</th><th>Durum</th><th></th></tr>
                                 </thead>
                                 <tbody>
                                 <?php foreach ($kat_liste as $k): ?>
@@ -1077,7 +1077,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                     <div class="iki-kolon">
                         <div>
                             <div class="panel">
-                                <div class="panel-bas"><h3>Haber Icerigi</h3></div>
+                                <div class="panel-bas"><h3>Haber İçeriği</h3></div>
                                 <div class="panel-ic">
                                     <div class="form-grup">
                                         <label>Başlık *</label>
@@ -1574,7 +1574,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                 <div class="icerik-bas">
                     <div>
                         <h1>Kullanıcılar</h1>
-                        <div class="alt-metin"><?= count($usr_liste) ?> kullanici</div>
+                        <div class="alt-metin"><?= count($usr_liste) ?> kullanıcı</div>
                     </div>
                     <a href="<?= url('yonetim.php?sayfa=kullanicilar&islem=ekle') ?>" class="buton"><?= ikon('plus') ?>Yeni Kullanıcı</a>
                 </div>

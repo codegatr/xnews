@@ -228,7 +228,7 @@ try {
     }
 
     if ($islem === 'guncelle' && post()) {
-        if (!csrf_doğrula($_POST['_csrf'] ?? '')) {
+        if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
             throw new RuntimeException('Güvenlik doğrulaması başarısız.');
         }
         if (!$yeni_surum_var) {
@@ -328,7 +328,7 @@ body { background: #f5f7fa; padding: 40px 20px; }
             <p style="color:var(--muted);margin-bottom:20px">Sunucunuzda yüklü olan XNEWS sürümü.</p>
             <div class="surum-kart">
                 <div class="surum-kutu">
-                    <div class="etiket">Yuklu</div>
+                    <div class="etiket">Yüklü</div>
                     <div class="numara">v<?= h($mevcut_surum) ?></div>
                 </div>
                 <div></div>
@@ -375,7 +375,7 @@ body { background: #f5f7fa; padding: 40px 20px; }
                 <ul style="margin-left:20px">
                     <li>✓ Mevcut dosyalarin tamami otomatik yedeklenir (<code>uploads/yedek/</code>)</li>
                     <li>✓ <code>config.php</code> ve <code>uploads/</code> korunur</li>
-                    <li>✓ Veritabani degismez</li>
+                    <li>✓ Veritabanı degismez</li>
                     <li>⚠ İşlem sirasinda site kısa bir sure erisilemeyebilir</li>
                 </ul>
             </div>
@@ -393,7 +393,7 @@ body { background: #f5f7fa; padding: 40px 20px; }
         <div class="gun-bas">
             <div class="surum-kart">
                 <div class="surum-kutu yeni">
-                    <div class="etiket">Yuklu Sürüm</div>
+                    <div class="etiket">Yüklü Sürüm</div>
                     <div class="numara">v<?= h($mevcut_surum) ?></div>
                 </div>
                 <div class="ok-ikon" style="background:var(--success)">✓</div>

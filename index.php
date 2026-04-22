@@ -586,7 +586,7 @@ case 'arama':
     <div class="bolum-baslik"><h2>Arama<?= $q ? ': ' . h($q) : '' ?></h2><span class="tumu"><?= $toplam ?> sonuc</span></div>
     <form method="get" action="<?= url() ?>" style="margin-bottom:30px;display:flex;gap:10px;max-width:600px">
         <input type="hidden" name="sayfa" value="arama">
-        <input type="search" name="q" value="<?= h($q) ?>" placeholder="Aramak istediginiz kelimeyi yazin..." style="flex:1;padding:14px 18px;border:2px solid var(--black);font-family:var(--font-ui);font-size:15px;outline:none" required autofocus>
+        <input type="search" name="q" value="<?= h($q) ?>" placeholder="Aramak istediğiniz kelimeyi yazin..." style="flex:1;padding:14px 18px;border:2px solid var(--black);font-family:var(--font-ui);font-size:15px;outline:none" required autofocus>
         <button type="submit" style="padding:0 24px;background:var(--brand);color:#fff;border:none;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:13px;cursor:pointer">Ara</button>
     </form>
     <?php if (empty($sonuc) && $q): ?>
@@ -627,7 +627,7 @@ case 'hakkimizda': case 'iletisim': case 'reklam': case 'gizlilik': case 'kullan
             </ul>
         <?php elseif ($sayfa === 'reklam'): ?>
             <p><?= h(ayar('site_adi')) ?> uzerinde reklam vermek için bizimle iletisime gecin.</p>
-            <h2>Reklam Alanlarimiz</h2>
+            <h2>Reklam Alanlarımız</h2>
             <ul>
                 <li>Üst Banner (970×90)</li>
                 <li>Sidebar (300×250 / 300×600)</li>
@@ -684,6 +684,6 @@ sayfa_404:
     } else {
         log_ekle('hata', 'index.php hatasi', $e->getMessage());
         http_response_code(500);
-        echo '<div style="padding:60px;text-align:center;font-family:system-ui"><h1>Bir hata olustu</h1><p>Kısa bir sure sonra tekrar deneyiniz.</p></div>';
+        echo '<div style="padding:60px;text-align:center;font-family:system-ui"><h1>Bir hata oluştu</h1><p>Kısa bir sure sonra tekrar deneyiniz.</p></div>';
     }
 }

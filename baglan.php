@@ -36,7 +36,7 @@ try {
     ]);
 } catch (PDOException $e) {
     if (defined('HATA_AYIKLAMA') && HATA_AYIKLAMA) {
-        die('Veritabani baglanti hatasi: ' . $e->getMessage());
+        die('Veritabanı baglanti hatasi: ' . $e->getMessage());
     }
     error_log('[XNEWS DB] ' . $e->getMessage());
     http_response_code(503);
@@ -83,7 +83,7 @@ function csrf_token(): string {
 /**
  * CSRF token dogrula
  */
-function csrf_doğrula(?string $token): bool {
+function csrf_dogrula(?string $token): bool {
     return !empty($token) && !empty($_SESSION['_csrf']) && hash_equals($_SESSION['_csrf'], $token);
 }
 

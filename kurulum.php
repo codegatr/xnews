@@ -252,7 +252,7 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
     <div class="adimlar">
         <div class="adim <?= $adim === 1 ? 'aktif' : ($adim > 1 ? 'tamam' : '') ?>">1. Karsilama</div>
         <div class="adim <?= $adim === 2 ? 'aktif' : ($adim > 2 ? 'tamam' : '') ?>">2. Gereksinim</div>
-        <div class="adim <?= $adim === 3 ? 'aktif' : ($adim > 3 ? 'tamam' : '') ?>">3. Veritabani</div>
+        <div class="adim <?= $adim === 3 ? 'aktif' : ($adim > 3 ? 'tamam' : '') ?>">3. Veritabanı</div>
         <div class="adim <?= $adim === 4 ? 'aktif' : ($adim > 4 ? 'tamam' : '') ?>">4. Yönetici</div>
         <div class="adim <?= $adim === 5 ? 'aktif tamam' : '' ?>">5. Bitti</div>
     </div>
@@ -266,7 +266,7 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
                 <p><strong>Baslamadan önce hazirlayin:</strong></p>
                 <ul style="margin-left:20px;margin-top:8px">
                     <li>DirectAdmin veya hosting panelinizden olusturulmus bir MySQL veritabani</li>
-                    <li>Veritabani kullanıcı adi ve sifresi</li>
+                    <li>Veritabanı kullanıcı adi ve sifresi</li>
                     <li>Site URL (ornek: https://xnews.com.tr)</li>
                     <li>Yönetici paneli için kullanıcı adi/sifre</li>
                 </ul>
@@ -297,7 +297,7 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
             </div>
 
         <?php elseif ($adim === 3): ?>
-            <h2>Veritabani Bilgileri</h2>
+            <h2>Veritabanı Bilgileri</h2>
             <p class="alt">DirectAdmin panelinden olusturdugunuz MySQL bilgilerini girin.</p>
             <form method="post">
                 <div class="grid-2">
@@ -313,7 +313,7 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
                     </div>
                 </div>
                 <div class="grup">
-                    <label>Veritabani Adi</label>
+                    <label>Veritabanı Adi</label>
                     <input type="text" name="db_name" value="<?= htmlspecialchars($_POST['db_name'] ?? '') ?>" required>
                     <div class="ipucu">Ornek: kullanici_xnews</div>
                 </div>
@@ -377,13 +377,13 @@ input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(2
         <?php elseif ($adim === 5): ?>
             <div class="bitti">
                 <div class="tik">✅</div>
-                <h2>Kurulum Tamamlandi!</h2>
+                <h2>Kurulum Tamamlandı!</h2>
                 <p style="color:#475569">XNEWS artik kullanima hazir.</p>
                 <div class="bilgi-kart">
                     <strong>⚠ Güvenlik için simdi yapmaniz gerekenler:</strong>
                     <ol style="margin-left:20px;margin-top:10px">
                         <li><code>kurulum.php</code> dosyasini FTP'den silin</li>
-                        <li><code>config.php</code> izinlerini 644 yapin (yazmaya kapalı)</li>
+                        <li><code>config.php</code> izinlerini 644 yapın (yazmaya kapalı)</li>
                         <li>DirectAdmin'den cron job ekleyin:<br>
                             <code style="font-size:11px">*/10 * * * * wget -q -O /dev/null "https://xnews.com.tr/cron.php?anahtar=CRON_ANAHTARI"</code>
                         </li>
