@@ -76,7 +76,6 @@ ul, ol { list-style: none; }
     font-family: var(--font-ui);
     font-size: 13px;
     overflow: hidden;
-    border-bottom: 2px solid var(--warm-yellow);
 }
 .son-dakika-serit .kapsayici { display: flex; align-items: center; gap: 14px; padding: 10px var(--gutter); }
 .sd-etiket {
@@ -194,8 +193,17 @@ ul, ol { list-style: none; }
     z-index: 100;
     box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
-.kat-menu .kapsayici { display: flex; align-items: center; justify-content: space-between; }
-.kat-liste { display: flex; list-style: none; }
+.kat-menu .kapsayici { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.kat-liste {
+    display: flex;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.kat-liste::-webkit-scrollbar { display: none; }
 .kat-liste > li > a {
     display: block;
     color: var(--white);
@@ -204,9 +212,10 @@ ul, ol { list-style: none; }
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: .06em;
-    padding: 16px 18px;
+    padding: 16px 16px;
     position: relative;
     transition: all .2s;
+    white-space: nowrap;
 }
 .kat-liste > li > a::after {
     content: '';
