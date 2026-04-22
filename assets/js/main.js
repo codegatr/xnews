@@ -102,12 +102,165 @@ window.xnews = (function() {
         });
     }
 
+    // ==================================================
+    // ÇEREZ YÖNETIMI (KVKK uyumlu)
+    // ==================================================
+    const CEREZ_KEY = 'xn_cerez_onay';
+    const CEREZ_VERSION = 2; // Politika değişirse arttır
+
+    function cerezOku() {
+        try {
+            const c = document.cookie.split('; ').find(r => r.startsWith(CEREZ_KEY + '='));
+            if (!c) return null;
+            return JSON.parse(decodeURIComponent(c.split('=')[1]));
+        } catch(e) { return null; }
+    }
+    function cerezYaz(data) {
+        const val = encodeURIComponent(JSON.stringify({...data, v: CEREZ_VERSION, t: Date.now()}));
+        document.cookie = CEREZ_KEY + '=' + val + '; path=/; max-age=' + (365*24*60*60) + '; SameSite=Lax';
+    }
+    function cerezBannerKontrol() {
+        const banner = $('#cerezBanner');
+        if (!banner) return;
+        const mevcut = cerezOku();
+        if (!mevcut || mevcut.v !== CEREZ_VERSION) {
+            banner.style.display = 'block';
+        } else {
+            cerezUygula(mevcut);
+        }
+    }
+    function cerezUygula(tercih) {
+        // Analitik: Google Analytics yükle (varsa)
+        if (tercih.analitik) {
+            window.xnCerezAnalitikAktif = true;
+            // Örnek: loadGA(); (admin GA key set ederse yüklenir)
+        }
+        if (tercih.reklam) {
+            window.xnCerezReklamAktif = true;
+            // AdSense consent
+            if (window.adsbygoogle) {
+                try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){}
+            }
+        }
+    }
+    function cerezKabul(tur) {
+        const tercih = tur === 'tumu'
+            ? { analitik: true, reklam: true }
+            : { analitik: false, reklam: false };
+        cerezYaz(tercih);
+        cerezUygula(tercih);
+        const b = $('#cerezBanner'); if (b) b.style.display = 'none';
+        const m = $('#cerezModal'); if (m) m.style.display = 'none';
+    }
+    function cerezAyarlariAc() {
+        const modal = $('#cerezModal');
+        if (!modal) return;
+        const mevcut = cerezOku() || {};
+        if ($('#cerez_analitik')) $('#cerez_analitik').checked = !!mevcut.analitik;
+        if ($('#cerez_reklam')) $('#cerez_reklam').checked = !!mevcut.reklam;
+        modal.style.display = 'flex';
+    }
+    function cerezAyarlariKapat() {
+        const m = $('#cerezModal'); if (m) m.style.display = 'none';
+    }
+    function cerezKaydet() {
+        const tercih = {
+            analitik: $('#cerez_analitik')?.checked || false,
+            reklam:   $('#cerez_reklam')?.checked || false,
+        };
+        cerezYaz(tercih);
+        cerezUygula(tercih);
+        const m = $('#cerezModal'); if (m) m.style.display = 'none';
+        const b = $('#cerezBanner'); if (b) b.style.display = 'none';
+    }
+
+    // ==================================================
+    // FONT SIZE AYARI (haber detay)
+    // ==================================================
+    const FS_KEY = 'xn_fs';
+    const FS_SIRA = ['fs-kucuk', '', 'fs-buyuk', 'fs-cok-buyuk'];
+    function fontSizeUygula() {
+        const mevcut = localStorage.getItem(FS_KEY) || '';
+        // Temizle
+        FS_SIRA.forEach(c => { if (c) document.body.classList.remove(c); });
+        if (mevcut) document.body.classList.add(mevcut);
+    }
+    function fontSizeDegistir(yon) {
+        let mevcut = localStorage.getItem(FS_KEY) || '';
+        let idx = FS_SIRA.indexOf(mevcut);
+        if (idx === -1) idx = 1; // varsayılan
+        idx = Math.max(0, Math.min(FS_SIRA.length - 1, idx + yon));
+        const yeni = FS_SIRA[idx];
+        if (yeni) localStorage.setItem(FS_KEY, yeni);
+        else localStorage.removeItem(FS_KEY);
+        fontSizeUygula();
+    }
+
+    // ==================================================
+    // DARK MODE
+    // ==================================================
+    const TEMA_KEY = 'xn_tema';
+    function temaUygula() {
+        const mevcut = localStorage.getItem(TEMA_KEY) || 'oto';
+        document.body.classList.remove('tema-oto', 'tema-koyu', 'tema-acik');
+        document.body.classList.add('tema-' + mevcut);
+    }
+    function temaDegistir() {
+        const mevcut = localStorage.getItem(TEMA_KEY) || 'oto';
+        const sonraki = mevcut === 'oto' ? 'koyu' : (mevcut === 'koyu' ? 'acik' : 'oto');
+        localStorage.setItem(TEMA_KEY, sonraki);
+        temaUygula();
+    }
+
+    // ==================================================
+    // YAZDIR
+    // ==================================================
+    function yazdir() { window.print(); }
+
+    // ==================================================
+    // HABERI DINLE (Web Speech API)
+    // ==================================================
+    let _konusma = null;
+    function haberiDinle() {
+        if (!('speechSynthesis' in window)) {
+            alert('Tarayıcınız sesli okumayı desteklemiyor.');
+            return;
+        }
+        if (_konusma && speechSynthesis.speaking) {
+            speechSynthesis.cancel();
+            _konusma = null;
+            return;
+        }
+        const baslik = document.querySelector('.hd-baslik')?.innerText || '';
+        const icerik = document.querySelector('.hd-icerik')?.innerText || '';
+        const metin = (baslik + '. ' + icerik).substring(0, 5000);
+        _konusma = new SpeechSynthesisUtterance(metin);
+        _konusma.lang = 'tr-TR';
+        _konusma.rate = 1.0;
+        speechSynthesis.speak(_konusma);
+    }
+
+    // ==================================================
+    // MOBIL SABIT BANNER (kapat)
+    // ==================================================
+    function mobilBannerKapat() {
+        const b = $('.reklam-mobil-sabit');
+        if (b) b.style.display = 'none';
+        sessionStorage.setItem('xn_msb_kapali', '1');
+    }
+    function mobilBannerKontrol() {
+        const b = $('.reklam-mobil-sabit');
+        if (!b) return;
+        if (sessionStorage.getItem('xn_msb_kapali')) return;
+        b.classList.add('aktif');
+    }
+
     // Baslangic
     document.addEventListener('DOMContentLoaded', () => {
         ilerlemeCubuguBaslat();
         lazyLoadBaslat();
         trTarihGuncelle();
-        setInterval(trTarihGuncelle, 60000); // Her dakikada bir guncelle
+        setInterval(trTarihGuncelle, 60000);
 
         // Manset haberlerini tikla
         $$('.haber-kart, .manset-buyuk, .manset-kucuk, .mini-kart').forEach(kart => {
@@ -121,11 +274,20 @@ window.xnews = (function() {
                 });
             }
         });
+
+        // Cerez + Tema + Font size uygula
+        temaUygula();
+        fontSizeUygula();
+        setTimeout(cerezBannerKontrol, 800); // Sayfa yuklendikten sonra bildir
+        mobilBannerKontrol();
     });
 
     return {
         mobilMenuAc, mobilMenuKapat,
         aramaAc, aramaKapat,
         paylas,
+        cerezKabul, cerezAyarlariAc, cerezAyarlariKapat, cerezKaydet,
+        fontSizeDegistir, temaDegistir, yazdir, haberiDinle,
+        mobilBannerKapat,
     };
 })();

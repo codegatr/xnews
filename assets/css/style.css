@@ -586,7 +586,7 @@ main { padding: 40px 0 80px; min-height: 500px; position: relative; z-index: 0; 
    FOOTER
    =================================================== */
 footer { background: var(--black); color: #d1d1d1; padding: 50px 0 24px; margin-top: 60px; font-family: var(--font-ui); font-size: 14px; position: relative; z-index: 1; clear: both; overflow: hidden; }
-.footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; position: relative; }
+.footer-grid { display: grid; grid-template-columns: 1.8fr .9fr .9fr .9fr 1fr; gap: 30px; margin-bottom: 40px; position: relative; }
 .footer-marka .logo-metin { color: var(--white); font-size: 48px; }
 .footer-marka .logo-metin .x { color: var(--brand); }
 .footer-marka p { color: #999; margin-top: 12px; line-height: 1.6; font-size: 13px; max-width: 380px; }
@@ -668,3 +668,179 @@ footer { background: var(--black); color: #d1d1d1; padding: 50px 0 24px; margin-
     body { background: white; color: black; font-size: 12pt; }
     .hd-baslik { font-size: 28pt; }
 }
+
+/* ===================================================
+   COKIE BANNER (KVKK uyumlu)
+   =================================================== */
+.cerez-banner {
+    position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 9998;
+    max-width: 1100px; margin: 0 auto;
+    background: #0f172a; color: #fff;
+    border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    padding: 18px 22px;
+    animation: cerezSlide .4s ease-out;
+}
+@keyframes cerezSlide { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.cerez-banner-i { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+.cerez-banner-metin { flex: 1; min-width: 280px; font-size: 13px; line-height: 1.55; }
+.cerez-banner-metin strong { font-size: 15px; display: block; margin-bottom: 4px; }
+.cerez-banner-metin p { margin: 0; color: #cbd5e1; }
+.cerez-banner-btn { display: flex; gap: 8px; flex-wrap: wrap; }
+.cb-btn {
+    border: none; padding: 11px 22px; font-weight: 600; font-size: 13px;
+    cursor: pointer; border-radius: 6px; font-family: inherit;
+    transition: all .15s; letter-spacing: .02em;
+}
+.cb-btn-ana { background: var(--brand); color: #fff; }
+.cb-btn-ana:hover { background: #a30d26; }
+.cb-btn-alt { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.2); }
+.cb-btn-alt:hover { background: rgba(255,255,255,.2); }
+.cb-btn-icon { padding: 11px 14px; background: rgba(255,255,255,.1); color: #fff; font-size: 18px; }
+
+.cerez-modal {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.cerez-modal-i {
+    background: #fff; border-radius: 12px; max-width: 620px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    animation: cerezModalIn .3s ease-out;
+}
+@keyframes cerezModalIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.cerez-modal-ust { display: flex; justify-content: space-between; align-items: center; padding: 20px 28px; border-bottom: 1px solid #e5e5e5; }
+.cerez-modal-ust h3 { font-family: var(--font-display); font-size: 22px; text-transform: uppercase; letter-spacing: -.5px; }
+.cerez-modal-kapat { background: none; border: none; font-size: 28px; cursor: pointer; color: #64748b; line-height: 1; padding: 0 4px; }
+.cerez-modal-icerik { padding: 20px 28px; }
+.cerez-kategori { padding: 16px; border: 1px solid #e5e5e5; border-radius: 8px; margin-bottom: 14px; transition: border-color .2s; }
+.cerez-kategori:hover { border-color: var(--brand); }
+.cerez-kategori label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 15px; font-weight: 600; }
+.cerez-kategori label input { width: 18px; height: 18px; accent-color: var(--brand); cursor: pointer; }
+.cerez-kategori p { margin: 8px 0 0 28px; color: #64748b; font-size: 13px; line-height: 1.55; }
+.cerez-zorunlu { margin-left: auto; font-size: 11px; color: #10b981; background: #d1fae5; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+.cerez-modal-alt { padding: 16px 28px; border-top: 1px solid #e5e5e5; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+@media (max-width: 600px) {
+    .cerez-banner { left: 10px; right: 10px; bottom: 10px; padding: 16px; }
+    .cerez-banner-btn { width: 100%; justify-content: stretch; }
+    .cerez-banner-btn .cb-btn { flex: 1; }
+}
+
+/* ===================================================
+   BREADCRUMB
+   =================================================== */
+.breadcrumb {
+    font-family: var(--font-ui); font-size: 12px;
+    padding: 10px 0; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .06em;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.breadcrumb a { color: var(--muted); transition: color .2s; }
+.breadcrumb a:hover { color: var(--brand); }
+.breadcrumb .sep { color: #cbd5e1; font-size: 10px; }
+.breadcrumb .son { color: var(--ink); font-weight: 600; }
+
+/* ===================================================
+   HABER DETAY ARAC CUBUGU (font size, yazdir, dinle)
+   =================================================== */
+.hd-araclar {
+    display: flex; gap: 8px; align-items: center;
+    padding: 12px 0; margin: 20px 0;
+    border-top: 1px solid var(--paper-border);
+    border-bottom: 1px solid var(--paper-border);
+    flex-wrap: wrap;
+}
+.hd-araclar-sol { display: flex; gap: 6px; align-items: center; }
+.hd-araclar-sol span { font-family: var(--font-ui); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-right: 4px; }
+.hd-arac-btn {
+    background: var(--paper-dark); border: 1px solid var(--paper-border);
+    padding: 7px 12px; font-family: var(--font-ui); font-size: 12px;
+    font-weight: 600; cursor: pointer; color: var(--ink);
+    border-radius: 3px; transition: all .15s;
+    display: inline-flex; align-items: center; gap: 5px;
+}
+.hd-arac-btn:hover { background: var(--black); color: #fff; border-color: var(--black); }
+.hd-arac-btn svg { width: 14px; height: 14px; }
+.hd-araclar-sag { margin-left: auto; }
+
+/* Font size adjusters */
+body.fs-buyuk .hd-icerik { font-size: 20px; }
+body.fs-cok-buyuk .hd-icerik { font-size: 22px; line-height: 1.85; }
+body.fs-kucuk .hd-icerik { font-size: 16px; }
+
+/* ===================================================
+   POPULER / TREND WIDGET
+   =================================================== */
+.populer-liste { display: flex; flex-direction: column; gap: 14px; }
+.populer-oge { display: flex; gap: 12px; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid var(--paper-border); }
+.populer-oge:last-child { border-bottom: none; padding-bottom: 0; }
+.populer-numara {
+    font-family: var(--font-display); font-size: 36px; font-weight: 900;
+    color: var(--brand); line-height: 1; letter-spacing: -2px;
+    flex-shrink: 0; width: 36px;
+}
+.populer-icerik { flex: 1; min-width: 0; }
+.populer-icerik a { font-size: 14px; font-weight: 600; line-height: 1.35; color: var(--ink); display: block; }
+.populer-icerik a:hover { color: var(--brand); }
+.populer-meta { font-family: var(--font-ui); font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+
+/* ===================================================
+   MOBIL SABIT BANNER (alt yapisik)
+   =================================================== */
+.reklam-mobil-sabit {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #f8fafc; border-top: 1px solid #e5e5e5;
+    padding: 6px; z-index: 500;
+    display: none; text-align: center;
+    box-shadow: 0 -2px 12px rgba(0,0,0,.08);
+}
+@media (max-width: 768px) {
+    .reklam-mobil-sabit.aktif { display: block; }
+}
+.reklam-mobil-sabit .kapat {
+    position: absolute; right: 6px; top: 6px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(0,0,0,.1); border: none; cursor: pointer;
+    font-size: 14px; line-height: 1; color: #64748b;
+}
+
+/* ===================================================
+   TREND ETIKETLER (Trending)
+   =================================================== */
+.trend-etiketler { display: flex; flex-wrap: wrap; gap: 8px; }
+.trend-etiket {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--paper-dark); padding: 6px 12px;
+    font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+    border-radius: 30px; color: var(--ink-muted);
+    text-transform: uppercase; letter-spacing: .04em;
+    transition: all .15s;
+}
+.trend-etiket:hover { background: var(--brand); color: #fff; }
+.trend-etiket::before { content: '#'; color: var(--brand); font-weight: 800; }
+.trend-etiket:hover::before { color: #fff; }
+
+/* ===================================================
+   DARK MODE (prefers-color-scheme)
+   =================================================== */
+@media (prefers-color-scheme: dark) {
+    body.tema-oto {
+        --paper: #0f172a; --paper-dark: #1e293b; --paper-border: #334155;
+        --ink: #f1f5f9; --ink-muted: #cbd5e1; --muted: #94a3b8;
+        --white: #f8fafc; --black: #020617;
+        background: var(--paper); color: var(--ink);
+    }
+    body.tema-oto .sidebar-blok, body.tema-oto footer { background: #1e293b; }
+    body.tema-oto .logo-metin { color: #f8fafc; }
+    body.tema-oto .kat-menu { background: #020617; }
+    body.tema-oto img { filter: brightness(.9); }
+}
+body.tema-koyu {
+    --paper: #0f172a; --paper-dark: #1e293b; --paper-border: #334155;
+    --ink: #f1f5f9; --ink-muted: #cbd5e1; --muted: #94a3b8;
+    --white: #f8fafc; --black: #020617;
+    background: var(--paper); color: var(--ink);
+}
+body.tema-koyu .sidebar-blok, body.tema-koyu footer { background: #1e293b; }
+body.tema-koyu .logo-metin { color: #f8fafc; }
+body.tema-koyu .kat-menu { background: #020617; }

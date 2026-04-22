@@ -68,8 +68,36 @@ function sayfa_basla(array $opt): void {
 <meta property="og:title" content="<?= h($baslik) ?>">
 <meta property="og:description" content="<?= h(kisalt($aciklama, 155)) ?>">
 <meta property="og:image" content="<?= h($gorsel) ?>">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:url" content="<?= h($canonical) ?>">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<?= h($baslik) ?>">
+<meta name="twitter:description" content="<?= h(kisalt($aciklama, 155)) ?>">
+<meta name="twitter:image" content="<?= h($gorsel) ?>">
+<?php if ($tw = ayar('twitter_kullanici')): ?><meta name="twitter:site" content="@<?= h(ltrim($tw, '@')) ?>"><?php endif; ?>
+<?php if ($aktif === 'haber' && !empty($opt['haber'])): $hb = $opt['haber']; ?>
+<meta property="article:published_time" content="<?= h(date('c', strtotime($hb['yayin_tarihi'] ?? $hb['olusturma_tarihi'] ?? 'now'))) ?>">
+<?php if (!empty($hb['guncellenme_tarihi'])): ?><meta property="article:modified_time" content="<?= h(date('c', strtotime($hb['guncellenme_tarihi']))) ?>"><?php endif; ?>
+<?php if (!empty($hb['kat_ad'])): ?><meta property="article:section" content="<?= h($hb['kat_ad']) ?>"><?php endif; ?>
+<?php if (!empty($hb['yazar'])): ?><meta property="article:author" content="<?= h($hb['yazar']) ?>"><?php endif; ?>
+<!-- Schema.org NewsArticle JSON-LD -->
+<script type="application/ld+json">
+<?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'NewsArticle',
+    'headline' => $hb['baslik'] ?? $baslik,
+    'description' => kisalt($aciklama, 155),
+    'image' => [$gorsel],
+    'datePublished' => date('c', strtotime($hb['yayin_tarihi'] ?? $hb['olusturma_tarihi'] ?? 'now')),
+    'dateModified' => date('c', strtotime($hb['guncellenme_tarihi'] ?? $hb['yayin_tarihi'] ?? 'now')),
+    'author' => ['@type' => 'Organization', 'name' => $hb['kaynak_atfi'] ?? $hb['kaynak_ad'] ?? ayar('site_adi')],
+    'publisher' => ['@type' => 'Organization', 'name' => ayar('site_adi'), 'logo' => ['@type' => 'ImageObject', 'url' => url('favicon.svg')]],
+    'articleSection' => $hb['kat_ad'] ?? null,
+    'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $canonical],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) ?>
+</script>
+<?php endif; ?>
 <link rel="icon" type="image/svg+xml" href="<?= url('favicon.svg') ?>">
 <link rel="apple-touch-icon" href="<?= url('favicon.svg') ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -191,15 +219,25 @@ function sayfa_bitis(string $aktif = ''): void {
             <h4>Kurumsal</h4>
             <ul>
                 <li><a href="<?= url('hakkimizda') ?>">Hakkımızda</a></li>
+                <li><a href="<?= url('kunye') ?>">Künye</a></li>
                 <li><a href="<?= url('iletisim') ?>">İletişim</a></li>
                 <li><a href="<?= url('reklam') ?>">Reklam Ver</a></li>
-                <li><a href="<?= url('gizlilik') ?>">Gizlilik Politikasi</a></li>
-                <li><a href="<?= url('kullanim-sartlari') ?>">Kullanim Sartlari</a></li>
+                <li><a href="<?= url('yayin-ilkeleri') ?>">Yayın İlkelerimiz</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4>Yasal</h4>
+            <ul>
+                <li><a href="<?= url('kvkk') ?>">KVKK Aydınlatma</a></li>
+                <li><a href="<?= url('gizlilik') ?>">Gizlilik Politikası</a></li>
+                <li><a href="<?= url('cerez') ?>">Çerez Politikası</a></li>
+                <li><a href="<?= url('kullanim') ?>">Kullanım Şartları</a></li>
+                <li><a href="<?= url('kaldirma-talebi') ?>">Kaldırma Talebi</a></li>
             </ul>
         </div>
         <div>
             <h4>Abone Ol</h4>
-            <p style="color:#aaa;font-size:13px;margin-bottom:12px">Son dakika haberlerini kacirmayin.</p>
+            <p style="color:#aaa;font-size:13px;margin-bottom:12px">Son dakika haberlerini kaçırmayın.</p>
             <a href="<?= url('rss') ?>" style="display:inline-flex;align-items:center;gap:8px;background:#c8102e;color:#fff;padding:10px 18px;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.08em">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27zm0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93z"/></svg>
                 RSS Beslemesi
@@ -207,10 +245,74 @@ function sayfa_bitis(string $aktif = ''): void {
         </div>
     </div>
     <div class="footer-alt">
-        <div>© <?= date('Y') ?> <?= h(ayar('site_adi', 'XNEWS')) ?>. Tüm haklari saklidir.</div>
+        <div>© <?= date('Y') ?> <?= h(ayar('site_adi', 'XNEWS')) ?>. Tüm hakları saklıdır.</div>
         <div><a href="https://codega.com.tr" target="_blank" rel="noopener">Powered by CODEGA</a></div>
     </div>
+<?php reklam_goster('alt_banner'); ?>
+
 </div></footer>
+
+<!-- Mobil Sabit Banner (alta yapışık) -->
+<div class="reklam-mobil-sabit">
+    <button class="kapat" onclick="xnews.mobilBannerKapat()" aria-label="Kapat">×</button>
+    <?php reklam_goster('mobil_sabit'); ?>
+</div>
+
+<?php if (ayar('cerez_bildirim_aktif', '1') === '1'): ?>
+<!-- Çerez Bildirim Paneli -->
+<div id="cerezBanner" class="cerez-banner" style="display:none" role="dialog" aria-label="Çerez Tercihleri">
+    <div class="cerez-banner-i">
+        <div class="cerez-banner-metin">
+            <strong>🍪 Çerez Kullanımı</strong>
+            <p>Sitemizde deneyiminizi iyileştirmek için çerezler kullanıyoruz. <strong>Zorunlu çerezler</strong> sitenin çalışması için gereklidir. <strong>Analitik ve reklam çerezleri</strong> tercihlerinize bağlıdır.
+            <a href="<?= url('cerez') ?>" style="color:#c8102e;text-decoration:underline">Detaylı bilgi</a>.</p>
+        </div>
+        <div class="cerez-banner-btn">
+            <button onclick="xnews.cerezKabul('tumu')" class="cb-btn cb-btn-ana">Tümünü Kabul Et</button>
+            <button onclick="xnews.cerezKabul('zorunlu')" class="cb-btn cb-btn-alt">Sadece Zorunlu</button>
+            <button onclick="xnews.cerezAyarlariAc()" class="cb-btn cb-btn-icon" aria-label="Özel tercihler">⚙</button>
+        </div>
+    </div>
+</div>
+
+<!-- Çerez Ayarlar Modal -->
+<div id="cerezModal" class="cerez-modal" style="display:none">
+    <div class="cerez-modal-i">
+        <div class="cerez-modal-ust">
+            <h3>Çerez Tercihleri</h3>
+            <button onclick="xnews.cerezAyarlariKapat()" class="cerez-modal-kapat" aria-label="Kapat">&times;</button>
+        </div>
+        <div class="cerez-modal-icerik">
+            <div class="cerez-kategori">
+                <label>
+                    <input type="checkbox" checked disabled>
+                    <strong>Zorunlu Çerezler</strong>
+                    <span class="cerez-zorunlu">Her zaman aktif</span>
+                </label>
+                <p>Sitenin temel işlevleri için gerekli. Oturum yönetimi, güvenlik (CSRF), çerez tercihleriniz.</p>
+            </div>
+            <div class="cerez-kategori">
+                <label>
+                    <input type="checkbox" id="cerez_analitik">
+                    <strong>Analitik Çerezler</strong>
+                </label>
+                <p>Site kullanımını anonim olarak analiz eder (Google Analytics). Hangi sayfaların popüler olduğunu anlamamıza yardımcı olur.</p>
+            </div>
+            <div class="cerez-kategori">
+                <label>
+                    <input type="checkbox" id="cerez_reklam">
+                    <strong>Reklam Çerezleri</strong>
+                </label>
+                <p>Kişiselleştirilmiş reklam göstermek için kullanılır (Google AdSense, vb.). Kapatırsanız genel reklamlar görürsünüz.</p>
+            </div>
+        </div>
+        <div class="cerez-modal-alt">
+            <button onclick="xnews.cerezKaydet()" class="cb-btn cb-btn-ana">Tercihlerimi Kaydet</button>
+            <button onclick="xnews.cerezKabul('tumu')" class="cb-btn cb-btn-alt">Tümünü Kabul Et</button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php if ($aktif === 'haber'): ?><div class="ilerleme-cubugu" id="ilerlemeCubugu"></div><?php endif; ?>
 <script src="<?= url('assets/js/main.js') ?>?v=<?= h(ayar('mevcut_surum', '1.0.0')) ?>" defer></script>
@@ -372,19 +474,43 @@ case 'anasayfa':
         <aside class="sidebar">
             <?php reklam_goster('sidebar_ust'); ?>
             <div class="sidebar-blok">
-                <h3>En Çok Okunan</h3>
+                <h3>🔥 En Çok Okunan</h3>
                 <?php if (empty($pop)): ?>
                     <p style="color:var(--muted);font-size:13px;padding:12px 0">Henüz okunma verisi yok.</p>
-                <?php else: $i = 1; foreach ($pop as $p): ?>
-                <a href="<?= h(haber_url($p)) ?>" class="mini-kart">
-                    <span class="numara"><?= $i++ ?></span>
-                    <div>
-                        <h4><?= h(kisalt($p['baslik'], 80)) ?></h4>
-                        <div class="meta"><?= h(goreceli_zaman($p['yayin_tarihi'])) ?></div>
+                <?php else: ?>
+                <div class="populer-liste">
+                    <?php $i = 1; foreach ($pop as $p): ?>
+                    <div class="populer-oge">
+                        <div class="populer-numara"><?= $i++ ?></div>
+                        <div class="populer-icerik">
+                            <a href="<?= h(haber_url($p)) ?>"><?= h(kisalt($p['baslik'], 75)) ?></a>
+                            <div class="populer-meta"><?= h(goreceli_zaman($p['yayin_tarihi'])) ?> · <?= (int)($p['okunma'] ?? 0) ?> okunma</div>
+                        </div>
                     </div>
-                </a>
-                <?php endforeach; endif; ?>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
             </div>
+
+            <?php
+            // Trend etiketler - son 7 gundeki en populer etiketler
+            $trend_etiketler = $db->query("SELECT e.ad, e.slug FROM {$prefix}tags e
+                INNER JOIN {$prefix}news_tags ht ON ht.tag_id = e.id
+                INNER JOIN {$prefix}news h ON h.id = ht.news_id
+                WHERE h.durum = 'yayinda' AND h.yayin_tarihi > DATE_SUB(NOW(), INTERVAL 7 DAY)
+                GROUP BY e.id ORDER BY COUNT(*) DESC LIMIT 12")->fetchAll();
+            ?>
+            <?php if (!empty($trend_etiketler)): ?>
+            <div class="sidebar-blok">
+                <h3>🏷 Trend Konular</h3>
+                <div class="trend-etiketler" style="padding-top:12px">
+                    <?php foreach ($trend_etiketler as $e): ?>
+                        <a href="<?= url('etiket/' . $e['slug']) ?>" class="trend-etiket"><?= h($e['ad']) ?></a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <?php reklam_goster('sidebar_alt'); ?>
         </aside>
     </div>
@@ -501,6 +627,17 @@ case 'haber':
     ]);
 ?>
 <main><div class="kapsayici">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Kırıntı yolu">
+        <a href="<?= url() ?>">Ana Sayfa</a>
+        <?php if (!empty($haber['kat_ad'])): ?>
+            <span class="sep">›</span>
+            <a href="<?= h(url('kategori/' . $haber['kat_slug'])) ?>"><?= h($haber['kat_ad']) ?></a>
+        <?php endif; ?>
+        <span class="sep">›</span>
+        <span class="son"><?= h(mb_substr($haber['baslik'], 0, 60, 'UTF-8')) . (mb_strlen($haber['baslik'], 'UTF-8') > 60 ? '...' : '') ?></span>
+    </nav>
+
     <article class="haber-detay">
         <div class="hd-ust-bilgi">
             <?php if (!empty($haber['kat_ad'])): ?>
@@ -522,6 +659,29 @@ case 'haber':
             </div>
         <?php endif; ?>
 
+        <!-- Araç çubuğu: font size, yazdır, dinle, tema -->
+        <div class="hd-araclar">
+            <div class="hd-araclar-sol">
+                <span>Yazı Boyutu</span>
+                <button class="hd-arac-btn" onclick="xnews.fontSizeDegistir(-1)" aria-label="Küçült">A-</button>
+                <button class="hd-arac-btn" onclick="xnews.fontSizeDegistir(1)" aria-label="Büyüt">A+</button>
+            </div>
+            <div class="hd-araclar-sag">
+                <button class="hd-arac-btn" onclick="xnews.haberiDinle()" title="Sesli Oku">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+                    Dinle
+                </button>
+                <button class="hd-arac-btn" onclick="xnews.temaDegistir()" title="Tema Değiştir">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                    Tema
+                </button>
+                <button class="hd-arac-btn" onclick="xnews.yazdir()" title="Yazdır">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Yazdır
+                </button>
+            </div>
+        </div>
+
         <?php reklam_goster('makale_ust'); ?>
         <div class="hd-icerik"><?= $icerik_final ?></div>
 
@@ -531,6 +691,10 @@ case 'haber':
             <?php if (!empty($haber['orijinal_url'])): ?>
                 · <a href="<?= h($haber['orijinal_url']) ?>" target="_blank" rel="noopener nofollow">Orijinal haber &rarr;</a>
             <?php endif; ?>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,.15);font-size:13px">
+                <span style="color:var(--muted)">Hak sahibi misiniz? </span>
+                <a href="<?= url('kaldirma-talebi') ?>?haber=<?= (int)$haber['id'] ?>" style="color:var(--brand);font-weight:600">Bu haberin kaldırılmasını talep et &rarr;</a>
+            </div>
         </div>
         <?php endif; ?>
 
@@ -603,7 +767,18 @@ case 'arama':
 // STATIK SAYFALAR
 // -----------------------------------------------------
 case 'hakkimizda': case 'iletisim': case 'reklam': case 'gizlilik': case 'kullanim':
-    $basliklar = ['hakkimizda' => 'Hakkımızda', 'iletisim' => 'İletişim', 'reklam' => 'Reklam Ver', 'gizlilik' => 'Gizlilik Politikası', 'kullanim' => 'Kullanım Şartları'];
+case 'kvkk': case 'cerez': case 'kunye': case 'yayin-ilkeleri':
+    $basliklar = [
+        'hakkimizda'      => 'Hakkımızda',
+        'iletisim'        => 'İletişim',
+        'reklam'          => 'Reklam Ver',
+        'gizlilik'        => 'Gizlilik Politikası',
+        'kullanim'        => 'Kullanım Şartları',
+        'kvkk'            => 'KVKK Aydınlatma Metni',
+        'cerez'           => 'Çerez Politikası',
+        'kunye'           => 'Künye',
+        'yayin-ilkeleri'  => 'Yayın İlkelerimiz',
+    ];
     $baslik_st = $basliklar[$sayfa];
     sayfa_basla(['aktif_sayfa' => $sayfa, 'baslik' => $baslik_st . ' - ' . ayar('site_adi')]);
 ?>
@@ -651,14 +826,408 @@ case 'hakkimizda': case 'iletisim': case 'reklam': case 'gizlilik': case 'kullan
             <p>Sitemizde yer alan haberler kaynak belirtilmek suretiyle orijinal yayıncılardan sunulmaktadır. Haberlerin telif hakkı kaynak yayın kuruluşuna aittir.</p>
             <h2>2. Sorumluluk Reddi</h2>
             <p>Sitemizde yayımlanan haberlerin doğruluğu, güncel olup olmadığı ve içeriği kaynak yayıncının sorumluluğundadır.</p>
-            <h2>3. Değişiklikler</h2>
-            <p>Bu kullanım şartları önceden haber verilmeksizin değiştirilebilir.</p>
+            <h2>3. İçerik Kaldırma Talebi</h2>
+            <p>Haber sahibi olan yayıncılar, hak sahipleri veya haber içeriğinde adı geçen kişiler, içeriğin kaldırılmasını talep edebilirler. Talepte bulunmak için <a href="<?= url('kaldirma-talebi') ?>">Kaldırma Talebi</a> sayfasını kullanabilirsiniz.</p>
+            <h2>4. Değişiklikler</h2>
+            <p>Bu kullanım şartları önceden haber verilmeksizin değiştirilebilir. Güncel sürümü bu sayfada yayımlanır.</p>
+
+        <?php elseif ($sayfa === 'kvkk'): ?>
+            <p><strong>6698 Sayılı Kişisel Verilerin Korunması Kanunu (KVKK) Uyarınca Aydınlatma Metni</strong></p>
+            <p>İşbu aydınlatma metni, <?= h(ayar('kvkk_veri_sorumlu', ayar('site_adi'))) ?> ("Veri Sorumlusu") tarafından, 6698 sayılı Kişisel Verilerin Korunması Kanunu'nun 10. maddesi uyarınca, kişisel verilerinizin işlenmesine ilişkin usul ve esaslar hakkında sizleri bilgilendirmek amacıyla hazırlanmıştır.</p>
+
+            <h2>1. Veri Sorumlusunun Kimliği</h2>
+            <p>Unvan: <?= h(ayar('kvkk_veri_sorumlu', ayar('site_adi'))) ?><br>
+            <?php if ($adr = ayar('iletisim_adres')): ?>Adres: <?= h($adr) ?><br><?php endif; ?>
+            <?php if ($ep = ayar('kvkk_basvuru_eposta', ayar('iletisim_eposta'))): ?>E-posta: <?= h($ep) ?><br><?php endif; ?>
+            <?php if ($tel = ayar('iletisim_telefon')): ?>Telefon: <?= h($tel) ?><?php endif; ?></p>
+
+            <h2>2. İşlenen Kişisel Veriler</h2>
+            <p>Sitemizi ziyaretiniz ve hizmetlerimizden yararlanmanız sırasında aşağıdaki kişisel verileriniz işlenebilir:</p>
+            <ul>
+                <li><strong>Kimlik verileri:</strong> Ad, soyad (yalnızca iletişim/kaldırma talebi için)</li>
+                <li><strong>İletişim verileri:</strong> E-posta, telefon (yalnızca kendi talebinizle)</li>
+                <li><strong>İşlem güvenliği verileri:</strong> IP adresi, tarayıcı bilgileri, çerez bilgileri, erişim kayıtları</li>
+                <li><strong>Pazarlama verileri:</strong> Çerez ve analitik bilgiler (yalnızca izin verdiğiniz takdirde)</li>
+            </ul>
+
+            <h2>3. Kişisel Verilerin İşlenme Amaçları</h2>
+            <ul>
+                <li>Haber sunumu ve hizmetin sağlanması</li>
+                <li>Site güvenliğinin sağlanması ve kötüye kullanımın önlenmesi</li>
+                <li>Yasal yükümlülüklerin yerine getirilmesi (5651 Sayılı Kanun, KVKK, Basın Kanunu)</li>
+                <li>Kullanıcı geri bildirimlerinin ve kaldırma taleplerinin değerlendirilmesi</li>
+                <li>Site performansının ölçülmesi ve iyileştirilmesi (analitik)</li>
+            </ul>
+
+            <h2>4. Kişisel Verilerin Aktarılması</h2>
+            <p>Kişisel verileriniz; yasal yükümlülükler gereği yetkili kamu kurum ve kuruluşlarına, hizmet sağlayıcılarımıza (barındırma, analitik, reklam) gerektiği ölçüde aktarılabilir. Yurt dışına veri aktarımı yalnızca açık rızanızla veya KVKK madde 9 kapsamında gerçekleşir.</p>
+
+            <h2>5. Veri İşlemenin Hukuki Sebepleri</h2>
+            <ul>
+                <li>Kanunlarda açıkça öngörülmesi (KVKK md.5/2-a)</li>
+                <li>Bir hakkın tesisi, kullanılması veya korunması için zorunluluk (md.5/2-e)</li>
+                <li>Veri sorumlusunun meşru menfaati (md.5/2-f)</li>
+                <li>İlgili kişinin açık rızası (md.5/1) — yalnızca pazarlama çerezleri için</li>
+            </ul>
+
+            <h2>6. KVKK Madde 11 Kapsamındaki Haklarınız</h2>
+            <p>Veri sahibi olarak aşağıdaki haklara sahipsiniz:</p>
+            <ul>
+                <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme</li>
+                <li>İşlenmişse buna ilişkin bilgi talep etme</li>
+                <li>İşlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme</li>
+                <li>Yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme</li>
+                <li>Eksik veya yanlış işlenmişse düzeltilmesini isteme</li>
+                <li>KVKK md.7'de öngörülen şartlar çerçevesinde silinmesini veya yok edilmesini isteme</li>
+                <li>Otomatik sistemler vasıtasıyla analiz sonucu aleyhinize bir sonucun ortaya çıkmasına itiraz etme</li>
+                <li>Zarara uğramanız hâlinde tazminat talep etme</li>
+            </ul>
+
+            <h2>7. Başvuru Yöntemi</h2>
+            <?php $kvkk_ep = ayar('kvkk_basvuru_eposta', ayar('iletisim_eposta')); ?>
+            <p>KVKK kapsamındaki haklarınızı kullanmak için başvurularınızı yazılı olarak veya e-posta yoluyla iletebilirsiniz:</p>
+            <ul>
+                <?php if ($kvkk_ep): ?><li>E-posta: <a href="mailto:<?= h($kvkk_ep) ?>"><?= h($kvkk_ep) ?></a></li><?php endif; ?>
+                <?php if ($adr = ayar('iletisim_adres')): ?><li>Posta: <?= h($adr) ?></li><?php endif; ?>
+            </ul>
+            <p>Başvurunuz en geç <strong>30 gün</strong> içinde ücretsiz olarak sonuçlandırılır.</p>
+
+        <?php elseif ($sayfa === 'cerez'): ?>
+            <p>Bu Çerez Politikası, <?= h(ayar('site_adi')) ?> web sitesinde kullanılan çerezler hakkında sizleri bilgilendirmek amacıyla hazırlanmıştır.</p>
+
+            <h2>1. Çerez Nedir?</h2>
+            <p>Çerez (cookie), web sitelerinin kullanıcı deneyimini iyileştirmek amacıyla tarayıcınıza yerleştirdiği küçük metin dosyalarıdır. Çerezler, kişisel bilgisayarınızda veya mobil cihazınızda saklanır ve sitemize her ziyaretinizde bize gönderilir.</p>
+
+            <h2>2. Kullandığımız Çerez Türleri</h2>
+
+            <h3>2.1 Zorunlu Çerezler</h3>
+            <p>Sitemizin temel işlevlerini yerine getirmesi için gerekli çerezlerdir. Bu çerezler olmadan site düzgün çalışmaz. Genellikle tarafınızca yapılan bir işleme (oturum açma, form doldurma gibi) yanıt olarak ayarlanır. <strong>Onayınıza gerek yoktur.</strong></p>
+            <ul>
+                <li><code>PHPSESSID</code> — Oturum tanımlama</li>
+                <li><code>xn_cerez_onay</code> — Çerez tercihlerinizi hatırlar</li>
+                <li><code>xn_csrf</code> — Güvenlik (CSRF koruması)</li>
+            </ul>
+
+            <h3>2.2 Performans ve Analitik Çerezler</h3>
+            <p>Sitemizi nasıl kullandığınız hakkında anonim bilgi toplar. Hangi sayfaların popüler olduğunu, kullanıcıların sitede nasıl gezindiğini anlamamıza yardımcı olur. <strong>İzninize bağlıdır.</strong></p>
+            <ul>
+                <li>Google Analytics (<code>_ga, _gid</code>) — kullanıldığı takdirde</li>
+            </ul>
+
+            <h3>2.3 Reklam Çerezleri</h3>
+            <p>Size daha ilgili reklamlar göstermek ve reklam kampanyalarının etkinliğini ölçmek için kullanılır. <strong>İzninize bağlıdır.</strong></p>
+            <ul>
+                <li>Google AdSense (<code>__gads, __gpi</code>) — kullanıldığı takdirde</li>
+            </ul>
+
+            <h2>3. Çerezleri Nasıl Yönetebilirsiniz?</h2>
+            <p>Tarayıcı ayarlarınızdan çerezleri silebilir veya engelleyebilirsiniz. Ancak bu durumda sitemizin bazı bölümleri düzgün çalışmayabilir.</p>
+            <ul>
+                <li><strong>Chrome:</strong> Ayarlar → Gizlilik ve güvenlik → Çerezler</li>
+                <li><strong>Firefox:</strong> Ayarlar → Gizlilik ve Güvenlik → Çerezler ve Site Verileri</li>
+                <li><strong>Safari:</strong> Tercihler → Gizlilik → Çerezleri Yönet</li>
+                <li><strong>Edge:</strong> Ayarlar → Çerezler ve site izinleri</li>
+            </ul>
+
+            <h2>4. Çerez Tercihlerinizi Değiştirin</h2>
+            <p>Sitemizdeki çerez bildirim panelinden tercihlerinizi güncelleyebilirsiniz. <button onclick="xnews.cerezAyarlariAc()" style="background:#c8102e;color:#fff;border:none;padding:10px 18px;cursor:pointer;font-weight:600">Çerez Ayarlarını Aç</button></p>
+
+            <h2>5. Yasal Dayanak</h2>
+            <p>Bu politika 6698 Sayılı KVKK, Elektronik Ticaretin Düzenlenmesi Hakkında Kanun ve ilgili mevzuat çerçevesinde hazırlanmıştır.</p>
+
+        <?php elseif ($sayfa === 'kunye'): ?>
+            <p><strong>5187 Sayılı Basın Kanunu gereği künye bilgileri:</strong></p>
+            <table style="width:100%;border-collapse:collapse;margin:20px 0">
+                <tbody>
+                    <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;width:40%;background:#faf8f3">Yayının Adı</td><td style="padding:12px 8px"><?= h(ayar('site_adi')) ?></td></tr>
+                    <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Yayın Türü</td><td style="padding:12px 8px"><?= h(ayar('kunye_yayin_turu', 'Süreli İnternet Yayını')) ?></td></tr>
+                    <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Yayın Sıklığı</td><td style="padding:12px 8px"><?= h(ayar('kunye_yayin_sikligi', 'Günlük')) ?></td></tr>
+                    <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Yayın Sahibi</td><td style="padding:12px 8px"><?= h(ayar('kunye_yayin_sahibi', ayar('site_adi'))) ?></td></tr>
+                    <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Sorumlu Müdür</td><td style="padding:12px 8px"><?= h(ayar('kunye_sorumlu_mudur', '-')) ?></td></tr>
+                    <tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Yazı İşleri Müdürü</td><td style="padding:12px 8px"><?= h(ayar('kunye_yazi_isleri_md', ayar('kunye_sorumlu_mudur', '-'))) ?></td></tr>
+                    <?php if ($ts = ayar('kunye_ticaret_sicil')): ?><tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Ticaret Sicil No</td><td style="padding:12px 8px"><?= h($ts) ?></td></tr><?php endif; ?>
+                    <?php if ($m = ayar('kunye_mersis')): ?><tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">MERSİS No</td><td style="padding:12px 8px"><?= h($m) ?></td></tr><?php endif; ?>
+                    <?php if ($vd = ayar('kunye_vergi_dairesi')): ?><tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Vergi Dairesi / No</td><td style="padding:12px 8px"><?= h($vd) ?><?php if ($vn = ayar('kunye_vergi_no')): ?> / <?= h($vn) ?><?php endif; ?></td></tr><?php endif; ?>
+                    <?php if ($adr = ayar('iletisim_adres')): ?><tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Yönetim Yeri</td><td style="padding:12px 8px"><?= h($adr) ?></td></tr><?php endif; ?>
+                    <?php if ($tel = ayar('iletisim_telefon')): ?><tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Telefon</td><td style="padding:12px 8px"><?= h($tel) ?></td></tr><?php endif; ?>
+                    <?php if ($ep = ayar('iletisim_eposta')): ?><tr style="border-bottom:1px solid #e5e5e5"><td style="padding:12px 8px;font-weight:600;background:#faf8f3">E-posta</td><td style="padding:12px 8px"><a href="mailto:<?= h($ep) ?>"><?= h($ep) ?></a></td></tr><?php endif; ?>
+                    <tr><td style="padding:12px 8px;font-weight:600;background:#faf8f3">Web Sitesi</td><td style="padding:12px 8px"><a href="<?= url() ?>"><?= h(ayar('site_url', 'xnews.com.tr')) ?></a></td></tr>
+                </tbody>
+            </table>
+            <p><small>İşbu künye 5187 sayılı Basın Kanunu ve 5651 sayılı İnternet Ortamında Yapılan Yayınların Düzenlenmesi Hakkında Kanun çerçevesinde yayımlanmıştır.</small></p>
+
+        <?php elseif ($sayfa === 'yayin-ilkeleri'): ?>
+            <p><strong><?= h(ayar('site_adi')) ?> editöryal ilkeleri ve yayın standartları:</strong></p>
+
+            <h2>1. Doğruluk ve Güvenilirlik</h2>
+            <ul>
+                <li>Yayımlanan tüm haberler güvenilir kaynaklardan alınır ve <strong>orijinal yayıncıya link ile atıf yapılır</strong>.</li>
+                <li>Haber başlıkları, içerikle uyumlu olmak ve yanıltıcı/clickbait olmamak zorundadır.</li>
+                <li>Bilgi doğrulanamayan konularda tahmin yerine "iddia edildi", "bildirildi" gibi belirsiz ifadeler kullanılır.</li>
+            </ul>
+
+            <h2>2. Tarafsızlık</h2>
+            <ul>
+                <li>Haberlerde tarafsızlık esastır. Siyasi, dini, etnik ayrımcılık yapılmaz.</li>
+                <li>Köşe yazıları ve görüşler, haber olarak sunulmaz.</li>
+                <li>Tartışmalı konularda tüm taraflara eşit söz hakkı tanınmaya çalışılır.</li>
+            </ul>
+
+            <h2>3. Özel Hayat ve Kişilik Hakları</h2>
+            <ul>
+                <li>Kamuya mal olmayan kişilerin özel hayatları haber konusu yapılmaz.</li>
+                <li>Çocukların kimliği, suç şüphelilerinin tam adı (mahkeme kararı olmaksızın) korunur.</li>
+                <li>Şiddet, istismar mağdurlarının kimliği açıklanmaz.</li>
+            </ul>
+
+            <h2>4. Etik Kurallar</h2>
+            <ul>
+                <li>Basın İlan Kurumu ve Türkiye Gazeteciler Cemiyeti meslek ilkelerine uyulur.</li>
+                <li>Chiff, Kaynak, İntihal, Manipülasyon gibi etik ihlallere izin verilmez.</li>
+                <li>Intihal ve kaynaksız alıntı yapılmaz.</li>
+            </ul>
+
+            <h2>5. Düzeltme Hakkı</h2>
+            <ul>
+                <li>Yanlış bilgi tespit edilmesi halinde 24 saat içinde düzeltme yapılır.</li>
+                <li>İlgili kişiler Tekzip Hakkı'nı kullanmak için <a href="<?= url('iletisim') ?>">bize ulaşabilir</a>.</li>
+                <li>Haberin kaldırılması talebi için <a href="<?= url('kaldirma-talebi') ?>">Kaldırma Talebi</a> formu kullanılabilir.</li>
+            </ul>
+
+            <h2>6. Reklam Ayrımı</h2>
+            <ul>
+                <li>Sponsorlu içerikler "Reklam" veya "Sponsorlu" etiketiyle açıkça belirtilir.</li>
+                <li>Reklam ve editöryel içerik karıştırılmaz.</li>
+            </ul>
+
+            <h2>7. Yasal Yükümlülükler</h2>
+            <ul>
+                <li><?= h(ayar('site_adi')) ?>, 5651 sayılı İnternet Kanunu, 5187 sayılı Basın Kanunu ve 6698 sayılı KVKK'ya uygun faaliyet gösterir.</li>
+                <li>Erişim engelleme kararları ve yasal tebligatlara 24 saat içinde yanıt verilir.</li>
+            </ul>
         <?php endif; ?>
         </div>
     </article>
 </div></main>
 <?php
     sayfa_bitis($sayfa);
+    break;
+
+// -----------------------------------------------------
+// KALDIRMA TALEBI (Takedown Request)
+// -----------------------------------------------------
+case 'kaldirma-talebi':
+    $haber_id_q = (int)($_GET['haber'] ?? 0);
+    $haber_info = null;
+    if ($haber_id_q > 0) {
+        $st = $db->prepare("SELECT h.id, h.baslik, h.slug, k.slug AS kat_slug
+                            FROM {$prefix}news h LEFT JOIN {$prefix}categories k ON h.kategori_id = k.id
+                            WHERE h.id = ? AND h.durum = 'yayinda'");
+        $st->execute([$haber_id_q]);
+        $haber_info = $st->fetch();
+    }
+
+    $mesaj_kt = '';
+    $mesaj_kt_tip = '';
+
+    if (post()) {
+        if (!csrf_dogrula($_POST['_csrf'] ?? '')) {
+            $mesaj_kt = 'Güvenlik doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin.';
+            $mesaj_kt_tip = 'hata';
+        } else {
+            // Math CAPTCHA dogrulamasi
+            $captcha_cevap = (int)($_POST['captcha_cevap'] ?? 0);
+            $captcha_dogru = (int)($_POST['captcha_dogru'] ?? -1);
+            if ($captcha_cevap !== $captcha_dogru) {
+                $mesaj_kt = 'Güvenlik sorusu yanlış. Lütfen tekrar deneyin.';
+                $mesaj_kt_tip = 'hata';
+            } else {
+                $hid  = (int)($_POST['haber_id'] ?? 0);
+                $ad   = trim($_POST['ad'] ?? '');
+                $unv  = trim($_POST['unvan'] ?? '');
+                $ep   = trim($_POST['eposta'] ?? '');
+                $tel  = trim($_POST['telefon'] ?? '');
+                $krm  = trim($_POST['kurum'] ?? '');
+                $ilsk = $_POST['iliski'] ?? 'kisisel';
+                $seb  = $_POST['sebep']  ?? 'diger';
+                $ack  = trim($_POST['aciklama'] ?? '');
+                $knt  = trim($_POST['kanit_url'] ?? '');
+
+                // Basit dogrulama
+                if ($hid <= 0) {
+                    $mesaj_kt = 'Geçerli bir haber seçilmedi.';
+                    $mesaj_kt_tip = 'hata';
+                } elseif (mb_strlen($ad) < 3 || mb_strlen($ad) > 120) {
+                    $mesaj_kt = 'Lütfen geçerli bir ad soyad girin (3-120 karakter).';
+                    $mesaj_kt_tip = 'hata';
+                } elseif (!filter_var($ep, FILTER_VALIDATE_EMAIL)) {
+                    $mesaj_kt = 'Geçerli bir e-posta adresi girin.';
+                    $mesaj_kt_tip = 'hata';
+                } elseif (mb_strlen($ack) < 30) {
+                    $mesaj_kt = 'Lütfen talebinizi en az 30 karakter açıklayın.';
+                    $mesaj_kt_tip = 'hata';
+                } elseif (!in_array($ilsk, ['hak_sahibi','yayin_sahibi','avukat','kisisel','diger'])) {
+                    $mesaj_kt = 'Geçersiz ilişki türü.';
+                    $mesaj_kt_tip = 'hata';
+                } elseif (!in_array($seb, ['telif','kisilik','kvkk','yanlis','itibar','diger'])) {
+                    $mesaj_kt = 'Geçersiz sebep.';
+                    $mesaj_kt_tip = 'hata';
+                } else {
+                    // Haber gercekten var mi?
+                    $st = $db->prepare("SELECT id FROM {$prefix}news WHERE id = ?");
+                    $st->execute([$hid]);
+                    if (!$st->fetchColumn()) {
+                        $mesaj_kt = 'Haber bulunamadı.';
+                        $mesaj_kt_tip = 'hata';
+                    } else {
+                        // Kayit
+                        $st = $db->prepare("INSERT INTO {$prefix}takedown
+                            (haber_id, talep_eden_ad, talep_eden_unvan, eposta, telefon, kurum, iliski, sebep, aciklama, kanit_url, ip_adresi, kullanici_ajan, durum)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'beklemede')");
+                        $st->execute([
+                            $hid, $ad, $unv ?: null, $ep, $tel ?: null, $krm ?: null,
+                            $ilsk, $seb, $ack, $knt ?: null,
+                            $_SERVER['REMOTE_ADDR'] ?? null,
+                            substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
+                        ]);
+                        log_ekle('islem', 'Kaldırma talebi alındı', "Haber ID: $hid | Ad: $ad | E-posta: $ep");
+                        $mesaj_kt = 'Talebiniz alınmıştır. En geç ' . (int)ayar('takedown_yanit_suresi', 72) . ' saat içinde size dönüş yapılacaktır.';
+                        $mesaj_kt_tip = 'basari';
+                        $haber_info = null; // formu temizle
+                    }
+                }
+            }
+        }
+    }
+
+    // Math CAPTCHA uret
+    $cap_a = random_int(2, 9);
+    $cap_b = random_int(2, 9);
+    $cap_dogru = $cap_a + $cap_b;
+
+    sayfa_basla(['aktif_sayfa' => 'kaldirma-talebi', 'baslik' => 'Kaldırma Talebi - ' . ayar('site_adi')]);
+?>
+<main><div class="kapsayici">
+    <article class="haber-detay" style="max-width:800px">
+        <div class="hd-ust-bilgi"><h1 class="hd-baslik">Kaldırma Talebi</h1>
+            <p class="hd-ozet">Hak sahibi, yayıncı veya içerikte bahsi geçen kişiler, haber içeriğinin kaldırılmasını talep edebilir.</p>
+        </div>
+
+        <?php if ($mesaj_kt): ?>
+            <div style="padding:16px 20px;margin:20px 0;border-radius:4px;<?= $mesaj_kt_tip === 'basari' ? 'background:#d1fae5;border:1px solid #10b981;color:#064e3b' : 'background:#fee2e2;border:1px solid #ef4444;color:#7f1d1d' ?>">
+                <?= h($mesaj_kt) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($mesaj_kt_tip !== 'basari'): ?>
+        <div class="hd-icerik">
+            <div style="padding:14px 18px;background:#faf8f3;border-left:3px solid #c8102e;margin:20px 0;font-size:14px;line-height:1.7">
+                <strong>Önemli:</strong> Kaldırma talebiniz incelendikten sonra size <strong><?= (int)ayar('takedown_yanit_suresi', 72) ?> saat içinde</strong> dönüş yapılır. Hukuki belge/mahkeme kararı varsa eklemeniz yanıt süresini kısaltır. <strong>Gerçeğe aykırı talepler cezai sorumluluk doğurur.</strong>
+            </div>
+
+            <form method="post" style="display:flex;flex-direction:column;gap:18px;margin-top:30px">
+                <?= csrf_input() ?>
+                <input type="hidden" name="captcha_dogru" value="<?= $cap_dogru ?>">
+
+                <!-- Haber Bilgisi -->
+                <div>
+                    <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">Hangi haberin kaldırılmasını talep ediyorsunuz? *</label>
+                    <?php if ($haber_info): ?>
+                        <div style="padding:14px;background:#f1f5f9;border-radius:4px;border:1px solid #cbd5e1">
+                            <div style="font-weight:600"><?= h($haber_info['baslik']) ?></div>
+                            <div style="font-size:12px;color:#64748b;margin-top:4px">ID: <?= $haber_info['id'] ?></div>
+                        </div>
+                        <input type="hidden" name="haber_id" value="<?= (int)$haber_info['id'] ?>">
+                    <?php else: ?>
+                        <input type="number" name="haber_id" required min="1" placeholder="Haber ID'si veya URL" value="<?= h($_POST['haber_id'] ?? '') ?>" style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px">
+                        <div style="font-size:12px;color:#64748b;margin-top:4px">Haberin URL'sinden ID bulabilirsiniz: /haber/<strong>123</strong>-baslik</div>
+                    <?php endif; ?>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                    <div>
+                        <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">Ad Soyad *</label>
+                        <input type="text" name="ad" required minlength="3" maxlength="120" value="<?= h($_POST['ad'] ?? '') ?>" style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px">
+                    </div>
+                    <div>
+                        <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">Unvan / Görev</label>
+                        <input type="text" name="unvan" maxlength="120" placeholder="Avukat, Yayın Sahibi, vb." value="<?= h($_POST['unvan'] ?? '') ?>" style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px">
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                    <div>
+                        <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">E-posta *</label>
+                        <input type="email" name="eposta" required value="<?= h($_POST['eposta'] ?? '') ?>" style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px">
+                    </div>
+                    <div>
+                        <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">Telefon</label>
+                        <input type="tel" name="telefon" maxlength="30" value="<?= h($_POST['telefon'] ?? '') ?>" style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">Kurum / Şirket Adı</label>
+                    <input type="text" name="kurum" maxlength="150" value="<?= h($_POST['kurum'] ?? '') ?>" style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px">
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                    <div>
+                        <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">İçerikle İlişkiniz *</label>
+                        <?php $il_s = $_POST['iliski'] ?? ''; ?>
+                        <select name="iliski" required style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px;background:#fff">
+                            <option value="hak_sahibi" <?= $il_s==='hak_sahibi'?'selected':'' ?>>Hak sahibi (eser sahibi, telif)</option>
+                            <option value="yayin_sahibi" <?= $il_s==='yayin_sahibi'?'selected':'' ?>>Orijinal yayın sahibi</option>
+                            <option value="avukat" <?= $il_s==='avukat'?'selected':'' ?>>Avukat (vekâleten)</option>
+                            <option value="kisisel" <?= $il_s==='kisisel'?'selected':'' ?>>Kişisel (haberde adım geçiyor)</option>
+                            <option value="diger" <?= $il_s==='diger'?'selected':'' ?>>Diğer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">Kaldırma Sebebi *</label>
+                        <?php $s_s = $_POST['sebep'] ?? ''; ?>
+                        <select name="sebep" required style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px;background:#fff">
+                            <option value="telif" <?= $s_s==='telif'?'selected':'' ?>>Telif hakkı ihlali</option>
+                            <option value="kisilik" <?= $s_s==='kisilik'?'selected':'' ?>>Kişilik hakkı ihlali</option>
+                            <option value="kvkk" <?= $s_s==='kvkk'?'selected':'' ?>>KVKK - Kişisel veri</option>
+                            <option value="yanlis" <?= $s_s==='yanlis'?'selected':'' ?>>Yanlış / asılsız bilgi</option>
+                            <option value="itibar" <?= $s_s==='itibar'?'selected':'' ?>>İtibar / hakaret</option>
+                            <option value="diger" <?= $s_s==='diger'?'selected':'' ?>>Diğer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">Açıklama * <small style="font-weight:normal;color:#64748b">(en az 30 karakter)</small></label>
+                    <textarea name="aciklama" required minlength="30" rows="6" style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px;font-family:inherit;resize:vertical"><?= h($_POST['aciklama'] ?? '') ?></textarea>
+                </div>
+
+                <div>
+                    <label style="display:block;font-weight:600;margin-bottom:6px;font-size:13px">Kanıt / Belge URL</label>
+                    <input type="url" name="kanit_url" maxlength="500" placeholder="https://... (mahkeme kararı, telif belgesi, vb.)" value="<?= h($_POST['kanit_url'] ?? '') ?>" style="padding:12px;border:1px solid #cbd5e1;border-radius:4px;width:100%;font-size:14px">
+                </div>
+
+                <!-- Math CAPTCHA -->
+                <div style="padding:16px;background:#fef3c7;border:1px solid #fbbf24;border-radius:4px">
+                    <label style="display:block;font-weight:600;margin-bottom:8px;font-size:13px">Güvenlik Doğrulama: <?= $cap_a ?> + <?= $cap_b ?> = ?</label>
+                    <input type="number" name="captcha_cevap" required style="padding:10px;border:1px solid #cbd5e1;border-radius:4px;width:120px;font-size:14px">
+                </div>
+
+                <div style="font-size:12px;color:#64748b;line-height:1.6;padding:14px;background:#faf8f3;border-radius:4px">
+                    <strong>KVKK Bilgilendirme:</strong> Bu form aracılığıyla ilettiğiniz kişisel veriler (ad, e-posta, telefon, IP adresi), talebinizin değerlendirilmesi amacıyla işlenir ve yasal saklama sürelerine uygun olarak saklanır.
+                    <a href="<?= url('kvkk') ?>" target="_blank">Detaylı bilgi için KVKK Aydınlatma Metni</a>.
+                </div>
+
+                <button type="submit" style="background:#c8102e;color:#fff;border:none;padding:16px 32px;font-weight:700;text-transform:uppercase;font-size:14px;letter-spacing:.08em;cursor:pointer;border-radius:4px;font-family:inherit">
+                    Talebi Gönder
+                </button>
+            </form>
+        </div>
+        <?php endif; ?>
+    </article>
+</div></main>
+<?php
+    sayfa_bitis('kaldirma-talebi');
     break;
 
 // -----------------------------------------------------
