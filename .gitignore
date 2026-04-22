@@ -1,0 +1,31 @@
+# XNEWS - .gitignore
+
+# Kurulum sonrasi olusan dosyalar
+config.php
+install.lock
+
+# Kullanici yuklemeleri ve log'lar
+uploads/*
+!uploads/.htaccess
+!uploads/.gitkeep
+
+# Yedekler (guncelleme sistemi uretir)
+uploads/yedek/
+
+# Gecici klasorler
+*.bak
+*.tmp
+*.log
+*.cache
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# PHP / Composer (ileride eklenirse)
+/vendor/
+composer.lock
+composer.phar

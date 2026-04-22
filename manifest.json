@@ -1,0 +1,22 @@
+{
+    "proje": "XNEWS",
+    "marka": "CODEGA",
+    "surum": "1.0.0",
+    "surum_tarihi": "2026-04-22",
+    "php_minimum": "8.3.0",
+    "mysql_minimum": "5.7",
+    "github_repo": "codegatr/xnews",
+    "guncelleme_url": "https://api.github.com/repos/codegatr/xnews/releases/latest",
+    "korunan_dosyalar": [
+        "config.php",
+        "uploads/",
+        ".htaccess.local"
+    ],
+    "silinebilir_dosyalar": [
+        "kurulum.php",
+        "install.lock"
+    ],
+    "degisiklikler": [
+        "1.0.0 - Ilk surum: RSS toplama, yonetim paneli, reklam slotlari, GitHub guncelleme sistemi"
+    ]
+}

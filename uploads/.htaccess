@@ -1,0 +1,9 @@
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|php8|phar)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Sadece gorsel servis edilir
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

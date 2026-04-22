@@ -1,0 +1,132 @@
+# XNEWS - Apache / LiteSpeed Yapilandirma
+# DirectAdmin uyumlu
+
+# PHP surumunu belirle (DirectAdmin multi-PHP icin)
+# AddHandler application/x-httpd-php83 .php
+
+# Hata raporlama (production'da kapali olmali)
+php_flag display_errors off
+php_value error_reporting 0
+
+# Guvenlik
+Options -Indexes
+ServerSignature Off
+
+# Karakter kodlamasi
+AddDefaultCharset UTF-8
+
+# MIME turleri
+AddType application/json .json
+AddType image/svg+xml .svg
+AddType font/woff2 .woff2
+
+# Gzip sikistirma
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Tarayici onbellek
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# Guvenlik baslik
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Hassas dosyalari engelle
+<FilesMatch "\.(env|log|sql|md|json|lock)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "baglan.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "manifest.json">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Uploads klasorunde PHP calistirmayi engelle
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|php8|phar)$">
+    <If "%{REQUEST_URI} =~ m#^/uploads/#">
+        Order allow,deny
+        Deny from all
+    </If>
+</FilesMatch>
+
+# Temiz URL'ler (mod_rewrite)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # HTTPS zorla (aktif etmek icin yorumu kaldir)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # www olmayan surume yonlendir (aktif etmek icin yorumu kaldir)
+    # RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+    # RewriteRule ^(.*)$ https://%{HTTP_REQUEST_URI} [L,R=301]
+
+    # Gercek dosya/klasorse gec
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Yonetim paneli
+    RewriteRule ^yonetim/?$ yonetim.php [L,QSA]
+    RewriteRule ^yonetim/([a-z0-9-]+)/?$ yonetim.php?sayfa=$1 [L,QSA]
+    RewriteRule ^yonetim/([a-z0-9-]+)/([a-z0-9-]+)/?$ yonetim.php?sayfa=$1&islem=$2 [L,QSA]
+
+    # Kurulum ve guncelleme
+    RewriteRule ^kurulum/?$ kurulum.php [L,QSA]
+    RewriteRule ^guncelle/?$ guncelle.php [L,QSA]
+    RewriteRule ^cron/?$ cron.php [L,QSA]
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+    RewriteRule ^rss/?$ rss.php [L,QSA]
+    RewriteRule ^rss/([a-z0-9-]+)/?$ rss.php?kategori=$1 [L,QSA]
+
+    # Public sayfalar
+    RewriteRule ^haber/([0-9]+)-([a-z0-9-]+)/?$ index.php?sayfa=haber&id=$1&slug=$2 [L,QSA]
+    RewriteRule ^kategori/([a-z0-9-]+)/?$ index.php?sayfa=kategori&slug=$1 [L,QSA]
+    RewriteRule ^kategori/([a-z0-9-]+)/sayfa/([0-9]+)/?$ index.php?sayfa=kategori&slug=$1&sayfa_no=$2 [L,QSA]
+    RewriteRule ^etiket/([a-z0-9-]+)/?$ index.php?sayfa=etiket&slug=$1 [L,QSA]
+    RewriteRule ^arama/?$ index.php?sayfa=arama [L,QSA]
+    RewriteRule ^kaynak/([a-z0-9-]+)/?$ index.php?sayfa=kaynak&slug=$1 [L,QSA]
+
+    # Statik sayfalar
+    RewriteRule ^hakkimizda/?$ index.php?sayfa=hakkimizda [L,QSA]
+    RewriteRule ^iletisim/?$ index.php?sayfa=iletisim [L,QSA]
+    RewriteRule ^reklam/?$ index.php?sayfa=reklam [L,QSA]
+    RewriteRule ^gizlilik/?$ index.php?sayfa=gizlilik [L,QSA]
+    RewriteRule ^kullanim-sartlari/?$ index.php?sayfa=kullanim [L,QSA]
+
+    # Ana sayfa ve fallback
+    RewriteRule ^sayfa/([0-9]+)/?$ index.php?sayfa=anasayfa&sayfa_no=$1 [L,QSA]
+    RewriteRule ^$ index.php [L]
+</IfModule>
+
+# 404 ozel sayfa
+ErrorDocument 404 /index.php?sayfa=404
