@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.1.1",
+    "surum": "1.1.2",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,6 +17,7 @@
         "install.lock"
     ],
     "degisiklikler": [
+        "1.1.2 - Guclu karakter temizligi + admin toplu temizlik araci. h() icinde Unicode p{Cf} Format kategorisi (tum zero-width, bidi, word joiner). temizle_metin() helper. Yonetim -> Araclar sekmesi + toplu temizleme butonu.",
         "1.1.1 - İKİ BUG + SLIDER MYNET TARZI ZENGİNLESTIRILDI: (1) Kategori sayfasindaki basliklar altinda renkli kutucuklar bug duzeltildi - h() fonksiyonuna kontrol karakter (0x00-0x1F) ve zero-width Unicode (U+200B-200F, U+2028, U+2029, U+FEFF, U+FFFD) temizligi eklendi. RSS feed kirliliği artik görünmüyor. (2) Son Dakika Slider Mynet tarzina zenginlestirildi: yükseklik 480 -> 580px max, numaralar büyütüldü (44->54px), onceki/sonraki ok butonlari eklendi (hover ile görünür), sağ üstte slayt sayaci 1/6, kategori rozetinde ok işareti, başlık daha büyük (26-48px clamp), özet uzatıldı (140->160 karakter), Ken Burns zoom 1.08->1.15, ilerleme cubuğu gradient + glow shadow.",
         "1.1.0 - YENİ BÜYÜK SON DAKİKA SLIDER: Mynet tarzı numaralı slider (1-6) ile son dakika haberleri büyük görselli, oto-rotate slider olarak gösterilir. Manşet grid'inden önce ana sayfada. Sol numara paneli (tıklanabilir + hover), ortada büyük resim + overlay + başlık/özet, altta kırmızı ilerleme çubuğu (7sn). Hover iken duraklar. Mobilde responsive (numaralar üstte yatay, resim altında).",
         "1.0.12 - HOTFIX: Ana sayfada kategori baslikları üst üste binme düzeltildi. .kategori-bolum margin-top/bottom netlestirildi (60px alt), .bolum-baslik margin sifirlandi (sadece alt 24px). Kartlar flex column olarak stretch aligned, tüm kartlar aynı yükseklikte, meta kart alt kısmında sabitlendi.",
