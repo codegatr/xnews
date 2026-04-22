@@ -396,6 +396,31 @@ case 'anasayfa':
         WHERE h.durum = 'yayinda' AND h.yayin_tarihi >= DATE_SUB(NOW(), INTERVAL 7 DAY)
         ORDER BY h.okunma DESC LIMIT 5")->fetchAll();
 
+    // Büyük Son Dakika Slider: resmi OLAN son dakika haberlerden 6 tane
+    $sd_slider = $db->query("SELECT h.id, h.baslik, h.slug, h.ozet, h.resim, h.yayin_tarihi,
+            k.ad AS kat_ad, k.slug AS kat_slug, k.renk AS kat_renk, kay.ad AS kaynak_ad
+        FROM {$prefix}news h
+        LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
+        LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
+        WHERE h.durum = 'yayinda' AND h.son_dakika = 1
+          AND h.resim IS NOT NULL AND h.resim != ''
+        ORDER BY h.yayin_tarihi DESC LIMIT 6")->fetchAll();
+    // Yeterli son dakika yoksa, resimli en son haberlerle tamamla
+    if (count($sd_slider) < 6) {
+        $eksik_ids = array_column($sd_slider, 'id') ?: [0];
+        $in_sd = implode(',', array_fill(0, count($eksik_ids), '?'));
+        $sd_ek_st = $db->prepare("SELECT h.id, h.baslik, h.slug, h.ozet, h.resim, h.yayin_tarihi,
+                k.ad AS kat_ad, k.slug AS kat_slug, k.renk AS kat_renk, kay.ad AS kaynak_ad
+            FROM {$prefix}news h
+            LEFT JOIN {$prefix}categories k ON k.id = h.kategori_id
+            LEFT JOIN {$prefix}sources kay ON kay.id = h.kaynak_id
+            WHERE h.durum = 'yayinda' AND h.id NOT IN ($in_sd)
+              AND h.resim IS NOT NULL AND h.resim != ''
+            ORDER BY h.yayin_tarihi DESC LIMIT " . (6 - count($sd_slider)));
+        $sd_ek_st->execute($eksik_ids);
+        $sd_slider = array_merge($sd_slider, $sd_ek_st->fetchAll());
+    }
+
     sayfa_basla(['aktif_sayfa' => 'anasayfa']);
 ?>
 <main><div class="kapsayici">
@@ -416,6 +441,45 @@ case 'anasayfa':
             </p>
         </div>
     <?php else: ?>
+
+    <?php if (!empty($sd_slider) && count($sd_slider) >= 2): ?>
+    <!-- BÜYÜK SON DAKİKA SLIDER -->
+    <section class="sd-slider" id="sdSlider" data-adet="<?= count($sd_slider) ?>">
+        <div class="sd-slider-numaralar">
+            <?php foreach ($sd_slider as $i => $h): ?>
+                <button class="sd-num <?= $i === 0 ? 'aktif' : '' ?>" data-slide="<?= $i ?>" aria-label="Slide <?= $i + 1 ?>"><?= $i + 1 ?></button>
+            <?php endforeach; ?>
+        </div>
+        <div class="sd-slider-panel">
+            <div class="sd-slider-etiket">
+                <span class="sd-dot"></span>
+                SON DAKİKA
+            </div>
+            <?php foreach ($sd_slider as $i => $h): ?>
+            <a href="<?= h(haber_url($h)) ?>" class="sd-slide <?= $i === 0 ? 'aktif' : '' ?>" data-slide="<?= $i ?>">
+                <div class="sd-slide-gorsel">
+                    <img src="<?= h(haber_gorsel($h['resim'])) ?>" alt="<?= h($h['baslik']) ?>" loading="<?= $i === 0 ? 'eager' : 'lazy' ?>">
+                    <div class="sd-slide-overlay"></div>
+                </div>
+                <div class="sd-slide-metin">
+                    <?php if (!empty($h['kat_ad'])): ?>
+                        <span class="sd-slide-kat" style="background:<?= h($h['kat_renk'] ?? '#c8102e') ?>"><?= h($h['kat_ad']) ?></span>
+                    <?php endif; ?>
+                    <h2 class="sd-slide-baslik"><?= h($h['baslik']) ?></h2>
+                    <?php if (!empty($h['ozet'])): ?>
+                        <p class="sd-slide-ozet"><?= h(kisalt($h['ozet'], 140)) ?></p>
+                    <?php endif; ?>
+                    <div class="sd-slide-meta">
+                        <?php if (!empty($h['kaynak_ad'])): ?><span class="sd-slide-kaynak"><?= h($h['kaynak_ad']) ?></span> · <?php endif; ?>
+                        <span><?= h(goreceli_zaman($h['yayin_tarihi'])) ?></span>
+                    </div>
+                </div>
+            </a>
+            <?php endforeach; ?>
+        </div>
+        <div class="sd-slider-ilerleme"><div class="sd-slider-ilerleme-dolgu"></div></div>
+    </section>
+    <?php endif; ?>
 
     <section class="manset-grid">
         <?php $ilk = array_shift($mansetler); ?>

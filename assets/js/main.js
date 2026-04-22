@@ -243,6 +243,51 @@ window.xnews = (function() {
     }
 
     // ==================================================
+    // BÜYÜK SON DAKİKA SLIDER
+    // ==================================================
+    function sdSliderBaslat() {
+        const slider = $('#sdSlider');
+        if (!slider) return;
+        const adet = parseInt(slider.dataset.adet || 0);
+        if (adet < 2) return;
+
+        const numaralar = slider.querySelectorAll('.sd-num');
+        const slaytlar  = slider.querySelectorAll('.sd-slide');
+        const ilerleme  = slider.querySelector('.sd-slider-ilerleme-dolgu');
+        const SURE = 7000;
+        let aktifIdx = 0;
+        let sayac = 0;
+        let duraklatildi = false;
+
+        function goster(idx) {
+            numaralar.forEach((n, i) => n.classList.toggle('aktif', i === idx));
+            slaytlar.forEach((s, i) => s.classList.toggle('aktif', i === idx));
+            aktifIdx = idx;
+            sayac = 0;
+            if (ilerleme) ilerleme.style.width = '0%';
+        }
+
+        function sonraki() {
+            if (duraklatildi) return;
+            sayac += 100;
+            if (ilerleme) ilerleme.style.width = (sayac / SURE * 100) + '%';
+            if (sayac >= SURE) {
+                goster((aktifIdx + 1) % adet);
+            }
+        }
+
+        numaralar.forEach((n, i) => {
+            n.addEventListener('click', (e) => { e.preventDefault(); goster(i); });
+            n.addEventListener('mouseenter', () => goster(i));
+        });
+
+        slider.addEventListener('mouseenter', () => { duraklatildi = true; slider.classList.add('duraklatildi'); });
+        slider.addEventListener('mouseleave', () => { duraklatildi = false; slider.classList.remove('duraklatildi'); });
+
+        setInterval(sonraki, 100);
+    }
+
+    // ==================================================
     // MOBIL SABIT BANNER (kapat)
     // ==================================================
     function mobilBannerKapat() {
@@ -282,6 +327,7 @@ window.xnews = (function() {
         fontSizeUygula();
         setTimeout(cerezBannerKontrol, 800); // Sayfa yuklendikten sonra bildir
         mobilBannerKontrol();
+        sdSliderBaslat();
     });
 
     return {
