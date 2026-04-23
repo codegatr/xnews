@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.3.6",
+    "surum": "1.3.7",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,6 +17,7 @@
         "install.lock"
     ],
     "degisiklikler": [
+        "1.3.7 PATCH - Dashboard Kraliyet Merkezi yenilendi: (1) Sidebar logo yanina altin ♛ tac eklendi (sallan animasyonu), marka yazisi 'Kraliyet Merkezi · v1.3.7' Cormorant Garamond fontla. (2) Sidebar alti EKG ikonu devasa goruniyordu - SVG 14x14 boyut sabitlendi, 'Siteyi Gorüntüle' icin external-link ikonu, saray gradient hover. (3) 'Siteyi Gor' ust butonu iki satira boluniyordu - white-space:nowrap + saray tema (lacivert gradient + altin border). (4) Dashboard hero tamamen yenilendi: 72px animasyonlu altin tac solda, 'XNEWS KRALIYET MERKEZI' ust etiket, Cormorant baslik, takvim ikonlu tarih rozeti, sag altin muhur ✦ motif donen dasheli cerceve ile. (5) Hızlı Eylemler saray aksanli (altin sol cizgi + yildırım ikonlu baslik).",
         "1.3.6 HOTFIX KRITIK - Dashboard AdSense durum karti PHP acilis tag'i eksikti. Satir 777'de </div> sonrasi '<?php' yazilmamisti, $as_id = trim(ayar(...)) satirlari DIREKT HTML OLARAK ekrana yaziliyordu. Etkilenen: Yonetim > Dashboard. Acilis tag eklendi, artik dogru PHP olarak calisiyor.",
         "1.3.5 PATCH - Haberturk RSS zenginlestirme: Hatali 'anasayfa.xml' URL'i 'haberturk.com/rss/' olarak duzeltildi (hem calisiyor hem 17 item veriyor). 7 yeni kategori eklendi: Saglik, Magazin, Yasam, Teknoloji, Kultur-Sanat, Otomobil, Is-Yasam, Video. Haberturk kaynak sayisi 5->13. Video varsayilan pasif.",
         "1.3.4 PATCH - Disisleri Bakanligi RSS'i dogru URL'lere gecirildi (mfa.gov.tr/tr.rss.mfa?UUID formati). 1 calismayan kaynak silindi, 6 yeni aktif feed eklendi: Guncel Gelismeler (200 item), Bakanlik Aciklamalari (200), Guncel Duyurular (37), Diger Metinler (200), Enerji-Cevre (25), Enerji Arsiv (pasif). Toplam 670+ haber erisimi.",

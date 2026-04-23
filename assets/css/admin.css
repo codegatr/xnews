@@ -183,16 +183,46 @@ input[type=color] {
     background: linear-gradient(90deg, transparent, #d4af37, transparent);
 }
 .sb-logo-mini {
-    width: 38px; height: 38px;
+    width: 42px; height: 42px;
     background: linear-gradient(135deg, var(--brand), #a30d26);
     border-radius: var(--radius-sm);
     display: flex; align-items: center; justify-content: center;
     font-family: 'Oswald', sans-serif; font-weight: 700;
-    color: #fff; font-size: 20px;
-    box-shadow: 0 4px 12px rgba(200, 16, 46, .4);
+    color: #fff; font-size: 22px;
+    box-shadow:
+        0 4px 12px rgba(200, 16, 46, .4),
+        inset 0 1px 0 rgba(255, 255, 255, .15);
+    position: relative;
+    flex-shrink: 0;
 }
-.sb-bas .baslik { font-weight: 700; color: #fff; font-size: 15px; letter-spacing: .5px; text-shadow: 0 2px 6px rgba(0,0,0,.3); }
-.sb-bas .alt { font-size: 11px; color: #d4af37; text-transform: uppercase; letter-spacing: .15em; font-weight: 600; }
+.sb-logo-mini .sb-logo-x { line-height: 1; }
+.sb-logo-mini .sb-logo-tac {
+    position: absolute;
+    top: -9px; right: -8px;
+    font-size: 18px;
+    color: #d4af37;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, .5);
+    transform: rotate(10deg);
+    animation: tacSallan 4s ease-in-out infinite;
+}
+@keyframes tacSallan {
+    0%, 100% { transform: rotate(10deg); }
+    50% { transform: rotate(-5deg) scale(1.1); }
+}
+.sb-bas .baslik {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700; color: #fff;
+    font-size: 20px;
+    letter-spacing: .5px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    line-height: 1.1;
+}
+.sb-bas .alt {
+    font-size: 10px; color: #d4af37;
+    text-transform: uppercase; letter-spacing: .12em;
+    font-weight: 600;
+    margin-top: 2px;
+}
 
 .sb-grup-baslik {
     padding: 18px 24px 8px; font-size: 11px;
@@ -240,11 +270,38 @@ input[type=color] {
     padding: 2px 7px; border-radius: 999px;
 }
 .sb-alt {
-    padding: 16px 24px; border-top: 1px solid rgba(212, 175, 55, .1);
-    font-size: 12px; color: rgba(255, 255, 255, .5);
+    padding: 18px 20px; border-top: 1px solid rgba(212, 175, 55, .15);
+    display: flex; flex-direction: column; gap: 8px;
+    background: linear-gradient(180deg, transparent, rgba(212, 175, 55, .04));
 }
-.sb-alt a { color: #d4af37; opacity: .7; transition: opacity .2s; }
-.sb-alt a:hover { opacity: 1; }
+.sb-alt a {
+    color: rgba(212, 175, 55, .85);
+    font-size: 12px; letter-spacing: .02em;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 8px;
+    text-decoration: none;
+    transition: all .2s ease;
+}
+.sb-alt a:hover {
+    color: #f4e4bc;
+    background: rgba(212, 175, 55, .08);
+    transform: translateX(2px);
+}
+.sb-alt a svg {
+    width: 14px; height: 14px; flex-shrink: 0;
+    stroke: currentColor; stroke-width: 2;
+    fill: none; stroke-linecap: round; stroke-linejoin: round;
+}
+.sb-alt .sb-alt-brand {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: rgba(212, 175, 55, .4);
+    padding: 4px 12px; margin-top: 6px;
+    border-top: 1px dashed rgba(212, 175, 55, .12);
+    display: flex; align-items: center; gap: 6px;
+}
+.sb-alt .sb-alt-brand::before { content: '♛'; font-size: 14px; color: #d4af37; }
 
 .main { display: flex; flex-direction: column; min-width: 0; }
 
@@ -265,11 +322,25 @@ input[type=color] {
 .ust-bar-sag { display: flex; align-items: center; gap: 14px; }
 .ust-buton {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 12px; background: var(--bg);
+    padding: 8px 14px; background: var(--bg);
     border-radius: var(--radius-sm); font-size: 13px;
-    font-weight: 500; color: var(--ink-muted); transition: all .15s;
+    font-weight: 500; color: var(--ink-muted);
+    white-space: nowrap;
+    transition: all .15s;
+    text-decoration: none;
 }
-.ust-buton:hover { background: var(--brand-light); color: var(--brand); }
+.ust-buton svg { width: 14px; height: 14px; flex-shrink: 0; }
+.ust-buton:hover { background: var(--brand-light); color: var(--brand); transform: translateY(-1px); }
+.ust-buton.saray {
+    background: linear-gradient(135deg, #0a0e27, #131744);
+    color: #d4af37;
+    border: 1px solid rgba(212, 175, 55, .3);
+}
+.ust-buton.saray:hover {
+    background: linear-gradient(135deg, #131744, #1a1f5c);
+    color: #f4e4bc;
+    border-color: #d4af37;
+}
 .kullanici-dugme {
     display: inline-flex; align-items: center; gap: 10px;
     padding: 5px 12px 5px 5px; background: var(--bg);
@@ -903,3 +974,195 @@ table tbody tr:hover {
     .yp-stat-grid, .stat-grid { grid-template-columns: 1fr; }
     .saray-hosgeldin h1 { font-size: 20px; }
 }
+
+/* =====================================================
+   KRALIYET MERKEZİ - Dashboard Hero
+   ===================================================== */
+.kraliyet-hosgeldin {
+    position: relative;
+    background: linear-gradient(135deg, #0a0e27 0%, #131744 50%, #1a1f5c 100%);
+    border-radius: 18px;
+    padding: 32px 40px;
+    margin-bottom: 22px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 24px;
+    align-items: center;
+    box-shadow:
+        0 10px 40px rgba(10, 14, 39, .35),
+        inset 0 1px 0 rgba(212, 175, 55, .18);
+    border: 1px solid rgba(212, 175, 55, .2);
+}
+/* Altın dekoratif çerçeve */
+.kraliyet-hosgeldin::before {
+    content: '';
+    position: absolute; inset: 8px;
+    border: 1px solid rgba(212, 175, 55, .15);
+    border-radius: 12px;
+    pointer-events: none;
+}
+/* Sağ üst köşe kıvılcımları */
+.kraliyet-hosgeldin::after {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle at center, rgba(212, 175, 55, .15), transparent 60%);
+    pointer-events: none;
+}
+
+.kh-taç {
+    font-size: 72px;
+    color: #d4af37;
+    text-shadow:
+        0 0 20px rgba(212, 175, 55, .5),
+        0 2px 4px rgba(0, 0, 0, .4);
+    line-height: 1;
+    animation: tacParla 3s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(212, 175, 55, .3));
+    position: relative; z-index: 2;
+}
+@keyframes tacParla {
+    0%, 100% { transform: scale(1) rotate(-2deg); text-shadow: 0 0 20px rgba(212, 175, 55, .5), 0 2px 4px rgba(0, 0, 0, .4); }
+    50% { transform: scale(1.04) rotate(2deg); text-shadow: 0 0 30px rgba(212, 175, 55, .75), 0 2px 4px rgba(0, 0, 0, .4); }
+}
+
+.kh-metin { position: relative; z-index: 2; color: #fff; }
+.kh-ust {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .35em;
+    color: #d4af37;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+.kh-metin h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    margin: 0 0 8px;
+    font-size: 34px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: .01em;
+    line-height: 1.15;
+}
+.kh-metin h1 .altin {
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 50%, #d4af37 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
+    font-style: italic;
+}
+.kh-metin p {
+    margin: 0 0 12px;
+    color: rgba(255, 255, 255, .75);
+    font-size: 14px;
+    max-width: 620px;
+    line-height: 1.6;
+}
+.kh-tarih {
+    display: inline-flex; align-items: center;
+    background: rgba(212, 175, 55, .08);
+    color: #d4af37;
+    border: 1px solid rgba(212, 175, 55, .25);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .05em;
+}
+
+/* Sağ süslü motif (altın mühür) */
+.kh-sag-suslu {
+    position: relative; z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.kh-motif {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(244, 228, 188, .3), transparent 60%),
+        linear-gradient(135deg, #d4af37, #b8941f);
+    box-shadow:
+        0 4px 16px rgba(212, 175, 55, .35),
+        inset 0 2px 4px rgba(255, 255, 255, .25),
+        inset 0 -2px 4px rgba(0, 0, 0, .2);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.kh-motif::before {
+    content: '✦';
+    font-size: 32px;
+    color: #0a0e27;
+    font-weight: 700;
+}
+.kh-motif::after {
+    content: '';
+    position: absolute; inset: -6px;
+    border: 1px dashed rgba(212, 175, 55, .4);
+    border-radius: 50%;
+    animation: mohurDon 20s linear infinite;
+}
+@keyframes mohurDon {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* HIZLI EYLEMLER - saray aksanı */
+.hizli-eylemler {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+    border-left: 4px solid #d4af37;
+}
+.hizli-eylemler .he-baslik {
+    color: #0a0e27;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 4px;
+}
+.hizli-eylemler .he-baslik svg { color: #d4af37; }
+
+/* Mobil */
+@media (max-width: 900px) {
+    .kraliyet-hosgeldin {
+        grid-template-columns: auto 1fr;
+        padding: 22px 20px;
+        gap: 16px;
+    }
+    .kh-sag-suslu { display: none; }
+    .kh-taç { font-size: 48px; }
+    .kh-metin h1 { font-size: 24px; }
+    .kh-metin p { font-size: 13px; }
+    .kh-ust { font-size: 10px; letter-spacing: .25em; }
+}
+@media (max-width: 600px) {
+    .kraliyet-hosgeldin {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 24px 18px;
+    }
+    .kh-taç { font-size: 52px; margin: 0 auto; }
+    .kh-metin h1 { font-size: 22px; }
+}
+
+/* Eski saray-hosgeldin kullanımı için geriye uyumluluk */
+.saray-hosgeldin { display: none; }

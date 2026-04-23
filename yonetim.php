@@ -600,10 +600,13 @@ function menu_aktif(string $mevcut, string $slug): string {
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sb-bas">
-            <div class="sb-logo-mini">X</div>
+            <div class="sb-logo-mini">
+                <span class="sb-logo-x">X</span>
+                <span class="sb-logo-tac">♛</span>
+            </div>
             <div>
                 <div class="baslik">XNEWS</div>
-                <div class="alt">Yönetim v<?= h(ayar('mevcut_surum', '1.0.0')) ?></div>
+                <div class="alt">Kraliyet Merkezi · v<?= h(ayar('mevcut_surum', '1.0.0')) ?></div>
             </div>
         </div>
         <nav class="sb-nav">
@@ -622,8 +625,15 @@ function menu_aktif(string $mevcut, string $slug): string {
             <?php endforeach; ?>
         </nav>
         <div class="sb-alt">
-            <a href="<?= url('guncelle.php') ?>" style="display:block;padding:8px 0;color:#f87171"><?= ikon('activity') ?> Güncelleme Kontrol</a>
-            <a href="<?= url() ?>" target="_blank">&rarr; Siteyi Görüntüle</a>
+            <a href="<?= url('guncelle.php') ?>">
+                <svg viewBox="0 0 24 24"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                <span>Güncelleme Kontrol</span>
+            </a>
+            <a href="<?= url() ?>" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                <span>Siteyi Görüntüle</span>
+            </a>
+            <div class="sb-alt-brand">XNEWS Kraliyet Merkezi</div>
         </div>
     </aside>
 
@@ -639,8 +649,9 @@ function menu_aktif(string $mevcut, string $slug): string {
                 <div class="breadcrumb">Yönetim / <strong><?= h($sayfa_basligi) ?></strong></div>
             </div>
             <div class="ust-bar-sag">
-                <a href="<?= url() ?>" target="_blank" class="ust-buton">
-                    <?= ikon('arrow-up-right') ?><span>Siteyi Gör</span>
+                <a href="<?= url() ?>" target="_blank" rel="noopener" class="ust-buton saray" title="Siteyi yeni sekmede göster">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    <span>Siteyi Gör</span>
                 </a>
                 <div class="kullanici-dugme">
                     <div class="avatar"><?= h($avatar_kisa) ?></div>
@@ -685,14 +696,27 @@ function menu_aktif(string $mevcut, string $slug): string {
                     LEFT JOIN {$prefix}sources s ON s.id = c.kaynak_id
                     ORDER BY c.olusturma DESC LIMIT 6")->fetchAll();
             ?>
-                <div class="saray-hosgeldin">
-                    <h1>Hoş geldiniz, <span class="altin"><?= h(explode(' ', $yonetici['ad_soyad'] ?: $yonetici['kullanici_adi'])[0]) ?></span> 👋</h1>
-                    <p>XNEWS Haber İmparatorluğu yönetim sarayına eriştiniz.<br>Aşağıdan tüm imparatorluğunuzu görüntüleyebilirsiniz.</p>
-                    <span class="tarih"><?= h(tr_tarih(date('Y-m-d H:i:s'))) ?> · <?= h(date('l')) ?></span>
+                <div class="kraliyet-hosgeldin">
+                    <div class="kh-taç">♛</div>
+                    <div class="kh-metin">
+                        <div class="kh-ust">XNEWS KRALİYET MERKEZİ</div>
+                        <h1>Hoş geldiniz, <span class="altin"><?= h(explode(' ', $yonetici['ad_soyad'] ?: $yonetici['kullanici_adi'])[0]) ?></span></h1>
+                        <p>Haber İmparatorluğunuzun yönetim kademesine eriştiniz. Tüm imparatorluğunuzu aşağıdan yönetebilirsiniz.</p>
+                        <span class="kh-tarih">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <?= h(tr_tarih(date('Y-m-d H:i:s'))) ?> · <?= h(date('l')) ?>
+                        </span>
+                    </div>
+                    <div class="kh-sag-suslu">
+                        <div class="kh-motif"></div>
+                    </div>
                 </div>
 
-                <div class="hizli-eylemler" style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-                    <strong style="color:var(--saray-koyu);font-size:14px">⚡ Hızlı Eylemler:</strong>
+                <div class="hizli-eylemler">
+                    <strong class="he-baslik">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        Hızlı Eylemler
+                    </strong>
                     <a href="<?= url('yonetim.php?sayfa=kaynaklar') ?>" class="buton">RSS Kaynakları</a>
                     <a href="<?= url('yonetim.php?sayfa=haberler&islem=ekle') ?>" class="buton ikincil">Manuel Haber Ekle</a>
                     <form method="post" action="<?= url('yonetim.php?sayfa=cekim-tetik') ?>" style="display:inline">
