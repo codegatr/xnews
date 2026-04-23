@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.3.0",
+    "surum": "1.3.1",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,6 +17,7 @@
         "install.lock"
     ],
     "degisiklikler": [
+        "1.3.1 PATCH - Cron durumu bug fix: Cron.php 'cron_son_calisma' ayarina yaziyordu ama rehber/dashboard 'son_cron_tarihi' ayarina bakiyordu (uyumsuzluk). Dogru anahtarla + log tablosundan fallback ile okuma. Ek: Son 24 saat kac kez calisti metriği eklendi.",
         "1.3.0 MINOR - v1.2.5'ten beri biriken tum yeni ozellikler + Sistem Saglik Paneli (Dashboard'da 6 kartlik durum ozeti: Cron/RSS/SSL/Anahtar/Talepler/ads.txt)",
         "1.2.9 - Footer'a otomatik guncelleme bildirimi: Yasal uyari altinda 'Icerikler her X dakikada bir otomatik yuklenmekte ve guncellenmektedir' metni. Donen refresh ikonu animasyonu. Dakika degeri ayar olarak duzenlenebilir (Ayarlar > Genel > Otomatik Guncelleme Dakikasi, varsayilan 10).",
         "1.2.8 HOTFIX - Cron anahtari BUG FIX: Rehber 'ayar(cron_anahtar)' yerine 'CRON_ANAHTARI' sabitinden okuyor artik. Bu yuzden v1.2.6 ve v1.2.7 rehberlerinde komut sonunda anahtar gorunmuyordu. CRON_ANAHTARI tanimli degilse kirmizi kritik uyari + config.php duzeltme talimati.",

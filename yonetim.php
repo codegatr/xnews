@@ -726,7 +726,12 @@ function menu_aktif(string $mevcut, string $slug): string {
 
                 <?php
                 // SISTEM SAĞLIK PANELİ - tek bakışta her şey
-                $son_cron = ayar('son_cron_tarihi', '');
+                // Son cron: once ayar, sonra log fallback (cron.php ayar_guncelle('cron_son_calisma') yapiyor)
+                $son_cron = ayar('cron_son_calisma', '') ?: ayar('son_cron_tarihi', '');
+                if (empty($son_cron)) {
+                    $st_c = $db->query("SELECT olusturma FROM {$prefix}logs WHERE tip='cron' ORDER BY olusturma DESC LIMIT 1");
+                    $son_cron = $st_c ? ($st_c->fetchColumn() ?: '') : '';
+                }
                 $cron_dk = $son_cron ? (time() - strtotime($son_cron)) / 60 : null;
                 $cron_durum = $cron_dk === null ? 'yok' : ($cron_dk < 30 ? 'iyi' : ($cron_dk < 180 ? 'uyari' : 'sorun'));
 
@@ -2211,7 +2216,15 @@ function menu_aktif(string $mevcut, string $slug): string {
             case 'cron-rehber':
                 $site = $_SERVER['HTTP_HOST'] ?? 'xnews.com.tr';
                 $cron_anahtar = defined('CRON_ANAHTARI') ? CRON_ANAHTARI : '';
-                $son_cekim = ayar('son_cron_tarihi', '');
+
+                // Son cron calismasi - once ayar (cron.php bunu yaziyor), sonra log tablosundan fallback
+                $son_cekim = ayar('cron_son_calisma', '') ?: ayar('son_cron_tarihi', '');
+                if (empty($son_cekim)) {
+                    // Log tablosundan son 'cron' tip kaydını cek
+                    $st = $db->query("SELECT olusturma FROM {$prefix}logs WHERE tip='cron' ORDER BY olusturma DESC LIMIT 1");
+                    $son_cekim = $st ? ($st->fetchColumn() ?: '') : '';
+                }
+
                 $dokuman_kok = rtrim(str_replace('\\', '/', __DIR__), '/');
                 $cron_php_yolu = $dokuman_kok . '/cron.php';
 
@@ -2232,16 +2245,27 @@ function menu_aktif(string $mevcut, string $slug): string {
                 </div>
 
                 <!-- Durum -->
-                <div class="panel" style="margin-bottom:18px;background:<?= $son_cekim ? 'linear-gradient(135deg,#ecfdf5,#fff)' : 'linear-gradient(135deg,#fef3c7,#fff)' ?>;border-left:4px solid <?= $son_cekim ? '#10b981' : '#f59e0b' ?>">
+                <?php
+                // Son 24 saatte kac kez calismis
+                $st_24h = $db->query("SELECT COUNT(*) FROM {$prefix}logs WHERE tip='cron' AND olusturma >= DATE_SUB(NOW(), INTERVAL 24 HOUR)");
+                $son_24h = $st_24h ? (int)$st_24h->fetchColumn() : 0;
+                $cron_aktif = !empty($son_cekim) && (time() - strtotime($son_cekim)) < 3600; // son 1 saat içinde calismissa
+                ?>
+                <div class="panel" style="margin-bottom:18px;background:<?= $cron_aktif ? 'linear-gradient(135deg,#ecfdf5,#fff)' : 'linear-gradient(135deg,#fef3c7,#fff)' ?>;border-left:4px solid <?= $cron_aktif ? '#10b981' : '#f59e0b' ?>">
                     <div class="panel-ic">
                         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-                            <div style="font-size:38px"><?= $son_cekim ? '⏰' : '⚠️' ?></div>
+                            <div style="font-size:38px"><?= $cron_aktif ? '✅' : ($son_cekim ? '⏰' : '⚠️') ?></div>
                             <div style="flex:1;min-width:260px">
-                                <h3 style="margin:0 0 4px;color:<?= $son_cekim ? '#065f46' : '#92400e' ?>">
-                                    Cron Durumu: <?= $son_cekim ? 'Çalışıyor ✓' : 'Henüz kurulmadı / çalışmadı' ?>
+                                <h3 style="margin:0 0 4px;color:<?= $cron_aktif ? '#065f46' : '#92400e' ?>">
+                                    Cron Durumu: <?= $cron_aktif ? 'Aktif Çalışıyor ✓' : ($son_cekim ? 'Zamansız (son çalışma eskimiş)' : 'Henüz çalışmadı') ?>
                                 </h3>
-                                <div style="font-size:13px;color:var(--muted)">
-                                    <?= $son_cekim ? ('Son çekim: ' . h(goreceli_zaman($son_cekim))) : 'Cron kurduysanız bir kaç dakika bekleyin. Hemen test etmek isterseniz alt taraftaki "Manuel Tetikle" butonunu kullanın.' ?>
+                                <div style="font-size:13px;color:var(--muted);line-height:1.6">
+                                    <?php if ($son_cekim): ?>
+                                        Son çalışma: <strong><?= h(goreceli_zaman($son_cekim)) ?></strong> (<?= h(tr_tarih($son_cekim)) ?>)<br>
+                                        Son 24 saatte: <strong><?= $son_24h ?> kez çalıştı</strong>
+                                    <?php else: ?>
+                                        Cron henüz bir kere bile çalışmamış. Aşağıdaki adımları takip edin.
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <form method="post" action="<?= url('yonetim.php?sayfa=cekim-tetik') ?>">
