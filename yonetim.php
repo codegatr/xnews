@@ -774,6 +774,9 @@ function menu_aktif(string $mevcut, string $slug): string {
                         </div>
                     </div>
                 </div>
+
+                <?php
+                // AdSense entegrasyon durumu
                 $as_id = trim(ayar('adsense_client_id', ''));
                 $as_auto = ayar('adsense_auto_ads', '0') === '1';
                 $as_valid = !empty($as_id) && preg_match('/^ca-pub-\d{10,20}$/', $as_id);
