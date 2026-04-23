@@ -1024,7 +1024,7 @@ function menu_aktif(string $mevcut, string $slug): string {
                                             <?php if ($k['son_cekim']): ?>
                                                 <div style="font-size:13px"><?= h(goreceli_zaman($k['son_cekim'])) ?></div>
                                                 <?php if ($k['son_durum'] === 'hata'): ?>
-                                                    <span class="rozet hata" style="margin-top:2px">Hata</span>
+                                                    <span class="rozet hata" style="margin-top:2px;cursor:help" title="<?= h($k['son_hata'] ?: 'Bilinmeyen hata') ?>">Hata: <?= h(mb_substr($k['son_hata'] ?: 'Bilinmiyor', 0, 30, 'UTF-8')) ?><?= mb_strlen($k['son_hata'] ?? '', 'UTF-8') > 30 ? '...' : '' ?></span>
                                                 <?php endif; ?>
                                             <?php else: ?>
                                                 <span style="color:var(--muted-light)">Hic cekilmedi</span>

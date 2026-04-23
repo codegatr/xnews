@@ -91,16 +91,30 @@ function rss_cek(string $url): array {
 
     $ogeler = [];
 
+    // Tüm namespace'leri topla
+    $ns_all = array_merge($xml->getDocNamespaces(true), $xml->getNamespaces(true));
+    $atom_ns = 'http://www.w3.org/2005/Atom';
+    $rdf_ns = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+
     // RSS 2.0 format
     if (isset($xml->channel->item)) {
         foreach ($xml->channel->item as $item) {
             $ogeler[] = rss_oge_cikar($item, 'rss');
         }
     }
-    // Atom format
-    elseif (isset($xml->entry)) {
-        foreach ($xml->entry as $entry) {
-            $ogeler[] = rss_oge_cikar($entry, 'atom');
+    // Atom format - namespace ile
+    elseif ($xml->getName() === 'feed' || in_array($atom_ns, $ns_all, true)) {
+        // Default namespace Atom ise $xml->entry çalışmaz, namespace ile erişmek gerek
+        $atom_root = in_array($atom_ns, $ns_all, true) ? $xml->children($atom_ns) : $xml;
+        if (isset($atom_root->entry) && count($atom_root->entry) > 0) {
+            foreach ($atom_root->entry as $entry) {
+                $ogeler[] = rss_oge_cikar($entry, 'atom');
+            }
+        } elseif (isset($xml->entry)) {
+            // Namespace yoksa direkt
+            foreach ($xml->entry as $entry) {
+                $ogeler[] = rss_oge_cikar($entry, 'atom');
+            }
         }
     }
     // RDF format (RSS 1.0)

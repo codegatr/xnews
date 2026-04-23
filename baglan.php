@@ -389,8 +389,9 @@ function reklam_icerige_enjekte(string $html, int $paragraf_sonra = 3): string {
 // =====================================================
 
 function http_getir(string $url, int $zaman_asimi = 15, array $ek_baslik = []): array {
-    $ch = curl_init();
-    // Büyük siteler (Cloudflare/WAF) bot user-agent'leri bloklar — tarayıcı gibi görünelim
+    // Hedef sitenin origin'ini Referer olarak kullan (Cloudflare bot korumasını aşmaya yardımcı)
+    $referer = parse_url($url, PHP_URL_SCHEME) . '://' . parse_url($url, PHP_URL_HOST) . '/';
+
     $baslik = array_merge([
         'Accept: application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.8',
         'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -399,24 +400,38 @@ function http_getir(string $url, int $zaman_asimi = 15, array $ek_baslik = []): 
         'Pragma: no-cache',
         'DNT: 1',
         'Upgrade-Insecure-Requests: 1',
+        'Referer: ' . $referer,
+        'Sec-Fetch-Dest: document',
+        'Sec-Fetch-Mode: navigate',
+        'Sec-Fetch-Site: same-origin',
     ], $ek_baslik);
 
-    curl_setopt_array($ch, [
-        CURLOPT_URL            => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_MAXREDIRS      => 5,
-        CURLOPT_TIMEOUT        => $zaman_asimi,
-        CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => 0,
-        CURLOPT_HTTPHEADER     => $baslik,
-        CURLOPT_ENCODING       => '', // otomatik gzip/deflate decode
-    ]);
-    $icerik = curl_exec($ch);
-    $kod    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $hata   = curl_error($ch);
-    curl_close($ch);
+    // Retry: 503/429/502 geldiğinde bir kez daha dene (Cloudflare geçici limitleri)
+    $kod = 0;
+    $icerik = '';
+    $hata = '';
+    for ($deneme = 0; $deneme < 2; $deneme++) {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS      => 5,
+            CURLOPT_TIMEOUT        => $zaman_asimi,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_HTTPHEADER     => $baslik,
+            CURLOPT_ENCODING       => '', // otomatik gzip/deflate decode
+        ]);
+        $icerik = curl_exec($ch);
+        $kod    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $hata   = curl_error($ch);
+        curl_close($ch);
+        // Kalici olmayan hatalarda (rate limit / geçici) tekrar dene
+        if (!in_array($kod, [429, 502, 503, 504, 0], true)) break;
+        if ($deneme === 0) sleep(2); // Cloudflare rate limit için kısa bekleme
+    }
     return ['icerik' => $icerik, 'kod' => $kod, 'hata' => $hata];
 }
