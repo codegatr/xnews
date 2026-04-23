@@ -1,7 +1,7 @@
 {
     "proje": "XNEWS",
     "marka": "CODEGA",
-    "surum": "1.3.2",
+    "surum": "1.3.3",
     "surum_tarihi": "2026-04-22",
     "php_minimum": "8.3.0",
     "mysql_minimum": "5.7",
@@ -17,6 +17,7 @@
         "install.lock"
     ],
     "degisiklikler": [
+        "1.3.3 PATCH - 'Start tag expected' XML parse hatasi cozuldu: 4 katmanli savunma - (1) Gelismis on temizlik: BOM (UTF-8/16/32), whitespace, NBSP ve leading non-XML karakterleri temizle, ilk '<' karakterinden oncesini at. (2) HTML tespit: Cloudflare bot koruma sayfasi geldiyse title ile bildir. (3) JSON tespit: {/[ ile basliyorsa JSON yaniti diye hata ver. (4) Manuel gzip/deflate decode fallback - curl Brotli/gzip decode edemediyse magic byte'lara bakarak PHP gzdecode/gzuncompress ile ac. Accept-Encoding'ten Brotli ('br') kaldirildi - shared hostinglerde genelde yok. XML parse hatasinda satir/sutun ve ilk 120 byte icerik onizleme.",
         "1.3.2 PATCH - 3 buyuk RSS sorunu cozuldu: (1) NTV Atom format namespace fix - NTV 6 feed'i RSS2'den Atom'a gecmis, default namespace nedeniyle entry'ler parse edilmiyordu, namespace-aware parsing eklendi. (2) http_getir 2-kademeli retry + Referer + Sec-Fetch headers (Cloudflare rate limit/bot koruma asma). (3) RSS Kaynaklari listesinde hata sebebi gorunur (rozet uzerine hover tooltip + inline ilk 30 karakter).",
         "1.3.1 PATCH - Cron durumu bug fix: Cron.php 'cron_son_calisma' ayarina yaziyordu ama rehber/dashboard 'son_cron_tarihi' ayarina bakiyordu (uyumsuzluk). Dogru anahtarla + log tablosundan fallback ile okuma. Ek: Son 24 saat kac kez calisti metriği eklendi.",
         "1.3.0 MINOR - v1.2.5'ten beri biriken tum yeni ozellikler + Sistem Saglik Paneli (Dashboard'da 6 kartlik durum ozeti: Cron/RSS/SSL/Anahtar/Talepler/ads.txt)",

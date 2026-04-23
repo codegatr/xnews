@@ -392,18 +392,16 @@ function http_getir(string $url, int $zaman_asimi = 15, array $ek_baslik = []): 
     // Hedef sitenin origin'ini Referer olarak kullan (Cloudflare bot korumasını aşmaya yardımcı)
     $referer = parse_url($url, PHP_URL_SCHEME) . '://' . parse_url($url, PHP_URL_HOST) . '/';
 
+    // Brotli (br) shared hostinglerde genelde yok, sadece gzip/deflate kullan
     $baslik = array_merge([
         'Accept: application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.9, */*;q=0.8',
         'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Accept-Encoding: gzip, deflate, br',
+        'Accept-Encoding: gzip, deflate',
         'Cache-Control: no-cache',
         'Pragma: no-cache',
         'DNT: 1',
         'Upgrade-Insecure-Requests: 1',
         'Referer: ' . $referer,
-        'Sec-Fetch-Dest: document',
-        'Sec-Fetch-Mode: navigate',
-        'Sec-Fetch-Site: same-origin',
     ], $ek_baslik);
 
     // Retry: 503/429/502 geldiğinde bir kez daha dene (Cloudflare geçici limitleri)
@@ -423,7 +421,7 @@ function http_getir(string $url, int $zaman_asimi = 15, array $ek_baslik = []): 
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => 0,
             CURLOPT_HTTPHEADER     => $baslik,
-            CURLOPT_ENCODING       => '', // otomatik gzip/deflate decode
+            CURLOPT_ENCODING       => '', // otomatik gzip/deflate decode (curl destekliyorsa)
         ]);
         $icerik = curl_exec($ch);
         $kod    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -431,7 +429,22 @@ function http_getir(string $url, int $zaman_asimi = 15, array $ek_baslik = []): 
         curl_close($ch);
         // Kalici olmayan hatalarda (rate limit / geçici) tekrar dene
         if (!in_array($kod, [429, 502, 503, 504, 0], true)) break;
-        if ($deneme === 0) sleep(2); // Cloudflare rate limit için kısa bekleme
+        if ($deneme === 0) sleep(2);
     }
+
+    // Manuel gzip/deflate decode fallback (curl decode etmediyse)
+    if (!empty($icerik) && $kod === 200) {
+        // Gzip magic bytes: 1F 8B
+        if (substr($icerik, 0, 2) === "\x1f\x8b") {
+            $decoded = @gzdecode($icerik);
+            if ($decoded !== false) $icerik = $decoded;
+        }
+        // Raw deflate (zlib header 78 9C veya 78 DA)
+        elseif (preg_match('/^\x78[\x01\x5E\x9C\xDA]/', $icerik)) {
+            $decoded = @gzuncompress($icerik);
+            if ($decoded !== false) $icerik = $decoded;
+        }
+    }
+
     return ['icerik' => $icerik, 'kod' => $kod, 'hata' => $hata];
 }

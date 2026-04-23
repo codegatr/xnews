@@ -77,16 +77,54 @@ function rss_cek(string $url): array {
         throw new RuntimeException('Bos cevap');
     }
 
-    // BOM varsa temizle
-    $icerik = preg_replace('/^\xEF\xBB\xBF/', '', $r['icerik']);
+    $icerik = $r['icerik'];
+
+    // BOM (UTF-8/16/32) + tüm görünmez leading karakterleri temizle
+    $icerik = preg_replace('/^\xEF\xBB\xBF/', '', $icerik);
+    $icerik = preg_replace('/^\xFE\xFF|^\xFF\xFE/', '', $icerik);
+    $icerik = ltrim($icerik, " \t\n\r\0\x0B\xC2\xA0");
+
+    // Eger icerik < ile baslamiyorsa, ilk < olan yerden kes (HTTP header sizintisi vb)
+    $ilk_kucuk = strpos($icerik, '<');
+    if ($ilk_kucuk === false) {
+        throw new RuntimeException('Icerikte XML tagi yok (ilk 80 byte: "' . h(substr($icerik, 0, 80)) . '")');
+    }
+    if ($ilk_kucuk > 0) {
+        $icerik = substr($icerik, $ilk_kucuk);
+    }
+
+    // HTML sayfası geldi mi? (Cloudflare bot koruma, Just a moment, hata sayfası)
+    $ilk100 = strtolower(substr($icerik, 0, 500));
+    if (preg_match('/<(!doctype\s+html|html[\s>]|head[\s>]|body[\s>])/i', $ilk100)) {
+        $baslik = '';
+        if (preg_match('/<title[^>]*>([^<]+)<\/title>/i', $icerik, $m)) {
+            $baslik = ' - "' . trim($m[1]) . '"';
+        }
+        throw new RuntimeException('HTML yaniti alindi (muhtemelen Cloudflare bot koruma veya hata sayfasi)' . $baslik);
+    }
+
+    // JSON mu?
+    if (substr(ltrim($icerik), 0, 1) === '{' || substr(ltrim($icerik), 0, 1) === '[') {
+        throw new RuntimeException('JSON yaniti alindi, RSS/Atom bekleniyordu');
+    }
 
     // XML parse
     libxml_use_internal_errors(true);
+    libxml_clear_errors();
     $xml = simplexml_load_string($icerik, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NONET);
     if ($xml === false) {
-        $hatalar = array_map(fn($e) => trim($e->message), libxml_get_errors());
+        $hatalar = libxml_get_errors();
         libxml_clear_errors();
-        throw new RuntimeException('XML parse hatasi: ' . ($hatalar[0] ?? 'bilinmeyen'));
+        $hata_mesaji = 'XML parse hatasi: ';
+        if (!empty($hatalar)) {
+            $ilk = $hatalar[0];
+            $hata_mesaji .= trim($ilk->message) . ' (satir ' . $ilk->line . ', sutun ' . $ilk->column . ')';
+        } else {
+            $hata_mesaji .= 'bilinmeyen';
+        }
+        // Ilk 100 byte'i debug icin ekle
+        $ornek = h(substr($icerik, 0, 120));
+        throw new RuntimeException($hata_mesaji . ' | Icerik onizleme: "' . $ornek . '"');
     }
 
     $ogeler = [];
@@ -94,7 +132,6 @@ function rss_cek(string $url): array {
     // Tüm namespace'leri topla
     $ns_all = array_merge($xml->getDocNamespaces(true), $xml->getNamespaces(true));
     $atom_ns = 'http://www.w3.org/2005/Atom';
-    $rdf_ns = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 
     // RSS 2.0 format
     if (isset($xml->channel->item)) {
@@ -104,14 +141,12 @@ function rss_cek(string $url): array {
     }
     // Atom format - namespace ile
     elseif ($xml->getName() === 'feed' || in_array($atom_ns, $ns_all, true)) {
-        // Default namespace Atom ise $xml->entry çalışmaz, namespace ile erişmek gerek
         $atom_root = in_array($atom_ns, $ns_all, true) ? $xml->children($atom_ns) : $xml;
         if (isset($atom_root->entry) && count($atom_root->entry) > 0) {
             foreach ($atom_root->entry as $entry) {
                 $ogeler[] = rss_oge_cikar($entry, 'atom');
             }
         } elseif (isset($xml->entry)) {
-            // Namespace yoksa direkt
             foreach ($xml->entry as $entry) {
                 $ogeler[] = rss_oge_cikar($entry, 'atom');
             }
